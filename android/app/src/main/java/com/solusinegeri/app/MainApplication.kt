@@ -1,4 +1,4 @@
-package com.merchantclosepayv2
+package com.solusinegeri.app
 
 import android.app.Application
 import com.facebook.react.PackageList

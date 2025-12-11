@@ -1,4 +1,4 @@
-package com.merchantclosepayv2
+package com.solusinegeri.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

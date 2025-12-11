@@ -10,13 +10,13 @@ import Config from 'react-native-config';
  */
 export const securityConfig: TalsecConfig = {
   androidConfig: {
-    packageName: Config.ENV === 'staging' ? 'com.merchantclosepayv2.staging' : 'com.merchantclosepayv2',
+    packageName: Config.ENV === 'staging' ? 'com.solusinegeri.app.staging' : 'com.solusinegeri.app',
     // Run `keytool -list -v -keystore your_keystore.keystore` to get the SHA-256 hash
     certificateHashes: ['YOUR_RELEASE_KEY_HASH_HERE'], 
     supportedAlternativeStores: ['com.android.vending'],
   },
   iosConfig: {
-    appBundleId: 'com.merchantclosepayv2', 
+    appBundleId: 'com.solusinegeri.app', 
     appTeamId: 'YOUR_TEAM_ID', 
   },
   watcherMail: 'security@closepay.id', // Update with your security email

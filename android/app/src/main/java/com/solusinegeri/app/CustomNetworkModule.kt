@@ -1,4 +1,4 @@
-package com.merchantclosepayv2
+package com.solusinegeri.app
 
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerInterceptor
