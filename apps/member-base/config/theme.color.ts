@@ -4,6 +4,6 @@
  * Warna akan auto-update tanpa perlu restart app
  */
 
-export const themeColor = '#FF0000'; // Default: hijau
+export const themeColor = '#33793d'; // Default: hijau
 // Coba ubah ke: '#FF0000' (merah), '#0000FF' (biru), '#FFFF00' (kuning), dll
 

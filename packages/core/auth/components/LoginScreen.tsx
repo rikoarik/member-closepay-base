@@ -19,8 +19,6 @@ import {
   Keyboard,
   Image,
   Linking,
-  Animated,
-  Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -81,32 +79,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const socialProviders = loginConfig.socialLoginProviders || ['google']; // Default only Google, no Facebook
   const logoUri = config?.branding?.logo || '';
   const [appVersion, setAppVersion] = useState<string>('1.0.0');
-  const decoAnim = useRef(new Animated.Value(0)).current;
-
-  // Soft floating animation for decorations
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(decoAnim, {
-          toValue: 1,
-          duration: 2800,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(decoAnim, {
-          toValue: 0,
-          duration: 2800,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-
-    loop.start();
-    return () => {
-      loop.stop();
-    };
-  }, [decoAnim]);
 
   // Get app version on mount (async)
   useEffect(() => {
@@ -124,7 +96,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       } catch (error) {
         // Ignore and use fallback
       }
-      
+
       // Fallback to sync version from package.json
       setAppVersion(getAppVersion());
     };
@@ -197,13 +169,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     try {
       // WhatsApp number - bisa di-config atau hardcode
       const phone = '6289526643223'; // Format internasional tanpa +
-      
+
       // Get user info (jika sudah login, kalau belum kosong)
       const userName = user?.name || '';
       const userEmail = user?.email || '';
       const companyName = company?.name || config?.companyName || '';
       const birthDate = ''; // Bisa diambil dari user profile jika ada
-      
+
       // Template message
       const message = `Permisi kak, Aku ada kendala nih, bisa bantu? \n\n` +
         `Nama : ${userName}\n` +
@@ -211,11 +183,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         `Company : ${companyName}\n` +
         `Tanggal Lahir : ${birthDate}\n` +
         `Perihal : `;
-      
+
       // Encode message untuk URL
       const encodedMessage = encodeURIComponent(message);
       const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
-      
+
       // Check if WhatsApp can be opened
       const canOpen = await Linking.canOpenURL(url);
       if (canOpen) {
@@ -245,15 +217,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const screenHeight = Dimensions.get('window').height;
 
   return (
-    
+
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Absolute positioned background to ensure full coverage */}
-      <View
-        style={[
-          styles.absoluteBackground,
-          { backgroundColor: colors.background }
-        ]}
-      />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1, backgroundColor: 'transparent' }}
@@ -272,427 +239,273 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={false}
           contentInsetAdjustmentBehavior="automatic">
-          <View style={[styles.content, {  backgroundColor: 'transparent' }]}>
-          
-            <View style={styles.pageContainer}>
-              {/* Top decoration */}
-              <Animated.View
-                style={[
-                  styles.decorationBubble,
-                  {
-                    backgroundColor: colors.primary,
-                    opacity: 0.12,
-                    transform: [
-                      {
-                        translateY: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [-10, -18],
-                        }),
-                      },
-                      {
-                        translateX: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, 10],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  styles.decorationBubbleSmall,
-                  {
-                    backgroundColor: colors.primary,
-                    opacity: 0.1,
-                    transform: [
-                      {
-                        translateY: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [-18, 8],
-                        }),
-                      },
-                      {
-                        translateX: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, -10],
-                        }),
-                      },
-                      {
-                        scale: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1.02, 1.08],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  styles.decorationBubbleTiny,
-                  {
-                    backgroundColor: colors.primary,
-                    opacity: 0.08,
-                    transform: [
-                      {
-                        translateY: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [8, -10],
-                        }),
-                      },
-                      {
-                        translateX: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [3, -2],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  styles.decorationBubbleMini,
-                  {
-                    backgroundColor: colors.primary,
-                    opacity: 0.05,
-                    transform: [
-                      {
-                        translateY: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, -4],
-                        }),
-                      },
-                      {
-                        translateX: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [-2, 4],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  styles.decorationBubbleExtra,
-                  {
-                    backgroundColor: colors.primary,
-                    opacity: 0.07,
-                    transform: [
-                      {
-                        translateY: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [-6, 6],
-                        }),
-                      },
-                      {
-                        translateX: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [-6, 4],
-                        }),
-                      },
-                      {
-                        scale: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 1.05],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  styles.decorationRing,
-                  {
-                    borderColor: colors.primary,
-                    transform: [
-                      {
-                        translateY: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, 8],
-                        }),
-                      },
-                      {
-                        scale: decoAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.98, 1.04],
-                        }),
-                      },
-                    ],
-                    opacity: decoAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.05, 0.08],
-                    }),
-                  },
-                ]}
-              />
 
-              <View style={styles.logoWrapper}>
-                <View style={[styles.logoContainer, { backgroundColor: colors.background, opacity: 0.8 }]}>
-                  {logoUri ? (
-                    <Image
-                      source={{ uri: logoUri }}
-                      style={styles.logoImage}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                      <View style={styles.logoPlaceholder}>
-                        <LogoClosepay
-                          width={scale(60)}
-                          height={scale(60)}
-                        />
-                      </View>
-                  )}
-                </View>
-              </View>
-              <View style={[styles.mainCard, { backgroundColor: colors.surface }]}>
-                {/* Logo & version */}
-                <View style={[styles.topBar, { backgroundColor: 'transparent', paddingVertical: verticalScale(10) }]}>
-                  
-                  <Text style={[styles.versionText, { color: colors.textSecondary, backgroundColor: colors.surfaceSecondary || '#F1F5F9' }]}>
-                    version {appVersion} - {config?.companyName}
-                  </Text>
-                </View>
 
-                {/* Login Form */}
-                <View style={[styles.formContainer, { backgroundColor: 'transparent' }]}>
-                <View style={[styles.formSection, { backgroundColor: 'transparent' }]}>
-                <Text style={[styles.title, { color: colors.text }]}>{t('auth.login')}</Text>
-                {/* Identifier Input - Username, Email, or Phone */}
-                <View style={styles.inputContainer}>
-                  <Text style={[styles.label, { color: colors.text }]}>{t('auth.identifierLabel')}</Text>
-                  <TextInput
-                    ref={identifierInputRef}
-                    style={[
-                      styles.input,
-                      {
-                        backgroundColor: colors.inputBackground,
-                        borderColor: identifierError ? colors.error : colors.border,
-                        color: colors.text,
-                      },
-                      identifierFocused && {
-                        borderColor: colors.primary,
-                        backgroundColor: colors.inputFocused,
-                      },
-                      identifierError && {
-                        borderColor: colors.error,
-                        backgroundColor: colors.inputError,
-                      },
-                    ]}
-                    placeholder={t('auth.enterIdentifier')}
-                    placeholderTextColor={colors.textTertiary}
-                    value={identifier}
-                    onChangeText={setIdentifier}
-                    onFocus={() => setIdentifierFocused(true)}
-                    onBlur={() => setIdentifierFocused(false)}
-                    keyboardType="default"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    editable={!isLoggingIn}
-                    returnKeyType="next"
-                    onSubmitEditing={() => passwordInputRef.current?.focus()}
+          <View style={styles.pageContainer}>
+            {/* Top decoration */}
+            <View style={styles.logoWrapper}>
+              <View style={styles.logoContainer}>
+                {logoUri ? (
+                  <Image
+                    source={{ uri: logoUri }}
+                    style={styles.logoImage}
+                    resizeMode="cover"
                   />
-                  {identifierError ? (
-                    <Text style={[styles.errorText, { color: colors.error }]}>{identifierError}</Text>
-                  ) : null}
-                </View>
-
-                {/* Password Input */}
-                <View style={styles.inputContainer}>
-                  <Text style={[styles.label, { color: colors.text }]}>{t('auth.password')}</Text>
-                  <View style={styles.passwordContainer}>
-                    <TextInput
-                      ref={passwordInputRef}
-                      style={[
-                        styles.input,
-                        styles.passwordInput,
-                        {
-                          backgroundColor: colors.inputBackground,
-                          borderColor: passwordError ? colors.error : colors.border,
-                          color: colors.text,
-                        },
-                        passwordFocused && {
-                          borderColor: colors.primary,
-                          backgroundColor: colors.inputFocused,
-                        },
-                        passwordError && {
-                          borderColor: colors.error,
-                          backgroundColor: colors.inputError,
-                        },
-                      ]}
-                      placeholder={t('auth.enterPassword')}
-                      placeholderTextColor={colors.textTertiary}
-                      value={password}
-                      onChangeText={setPassword}
-                      onFocus={() => setPasswordFocused(true)}
-                      onBlur={() => setPasswordFocused(false)}
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      editable={!isLoggingIn}
-                      returnKeyType="done"
-                      onSubmitEditing={() => {
-                        Keyboard.dismiss();
-                      }}
+                ) : (
+                  <View style={styles.logoPlaceholder}>
+                    <LogoClosepay
+                      width={scale(100)}
+                      height={scale(100)}
                     />
-                    <TouchableOpacity
-                      style={styles.eyeButton}
-                      onPress={() => setShowPassword(!showPassword)}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      disabled={isLoggingIn}>
-                      {showPassword ? (
-                        <Eye size={getIconSize('medium')} color={colors.textSecondary} variant="Outline" />
-                      ) : (
-                        <EyeSlash size={getIconSize('medium')} color={colors.textSecondary} variant="Outline" />
-                      )}
-                    </TouchableOpacity>
-                  </View>
-                  {passwordError ? (
-                    <Text style={[styles.errorText, { color: colors.error }]}>{passwordError}</Text>
-                  ) : null}
-
-                  {/* Forgot Password Link */}
-                  <TouchableOpacity
-                    style={styles.forgotPasswordButton}
-                    onPress={() => {
-                      // @ts-ignore - navigation type will be inferred
-                      navigation.navigate('ForgotPassword');
-                    }}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    disabled={isLoggingIn}>
-                    <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>
-                      {t('auth.forgotPassword')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Login Button */}
-                <TouchableOpacity
-                  style={[
-                    styles.loginButton,
-                    { backgroundColor: colors.primary },
-                    isLoggingIn && { backgroundColor: colors.textTertiary, opacity: 0.7 },
-                  ]}
-                  onPress={handleLogin}
-                  disabled={isLoggingIn}
-                  activeOpacity={0.8}>
-                  <View style={styles.buttonContent}>
-                    {isLoggingIn ? (
-                      <ActivityIndicator
-                        color={colors.surface}
-                        size="small"
-                      />
-                    ) : (
-                      <Text style={[styles.loginButtonText, { color: colors.surface }]}>
-                        {t('auth.loginButton')}
-                      </Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
-
-                {/* Need Help Section */}
-                <View style={styles.needHelpContainer}>
-                  <Text style={[styles.needHelpText, { color: colors.textSecondary }]}>
-                    {t('auth.needHelp')}{' '}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={handleCustomerService}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    disabled={isLoggingIn}>
-                    <Text style={[styles.customerServiceText, { color: colors.primary }]}>
-                      {t('auth.customerService')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Social Login Section */}
-                {showSocialLogin && (
-                  <>
-                    {/* Separator */}
-                    <View style={styles.separatorContainer}>
-                      <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
-                      <Text style={[styles.separatorText, { color: colors.textSecondary }]}>
-                        {t('auth.or')}
-                      </Text>
-                      <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
-                    </View>
-
-                    {/* Social Login Buttons */}
-                    {socialProviders.includes('google') && (
-                      <TouchableOpacity
-                        style={[
-                          styles.socialButton,
-                          {
-                            backgroundColor: colors.surface,
-                            borderColor: colors.border,
-                          },
-                        ]}
-                        onPress={() => {
-                          // TODO: Implement Google login
-                          console.log('Google login clicked');
-                        }}
-                        disabled={isLoggingIn}
-                        activeOpacity={0.8}>
-                        <View style={styles.socialButtonContent}>
-                          {/* Google Logo SVG */}
-                          <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24">
-                            <Path
-                              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                              fill="#4285F4"
-                            />
-                            <Path
-                              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                              fill="#34A853"
-                            />
-                            <Path
-                              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                              fill="#FBBC05"
-                            />
-                            <Path
-                              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                              fill="#EA4335"
-                            />
-                          </Svg>
-                          <Text style={[styles.socialButtonText, { color: colors.text }]}>
-                            {t('auth.continueWithGoogle')}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  </>
-                )}
-
-                {/* Sign Up Link */}
-                {showSignUp && (
-                  <View style={styles.signUpContainer}>
-                    <Text style={[styles.signUpText, { color: colors.textSecondary }]}>
-                      {t('auth.dontHaveAccount')}{' '}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (onSignUpPress) {
-                          onSignUpPress();
-                        } else {
-                          // @ts-ignore - navigation type will be inferred
-                          navigation.navigate('SignUp');
-                        }
-                      }}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      disabled={isLoggingIn}>
-                      <Text style={[styles.signUpLink, { color: colors.primary }]}>
-                        {t('auth.signUp')}
-                      </Text>
-                    </TouchableOpacity>
                   </View>
                 )}
               </View>
             </View>
+            <View style={styles.mainCard}>
+              {/* Logo & version */}
+              <View style={styles.topBar}>
+
+                <Text style={[styles.versionText, { color: colors.textSecondary, backgroundColor: colors.surfaceSecondary || '#F1F5F9' }]}>
+                  version {appVersion} - {config?.companyName}
+                </Text>
+              </View>
+
+              {/* Login Form */}
+              <View style={styles.formContainer}>
+                <View style={styles.formSection}>
+                  <Text style={[styles.title, { color: colors.text }]}>{t('auth.login')}</Text>
+                  {/* Identifier Input - Username, Email, or Phone */}
+                  <View style={styles.inputContainer}>
+                    <Text style={[styles.label, { color: colors.text }]}>{t('auth.identifierLabel')}</Text>
+                    <TextInput
+                      ref={identifierInputRef}
+                      style={[
+                        styles.input,
+                        {
+                          backgroundColor: colors.inputBackground,
+                          borderColor: identifierError ? colors.error : colors.border,
+                          color: colors.text,
+                        },
+                        identifierFocused && {
+                          borderColor: colors.primary,
+                          backgroundColor: colors.inputFocused,
+                        },
+                        identifierError && {
+                          borderColor: colors.error,
+                          backgroundColor: colors.inputError,
+                        },
+                      ]}
+                      placeholder={t('auth.enterIdentifier')}
+                      placeholderTextColor={colors.textTertiary}
+                      value={identifier}
+                      onChangeText={setIdentifier}
+                      onFocus={() => setIdentifierFocused(true)}
+                      onBlur={() => setIdentifierFocused(false)}
+                      keyboardType="default"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      editable={!isLoggingIn}
+                      returnKeyType="next"
+                      onSubmitEditing={() => passwordInputRef.current?.focus()}
+                    />
+                    {identifierError ? (
+                      <Text style={[styles.errorText, { color: colors.error }]}>{identifierError}</Text>
+                    ) : null}
+                  </View>
+
+                  {/* Password Input */}
+                  <View style={styles.inputContainer}>
+                    <Text style={[styles.label, { color: colors.text }]}>{t('auth.password')}</Text>
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        ref={passwordInputRef}
+                        style={[
+                          styles.input,
+                          styles.passwordInput,
+                          {
+                            backgroundColor: colors.inputBackground,
+                            borderColor: passwordError ? colors.error : colors.border,
+                            color: colors.text,
+                          },
+                          passwordFocused && {
+                            borderColor: colors.primary,
+                            backgroundColor: colors.inputFocused,
+                          },
+                          passwordError && {
+                            borderColor: colors.error,
+                            backgroundColor: colors.inputError,
+                          },
+                        ]}
+                        placeholder={t('auth.enterPassword')}
+                        placeholderTextColor={colors.textTertiary}
+                        value={password}
+                        onChangeText={setPassword}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setPasswordFocused(false)}
+                        secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        editable={!isLoggingIn}
+                        returnKeyType="done"
+                        onSubmitEditing={() => {
+                          Keyboard.dismiss();
+                        }}
+                      />
+                      <TouchableOpacity
+                        style={styles.eyeButton}
+                        onPress={() => setShowPassword(!showPassword)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        disabled={isLoggingIn}>
+                        {showPassword ? (
+                          <Eye size={getIconSize('medium')} color={colors.textSecondary} variant="Outline" />
+                        ) : (
+                          <EyeSlash size={getIconSize('medium')} color={colors.textSecondary} variant="Outline" />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                    {passwordError ? (
+                      <Text style={[styles.errorText, { color: colors.error }]}>{passwordError}</Text>
+                    ) : null}
+
+                    {/* Forgot Password Link */}
+                    <TouchableOpacity
+                      style={styles.forgotPasswordButton}
+                      onPress={() => {
+                        // @ts-ignore - navigation type will be inferred
+                        navigation.navigate('ForgotPassword');
+                      }}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      disabled={isLoggingIn}>
+                      <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>
+                        {t('auth.forgotPassword')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Login Button */}
+                  <TouchableOpacity
+                    style={[
+                      styles.loginButton,
+                      { backgroundColor: colors.primary },
+                      isLoggingIn && { backgroundColor: colors.textTertiary, opacity: 0.7 },
+                    ]}
+                    onPress={handleLogin}
+                    disabled={isLoggingIn}
+                    activeOpacity={0.8}>
+                    <View style={styles.buttonContent}>
+                      {isLoggingIn ? (
+                        <ActivityIndicator
+                          color={colors.surface}
+                          size="small"
+                        />
+                      ) : (
+                        <Text style={[styles.loginButtonText, { color: colors.surface }]}>
+                          {t('auth.loginButton')}
+                        </Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+
+                  {/* Need Help Section */}
+                  <View style={styles.needHelpContainer}>
+                    <Text style={[styles.needHelpText, { color: colors.textSecondary }]}>
+                      {t('auth.needHelp')}{' '}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={handleCustomerService}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      disabled={isLoggingIn}>
+                      <Text style={[styles.customerServiceText, { color: colors.primary }]}>
+                        {t('auth.customerService')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Social Login Section */}
+                  {showSocialLogin && (
+                    <>
+                      {/* Separator */}
+                      <View style={styles.separatorContainer}>
+                        <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
+                        <Text style={[styles.separatorText, { color: colors.textSecondary }]}>
+                          {t('auth.or')}
+                        </Text>
+                        <View style={[styles.separatorLine, { backgroundColor: colors.border }]} />
+                      </View>
+
+                      {/* Social Login Buttons */}
+                      {socialProviders.includes('google') && (
+                        <TouchableOpacity
+                          style={[
+                            styles.socialButton,
+                            {
+                              backgroundColor: colors.surface,
+                              borderColor: colors.border,
+                            },
+                          ]}
+                          onPress={() => {
+                            // TODO: Implement Google login
+                            console.log('Google login clicked');
+                          }}
+                          disabled={isLoggingIn}
+                          activeOpacity={0.8}>
+                          <View style={styles.socialButtonContent}>
+                            {/* Google Logo SVG */}
+                            <Svg width={scale(20)} height={scale(20)} viewBox="0 0 24 24">
+                              <Path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                fill="#4285F4"
+                              />
+                              <Path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                fill="#34A853"
+                              />
+                              <Path
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                fill="#FBBC05"
+                              />
+                              <Path
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                fill="#EA4335"
+                              />
+                            </Svg>
+                            <Text style={[styles.socialButtonText, { color: colors.text }]}>
+                              {t('auth.continueWithGoogle')}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                    </>
+                  )}
+
+                  {/* Sign Up Link */}
+                  {showSignUp && (
+                    <View style={styles.signUpContainer}>
+                      <Text style={[styles.signUpText, { color: colors.textSecondary }]}>
+                        {t('auth.dontHaveAccount')}{' '}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (onSignUpPress) {
+                            onSignUpPress();
+                          } else {
+                            // @ts-ignore - navigation type will be inferred
+                            navigation.navigate('SignUp');
+                          }
+                        }}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        disabled={isLoggingIn}>
+                        <Text style={[styles.signUpLink, { color: colors.primary }]}>
+                          {t('auth.signUp')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
           </View>
-        </View>
-      </View>
+
         </ScrollView>
 
         {/* Error Modal - Only for API response errors */}
@@ -712,88 +525,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  absoluteBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 0,
-  },
+
   scrollContent: {
     flexGrow: 1,
     paddingBottom: verticalScale(32),
     zIndex: 1,
   },
-  content: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
+
   pageContainer: {
     width: '100%',
-    maxWidth: 460,
     alignSelf: 'center',
     position: 'relative',
-    paddingTop: verticalScale(56),
+    paddingTop: verticalScale(24),
+    flex: 1, // Fill available height
   },
-  decorationBubble: {
-    position: 'absolute',
-    top: verticalScale(-82),
-    left: scale(-36),
-    width: scale(220),
-    height: scale(220),
-    borderRadius: scale(110),
-    zIndex: 0,
-  },
-  decorationBubbleSmall: {
-    position: 'absolute',
-    top: verticalScale(-36),
-    right: scale(-20),
-    width: scale(170),
-    height: scale(170),
-    borderRadius: scale(85),
-    zIndex: 0,
-  },
-  decorationBubbleTiny: {
-    position: 'absolute',
-    top: verticalScale(-6),
-    left: scale(168),
-    width: scale(62),
-    height: scale(62),
-    borderRadius: scale(31),
-    zIndex: 0,
-  },
-  decorationBubbleMini: {
-    position: 'absolute',
-    top: verticalScale(40),
-    left: scale(96),
-    width: scale(40),
-    height: scale(40),
-    borderRadius: scale(20),
-    zIndex: 0,
-  },
-  decorationBubbleExtra: {
-    position: 'absolute',
-    top: verticalScale(-12),
-    right: scale(92),
-    width: scale(48),
-    height: scale(48),
-    borderRadius: scale(24),
-    zIndex: 0,
-  },
-  decorationRing: {
-    position: 'absolute',
-    top: verticalScale(-32),
-    left: scale(104),
-    width: scale(138),
-    height: scale(138),
-    borderRadius: scale(69),
-    borderWidth: 1.2,
-    opacity: 0.09,
-    zIndex: 0,
-  },
+
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -803,18 +549,15 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   formContainer: {
-    marginTop: verticalScale(10),
-    paddingHorizontal: 0,
+    marginTop: verticalScale(16),
+    justifyContent: 'flex-end'
   },
   logoContainer: {
-    width: scale(80), // Increased for larger logo
-    height: scale(80), // Increased for larger logo
-    borderRadius: scale(60), // Fully rounded (half of width/height) - perfect circle
-    overflow: 'hidden', // Ensure content is clipped to circle
+    width: scale(100),
+    height: scale(100),
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0 0 20px 6px rgba(0, 0, 0, 0.2)',
-    
+
   },
   logoImage: {
     width: '110%',
@@ -826,7 +569,6 @@ const styles = StyleSheet.create({
     height: '110%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent',
   },
   versionText: {
     fontSize: getResponsiveFontSize('small'),
@@ -843,26 +585,11 @@ const styles = StyleSheet.create({
   },
   mainCard: {
     width: '100%',
-    borderTopLeftRadius: scale(28),
-    borderTopRightRadius: scale(28),
-    paddingTop: verticalScale(16),
     paddingHorizontal: scale(16),
-    paddingBottom: verticalScale(16),
-    // Glassmorphism: semi-transparent surface + soft stroke + deep shadow
-    backgroundColor: 'rgba(255,255,255,0.68)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.55)',
-    ...Platform.select({
-      ios: {
-        shadowColor: 'rgba(0,0,0,0.2)',
-        shadowOffset: { width: 0, height: 16 },
-        shadowOpacity: 0.22,
-        shadowRadius: 32,
-      },
-      android: {
-        elevation: 14,
-      },
-    }),
+    marginTop: verticalScale(16),
+    flex: 1, // Allow card to fill available space
+    justifyContent: 'flex-end', // Align content to the bottom
+    paddingBottom: verticalScale(32), // Add some padding at the bottom
   },
   formCard: {
     borderRadius: 0,
@@ -872,14 +599,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   logoWrapper: {
-    position: 'absolute',
-    top: verticalScale(20),
-    left: 0,
-    right: 0,
-    marginLeft: scale(28),
-    alignItems: 'flex-start',
-    zIndex: 2,
-    
+    width: '100%',
+    alignItems: 'center',
+    marginTop: verticalScale(24),
+    justifyContent: 'center',
   },
   title: {
     fontSize: moderateScale(24),

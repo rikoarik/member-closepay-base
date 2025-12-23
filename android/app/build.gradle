@@ -184,4 +184,7 @@ dependencies {
 
     debugImplementation "com.github.chuckerteam.chucker:library:4.0.0"
     releaseImplementation "com.github.chuckerteam.chucker:library-no-op:4.0.0"
+    
+    // FileProvider support
+    implementation("androidx.core:core-ktx:1.12.0")
 }

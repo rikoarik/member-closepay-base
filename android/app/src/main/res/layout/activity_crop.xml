@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:fitsSystemWindows="false">
+
+    <!-- Image View Container -->
+    <FrameLayout
+        android:id="@+id/imageContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Image View -->
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="matrix" />
+
+        <!-- Crop Overlay -->
+        <com.solusinegeri.app.CropOverlayView
+            android:id="@+id/cropOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Crop Frame Container -->
+        <FrameLayout
+            android:id="@+id/cropFrameContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <!-- Crop Frame -->
+            <View
+                android:id="@+id/cropFrame"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:background="@drawable/crop_frame_border_enhanced" />
+
+            <!-- Corner Handles - L-shaped indicators -->
+            <View
+                android:id="@+id/cornerHandleTopLeft"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="top|start"
+                android:background="@drawable/corner_handle_l"
+                android:layout_marginTop="-2dp"
+                android:layout_marginStart="-2dp" />
+
+            <View
+                android:id="@+id/cornerHandleTopRight"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/corner_handle_l"
+                android:rotation="90"
+                android:layout_marginTop="-2dp"
+                android:layout_marginEnd="-2dp" />
+
+            <View
+                android:id="@+id/cornerHandleBottomLeft"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom|start"
+                android:background="@drawable/corner_handle_l"
+                android:rotation="270"
+                android:layout_marginBottom="-2dp"
+                android:layout_marginStart="-2dp" />
+
+            <View
+                android:id="@+id/cornerHandleBottomRight"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom|end"
+                android:background="@drawable/corner_handle_l"
+                android:rotation="180"
+                android:layout_marginBottom="-2dp"
+                android:layout_marginEnd="-2dp" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <!-- Toolbar with proper insets -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#CC000000"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:fitsSystemWindows="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Cancel Button (Left) -->
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Batal"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:background="@android:color/transparent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- Rotate Icon Button (Center) -->
+        <ImageButton
+            android:id="@+id/rotateButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_rotate"
+            android:tint="#FFFFFF"
+            android:contentDescription="Rotate"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Done Button (Right) - Centang Icon -->
+        <ImageButton
+            android:id="@+id/doneButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_check"
+            android:contentDescription="Done"
+            android:padding="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

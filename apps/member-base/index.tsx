@@ -18,7 +18,6 @@ import { SecurityProvider } from '@core/security/SecurityProvider';
 import { configService, configRefreshService } from '@core/config';
 import { initializePlugins } from '@core/config';
 import { createAppNavigator } from '@core/navigation';
-import { themeColorService } from '@core/theme';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { NotificationScreen } from './src/screens/NotificationScreen';
@@ -188,7 +187,6 @@ function MemberBaseAppContent(): React.JSX.Element {
         
         if (currentColor && currentColor !== lastThemeColor) {
           console.log('[Theme] Theme color file changed:', lastThemeColor, '→', currentColor);
-          themeColorService.setPrimaryColor(currentColor);
           lastThemeColor = currentColor;
         }
       } catch (error) {

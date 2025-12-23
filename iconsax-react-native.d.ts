@@ -39,5 +39,19 @@ declare module 'iconsax-react-nativejs' {
   export class Calendar extends Component<IconProps> {}
   export class Sort extends Component<IconProps> {}
   export class Filter extends Component<IconProps> {}
+  export class Profile extends Component<IconProps> {}
+  export class DocumentText extends Component<IconProps> {}
+  export class Grid extends Component<IconProps> {}
+  export class Sun1 extends Component<IconProps> {}
+  export class Document extends Component<IconProps> {}
+  export class Camera extends Component<IconProps> {}
+  export class Gallery extends Component<IconProps> {}
+  export class Trash extends Component<IconProps> {}
+  export class Edit2 extends Component<IconProps> {}
+  export class GalleryEdit extends Component<IconProps> {}
+  export class LanguageSquare extends Component<IconProps> {}
+  export class HamburgerMenu extends Component<IconProps> {}
+  export class User extends Component<IconProps> {}
+  export class Lock extends Component<IconProps> {}
 }
 

@@ -38,6 +38,12 @@
         </intent-filter>
       </activity>
       
+      <!-- Custom Crop Activity -->
+      <activity
+        android:name=".CropActivity"
+        android:theme="@style/AppTheme"
+        android:exported="false" />
+      
       <!-- Chucker Activities with edge-to-edge theme -->
       <activity
         android:name="com.chuckerteam.chucker.internal.ui.MainActivity"
@@ -49,5 +55,16 @@
         android:theme="@style/ChuckerTheme"
         android:exported="false"
         tools:replace="android:theme" />
+      
+      <!-- FileProvider for sharing files -->
+      <provider
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="${applicationId}.fileprovider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+          android:name="android.support.FILE_PROVIDER_PATHS"
+          android:resource="@xml/file_paths" />
+      </provider>
     </application>
 </manifest>

@@ -14,10 +14,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  Image,
+  Alert,
+  Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft2 } from 'iconsax-react-nativejs';
+import { ArrowLeft2, Profile, GalleryEdit, Camera, Gallery } from 'iconsax-react-nativejs';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useAuth } from '@core/auth';
@@ -31,6 +34,8 @@ import {
   getResponsiveFontSize,
   getIconSize,
   FontFamily,
+  BottomSheet,
+  permissionService,
 } from '@core/config';
 
 export const EditProfileScreen: React.FC = () => {
@@ -44,7 +49,9 @@ export const EditProfileScreen: React.FC = () => {
   const [name, setName] = useState(user?.name || 'Ilham Tarore');
   const [phone, setPhone] = useState('0892132731');
   const [address, setAddress] = useState('Bener, kec tengaran, kab semarang');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showPhotoPicker, setShowPhotoPicker] = useState(false);
 
   const [emailError, setEmailError] = useState('');
   const [nameError, setNameError] = useState('');
@@ -133,6 +140,145 @@ export const EditProfileScreen: React.FC = () => {
     return isValid;
   };
 
+  const handleChangePhoto = () => {
+    setShowPhotoPicker(true);
+  };
+
+  const handleSelectFromGallery = async () => {
+    setShowPhotoPicker(false);
+    
+    try {
+      const { NativeModules } = require('react-native');
+      const { ImagePickerModule } = NativeModules;
+      
+      if (!ImagePickerModule || !ImagePickerModule.pickImage) {
+        Alert.alert(
+          t('common.error') || 'Error',
+          t('profile.imagePickerNotAvailable') || 'Image picker module tidak tersedia.',
+          [{ text: t('common.ok') || 'OK' }]
+        );
+        return;
+      }
+      
+      const result = await ImagePickerModule.pickImage({
+        maxWidth: 1024,
+        maxHeight: 1024,
+        quality: 0.8,
+      });
+      
+      if (result && result.uri) {
+        // Convert file:// URI to proper format
+        const imageUri = result.uri.startsWith('file://') 
+          ? result.uri 
+          : `file://${result.uri}`;
+        setProfileImage(imageUri);
+      }
+    } catch (error: any) {
+      console.error('Error selecting image from gallery:', error);
+      
+      if (error.code === 'CANCELLED') {
+        // User cancelled, no need to show error
+        return;
+      }
+      
+      Alert.alert(
+        t('common.error') || 'Error',
+        error.message || t('profile.imagePickerError') || 'Terjadi kesalahan saat memilih foto.',
+        [{ text: t('common.ok') || 'OK' }]
+      );
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    setShowPhotoPicker(false);
+    
+    try {
+      // Request camera permission first
+      const permissionResult = await permissionService.requestCameraPermission();
+      
+      if (permissionResult.status !== 'granted') {
+        Alert.alert(
+          t('profile.cameraPermissionRequired') || 'Izin Kamera Diperlukan',
+          t('profile.cameraPermissionMessage') || 'Aplikasi memerlukan izin kamera untuk mengambil foto. Silakan aktifkan izin kamera di pengaturan.',
+          [
+            { text: t('common.cancel') || 'Batal', style: 'cancel' },
+            {
+              text: t('common.settings') || 'Pengaturan',
+              onPress: () => {
+                if (Platform.OS === 'ios') {
+                  Linking.openURL('app-settings:');
+                } else {
+                  Linking.openSettings();
+                }
+              },
+            },
+          ]
+        );
+        return;
+      }
+
+      const { NativeModules } = require('react-native');
+      const { ImagePickerModule } = NativeModules;
+      
+      if (!ImagePickerModule || !ImagePickerModule.takePicture) {
+        Alert.alert(
+          t('common.error') || 'Error',
+          t('profile.imagePickerNotAvailable') || 'Image picker module tidak tersedia.',
+          [{ text: t('common.ok') || 'OK' }]
+        );
+        return;
+      }
+      
+      const result = await ImagePickerModule.takePicture({
+        maxWidth: 1024,
+        maxHeight: 1024,
+        quality: 0.8,
+      });
+      
+      if (result && result.uri) {
+        // Convert file:// URI to proper format
+        const imageUri = result.uri.startsWith('file://') 
+          ? result.uri 
+          : `file://${result.uri}`;
+        setProfileImage(imageUri);
+      }
+    } catch (error: any) {
+      console.error('Error taking photo:', error);
+      
+      if (error.code === 'CANCELLED') {
+        // User cancelled, no need to show error
+        return;
+      }
+      
+      Alert.alert(
+        t('common.error') || 'Error',
+        error.message || t('profile.cameraError') || 'Terjadi kesalahan saat mengambil foto.',
+        [{ text: t('common.ok') || 'OK' }]
+      );
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setShowPhotoPicker(false);
+    Alert.alert(
+      t('profile.removePhoto') || 'Hapus Foto',
+      t('profile.removePhotoConfirmation') || 'Apakah Anda yakin ingin menghapus foto profil?',
+      [
+        {
+          text: t('common.cancel') || 'Batal',
+          style: 'cancel',
+        },
+        {
+          text: t('common.remove') || 'Hapus',
+          style: 'destructive',
+          onPress: () => {
+            setProfileImage(null);
+          },
+        },
+      ]
+    );
+  };
+
   const handleSave = async () => {
     if (!validateForm()) {
       return;
@@ -210,6 +356,78 @@ export const EditProfileScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
+          {/* Profile Photo Section */}
+          <View style={styles.profilePhotoSection}>
+            <View style={styles.profilePhotoContainer}>
+            {profileImage ? (
+                  <Image
+                    source={{ uri: profileImage }}
+                    style={[
+                      styles.profilePhoto,
+                      { borderColor: colors.surface },
+                    ]}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.profilePhotoPlaceholder,
+                      {
+                        backgroundColor: colors.primaryLight,
+                        borderColor: colors.surface,
+                      },
+                    ]}
+                  >
+                    {name ? (
+                      <Text
+                        style={[
+                          styles.profilePhotoInitial,
+                          {
+                            color: colors.primary,
+                            fontSize: getResponsiveFontSize('xlarge'),
+                          },
+                        ]}
+                      >
+                        {name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </Text>
+                    ) : (
+                      <Profile
+                        size={scale(60)}
+                        color={colors.primary}
+                        variant="Bold"
+                      />
+                    )}
+                  </View>
+                )}
+            </View>
+            <TouchableOpacity
+              style={styles.changePhotoButton}
+              onPress={handleChangePhoto}
+              activeOpacity={0.7}
+            >
+              <GalleryEdit size={getIconSize('small')} color={colors.primary} />
+              
+              <Text
+                style={[
+                  styles.changePhotoText,
+                  {
+                    color: colors.primary,
+                    fontSize: getResponsiveFontSize('medium'),
+                  },
+                ]}
+              >
+                {profileImage
+                  ? t('profile.changePhoto') || 'Ganti Foto'
+                  : t('profile.addPhoto') || 'Tambah Foto'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Email Input */}
           <View style={styles.inputContainer}>
             <Text
@@ -435,6 +653,148 @@ export const EditProfileScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Photo Picker Bottom Sheet */}
+      <BottomSheet
+        visible={showPhotoPicker}
+        onClose={() => setShowPhotoPicker(false)}
+        snapPoints={[3500]}
+      >
+        <View style={[styles.bottomSheetContent, { paddingHorizontal: getHorizontalPadding() }]}>
+          {/* Camera Option */}
+          <TouchableOpacity
+            style={[
+              styles.bottomSheetOption,
+              {
+                backgroundColor: colors.surface,
+                borderBottomColor: colors.border,
+              },
+            ]}
+            onPress={handleTakePhoto}
+            activeOpacity={0.7}
+          >
+            <View style={styles.bottomSheetOptionLeft}>
+              <View
+                style={[
+                  styles.bottomSheetIconContainer,
+                  { backgroundColor: colors.primaryLight },
+                ]}
+              >
+                <Camera size={getIconSize('medium')} color={colors.primary} />
+              </View>
+              <Text
+                style={[
+                  styles.bottomSheetOptionText,
+                  {
+                    color: colors.text,
+                    fontSize: getResponsiveFontSize('large'),
+                  },
+                ]}
+              >
+                {t('profile.fromCamera') || 'Ambil Foto'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Gallery Option */}
+          <TouchableOpacity
+            style={[
+              styles.bottomSheetOption,
+              {
+                backgroundColor: colors.surface,
+                borderBottomColor: colors.border,
+              },
+            ]}
+            onPress={handleSelectFromGallery}
+            activeOpacity={0.7}
+          >
+            <View style={styles.bottomSheetOptionLeft}>
+              <View
+                style={[
+                  styles.bottomSheetIconContainer,
+                  { backgroundColor: colors.primaryLight },
+                ]}
+              >
+                <Gallery size={getIconSize('medium')} color={colors.primary} />
+              </View>
+              <Text
+                style={[
+                  styles.bottomSheetOptionText,
+                  {
+                    color: colors.text,
+                    fontSize: getResponsiveFontSize('large'),
+                  },
+                ]}
+              >
+                {t('profile.fromGallery') || 'Dari Galeri'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Remove Photo Option (only if photo exists) */}
+          {profileImage && (
+            <TouchableOpacity
+              style={[
+                styles.bottomSheetOption,
+                styles.bottomSheetOptionDanger,
+                {
+                  backgroundColor: colors.surface,
+                  marginTop: moderateVerticalScale(8),
+                },
+              ]}
+              onPress={handleRemovePhoto}
+              activeOpacity={0.7}
+            >
+              <View style={styles.bottomSheetOptionLeft}>
+                <View
+                  style={[
+                    styles.bottomSheetIconContainer,
+                    { backgroundColor: colors.errorLight || colors.error + '20' },
+                  ]}
+                >
+                  <Text style={[styles.bottomSheetIconEmoji, { fontSize: getIconSize('medium') }]}>🗑️</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.bottomSheetOptionText,
+                    {
+                      color: colors.error,
+                      fontSize: getResponsiveFontSize('large'),
+                    },
+                  ]}
+                >
+                  {t('profile.removePhoto') || 'Hapus Foto'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* Cancel Button */}
+          <TouchableOpacity
+            style={[
+              styles.bottomSheetCancelButton,
+              {
+                backgroundColor: colors.surface,
+                marginTop: moderateVerticalScale(8),
+              },
+            ]}
+            onPress={() => setShowPhotoPicker(false)}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.bottomSheetCancelText,
+                {
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('large'),
+                },
+              ]}
+            >
+              {t('common.cancel') || 'Batal'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 };
@@ -471,6 +831,112 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: moderateVerticalScale(16),
     paddingBottom: moderateVerticalScale(100), // Space untuk footer
+  },
+  profilePhotoSection: {
+    alignItems: 'center',
+    marginBottom: moderateVerticalScale(24),
+  },
+  profilePhotoContainer: {
+    marginBottom: moderateVerticalScale(8),
+  },
+  profilePhotoWrapper: {
+    position: 'relative',
+    width: scale(120),
+    height: scale(120),
+    borderRadius: scale(60),
+    overflow: 'visible',
+  },
+  profilePhoto: {
+    width: scale(120),
+    height: scale(120),
+    borderRadius: scale(60),
+    borderWidth: 4,
+  },
+  profilePhotoPlaceholder: {
+    width: scale(120),
+    height: scale(120),
+    borderRadius: scale(60),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+  },
+  profilePhotoInitial: {
+    fontFamily: FontFamily.monasans.bold,
+  },
+  editPhotoButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: scale(36),
+    height: scale(36),
+    borderRadius: scale(18),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  changePhotoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+    paddingVertical: moderateVerticalScale(8),
+    paddingHorizontal: scale(16),
+  },
+  changePhotoText: {
+    fontFamily: FontFamily.monasans.semiBold,
+  },
+  bottomSheetContent: {
+    paddingTop: moderateVerticalScale(8),
+    paddingBottom: moderateVerticalScale(8),
+  },
+  bottomSheetOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: moderateVerticalScale(16),
+    paddingHorizontal: scale(16),
+    borderBottomWidth: 1,
+  },
+  bottomSheetOptionDanger: {
+    borderBottomWidth: 0,
+  },
+  bottomSheetOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  bottomSheetIconContainer: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: scale(16),
+  },
+  bottomSheetIconEmoji: {
+    textAlign: 'center',
+  },
+  changePhotoIcon: {
+    marginRight: scale(8),
+  },
+  bottomSheetOptionText: {
+    fontFamily: FontFamily.monasans.medium,
+  },
+  bottomSheetCancelButton: {
+    paddingVertical: moderateVerticalScale(16),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(12),
+    alignItems: 'center',
+    marginTop: moderateVerticalScale(8),
+  },
+  bottomSheetCancelText: {
+    fontFamily: FontFamily.monasans.semiBold,
   },
   inputContainer: {
     marginBottom: moderateVerticalScale(20),

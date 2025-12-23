@@ -8,8 +8,7 @@ export * from './types';
 
 // Services
 export * from './services/themeService';
-export { dummyThemeService } from './services/dummyThemeService';
-export { themeColorService } from './services/themeColorService';
+
 
 // Context
 export { ThemeProvider, useThemeContext } from './context/ThemeContext';

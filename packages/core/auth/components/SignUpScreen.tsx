@@ -18,13 +18,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-// DateTimePicker - optional dependency
-let DateTimePicker: any = null;
-try {
-  DateTimePicker = require('@react-native-community/datetimepicker').default;
-} catch (e) {
-  console.warn('[SignUpScreen] DateTimePicker not available. Date fields will use text input.');
-}
+
 import { useAuth, authService, type MetadataItem, type SignUpData, type TagItem } from '@core/auth';
 import {
   scale,
@@ -39,6 +33,7 @@ import {
   FontFamily,
   ErrorModal,
   configService,
+  DatePicker,
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
@@ -107,7 +102,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   // Dummy metadata - no API call
   const loadDummyMetadata = () => {
     setLoadingMetadata(true);
-    
+
     // Dummy metadata structure
     const dummyMetadata: MetadataItem[] = [
       {
@@ -166,7 +161,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
         },
       },
     ];
-    
+
     setMetadata(dummyMetadata);
     setLoadingMetadata(false);
   };
@@ -414,8 +409,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
       if (!value || (Array.isArray(value) && value.length === 0)) {
         setError(`${meta.data.display} ${t('auth.required')}`);
         setShowErrorModal(true);
-      return false;
-    }
+        return false;
+      }
     }
 
     // Check terms and privacy after all fields are validated
@@ -446,9 +441,9 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
         tags: selectedTags,
         oAuth: googleAuthData
           ? {
-              type: 'google',
-              googleAuthId: googleAuthData.id,
-            }
+            type: 'google',
+            googleAuthId: googleAuthData.id,
+          }
           : null,
       };
 
@@ -553,39 +548,24 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               {customDate[key] ? formatDate(customDate[key]) : t('auth.selectDate')}
             </Text>
           </TouchableOpacity>
-          {showDatePickers[key] && DateTimePicker && (
-            <DateTimePicker
-              value={customDate[key] || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              maximumDate={new Date()}
-              minimumDate={key === 'dateOfBirth' ? new Date(1900, 0, 1) : undefined}
-              onChange={(event: any, selectedDate?: Date) => {
-                setShowDatePickers({ ...showDatePickers, [key]: false });
-                if (selectedDate && event.type !== 'dismissed') {
-                  setCustomDate({ ...customDate, [key]: selectedDate });
-                  const formattedDate = selectedDate.toISOString().slice(0, 10);
-                  changeValue(formattedDate, key, tag, typeData);
-                }
-              }}
-            />
-          )}
-          {!DateTimePicker && (
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border,
-                  color: colors.text,
-                },
-              ]}
-              placeholder="YYYY-MM-DD"
-              value={value || ''}
-              onChangeText={(val) => changeValue(val, key, tag, typeData)}
-              placeholderTextColor={colors.textTertiary}
-            />
-          )}
+
+          <DatePicker
+            visible={!!showDatePickers[key]}
+            onClose={() => setShowDatePickers({ ...showDatePickers, [key]: false })}
+            onConfirm={(selectedDate) => {
+              setCustomDate({ ...customDate, [key]: selectedDate });
+              const formattedDate = selectedDate.toISOString().slice(0, 10);
+              changeValue(formattedDate, key, tag, typeData);
+            }}
+            value={customDate[key] || new Date()}
+            title={display}
+            maximumDate={
+              key === 'dateOfBirth'
+                ? new Date(new Date().setFullYear(new Date().getFullYear() - 5))
+                : new Date()
+            }
+            minimumDate={key === 'dateOfBirth' ? new Date(1900, 0, 1) : undefined}
+          />
         </View>
       );
     }
@@ -611,38 +591,19 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               {customDate[key] ? formatDateTime(customDate[key]) : t('auth.selectDateTime')}
             </Text>
           </TouchableOpacity>
-          {showDatePickers[key] && DateTimePicker && (
-            <DateTimePicker
-              value={customDate[key] || new Date()}
-              mode="datetime"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              maximumDate={new Date()}
-              onChange={(event: any, selectedDate?: Date) => {
-                setShowDatePickers({ ...showDatePickers, [key]: false });
-                if (selectedDate && event.type !== 'dismissed') {
-                  setCustomDate({ ...customDate, [key]: selectedDate });
-                  const formattedDate = selectedDate.toISOString().slice(0, 19).replace('T', ' ');
-                  changeValue(formattedDate, key, tag, typeData);
-                }
-              }}
-            />
-          )}
-          {!DateTimePicker && (
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: colors.inputBackground,
-                  borderColor: colors.border,
-                  color: colors.text,
-                },
-              ]}
-              placeholder="YYYY-MM-DD HH:mm:ss"
-              value={value || ''}
-              onChangeText={(val) => changeValue(val, key, tag, typeData)}
-              placeholderTextColor={colors.textTertiary}
-            />
-          )}
+
+          <DatePicker
+            visible={!!showDatePickers[key]}
+            onClose={() => setShowDatePickers({ ...showDatePickers, [key]: false })}
+            onConfirm={(selectedDate) => {
+              setCustomDate({ ...customDate, [key]: selectedDate });
+              const formattedDate = selectedDate.toISOString().slice(0, 19).replace('T', ' ');
+              changeValue(formattedDate, key, tag, typeData);
+            }}
+            value={customDate[key] || new Date()}
+            title={display}
+            maximumDate={new Date()}
+          />
         </View>
       );
     }
@@ -959,121 +920,121 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
             {/* Header with Back Button - Separated */}
             <View style={[styles.topBarContainer]}>
               <View style={[styles.header, { backgroundColor: colors.surface, paddingVertical: verticalScale(12), borderRadius: scale(12) }]}>
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => {
-                  if (onBackToLogin) {
-                    onBackToLogin();
-                  } else {
-                    // @ts-ignore - navigation type will be inferred
-                    navigation.goBack();
-                  }
-                }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <ArrowLeft2
-                  size={getIconSize('medium')}
-                  color={colors.text}
-                  variant="Linear"
-                />
-              </TouchableOpacity>
-              <Text style={[styles.headerTitle, { color: colors.text }]}>
-                {t('auth.signUp')}
-              </Text>
-              <View style={{ width: getIconSize('medium') }} />
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => {
+                    if (onBackToLogin) {
+                      onBackToLogin();
+                    } else {
+                      // @ts-ignore - navigation type will be inferred
+                      navigation.goBack();
+                    }
+                  }}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <ArrowLeft2
+                    size={getIconSize('medium')}
+                    color={colors.text}
+                    variant="Linear"
+                  />
+                </TouchableOpacity>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>
+                  {t('auth.signUp')}
+                </Text>
+                <View style={{ width: getIconSize('medium') }} />
               </View>
             </View>
 
             {/* Sign Up Form - At bottom */}
             <View style={[styles.formContainer, { backgroundColor: 'transparent' }]}>
               <View style={[styles.formSection, { backgroundColor: 'transparent' }]}>
-              
+
                 <View style={styles.formFieldsContainer}>
                   {metadata.map((meta, index) => renderField(meta, index))}
 
-              {/* Terms and Conditions */}
-              <View style={styles.termsContainer}>
-                <TouchableOpacity
-                  style={styles.checkbox}
-                  onPress={() => setAgreeToTerms(!agreeToTerms)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                  <View
-                    style={[
-                      styles.checkboxBox,
-                      {
-                        backgroundColor: agreeToTerms ? colors.primary : 'transparent',
-                        borderColor: agreeToTerms ? colors.primary : colors.border,
-                      },
-                    ]}>
-                    {agreeToTerms && <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>}
+                  {/* Terms and Conditions */}
+                  <View style={styles.termsContainer}>
+                    <TouchableOpacity
+                      style={styles.checkbox}
+                      onPress={() => setAgreeToTerms(!agreeToTerms)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                      <View
+                        style={[
+                          styles.checkboxBox,
+                          {
+                            backgroundColor: agreeToTerms ? colors.primary : 'transparent',
+                            borderColor: agreeToTerms ? colors.primary : colors.border,
+                          },
+                        ]}>
+                        {agreeToTerms && <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>}
+                      </View>
+                    </TouchableOpacity>
+                    <Text style={[styles.termsText, { color: colors.text }]}>
+                      {t('auth.agreeToTerms')}{' '}
+                      <Text
+                        style={[styles.termsLink, { color: colors.primary }]}
+                        onPress={() => {
+                          Linking.openURL('http://solusinegeri.com/term-condition').catch(() => {
+                            setError(t('auth.cannotOpenTerms'));
+                            setShowErrorModal(true);
+                          });
+                        }}>
+                        {t('auth.termsAndConditions')}
+                      </Text>
+                    </Text>
                   </View>
-                </TouchableOpacity>
-                <Text style={[styles.termsText, { color: colors.text }]}>
-                  {t('auth.agreeToTerms')}{' '}
-                  <Text
-                    style={[styles.termsLink, { color: colors.primary }]}
-                    onPress={() => {
-                      Linking.openURL('http://solusinegeri.com/term-condition').catch(() => {
-                        setError(t('auth.cannotOpenTerms'));
-                        setShowErrorModal(true);
-                      });
-                    }}>
-                    {t('auth.termsAndConditions')}
-                  </Text>
-                </Text>
-              </View>
 
-              {/* Privacy Policy */}
-              <View style={styles.termsContainer}>
-                <TouchableOpacity
-                  style={styles.checkbox}
-                  onPress={() => setAgreeToPrivacy(!agreeToPrivacy)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                  <View
-                    style={[
-                      styles.checkboxBox,
-                      {
-                        backgroundColor: agreeToPrivacy ? colors.primary : 'transparent',
-                        borderColor: agreeToPrivacy ? colors.primary : colors.border,
-                      },
-                    ]}>
-                    {agreeToPrivacy && <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>}
+                  {/* Privacy Policy */}
+                  <View style={styles.termsContainer}>
+                    <TouchableOpacity
+                      style={styles.checkbox}
+                      onPress={() => setAgreeToPrivacy(!agreeToPrivacy)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                      <View
+                        style={[
+                          styles.checkboxBox,
+                          {
+                            backgroundColor: agreeToPrivacy ? colors.primary : 'transparent',
+                            borderColor: agreeToPrivacy ? colors.primary : colors.border,
+                          },
+                        ]}>
+                        {agreeToPrivacy && <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>}
+                      </View>
+                    </TouchableOpacity>
+                    <Text style={[styles.termsText, { color: colors.text }]}>
+                      {t('auth.agreeToPrivacy')}{' '}
+                      <Text
+                        style={[styles.termsLink, { color: colors.primary }]}
+                        onPress={() => {
+                          Linking.openURL('http://solusinegeri.com/privacy-policy').catch(() => {
+                            setError(t('auth.cannotOpenPrivacy'));
+                            setShowErrorModal(true);
+                          });
+                        }}>
+                        {t('auth.privacyPolicy')}
+                      </Text>
+                    </Text>
                   </View>
-                </TouchableOpacity>
-                <Text style={[styles.termsText, { color: colors.text }]}>
-                  {t('auth.agreeToPrivacy')}{' '}
-                  <Text
-                    style={[styles.termsLink, { color: colors.primary }]}
-                    onPress={() => {
-                      Linking.openURL('http://solusinegeri.com/privacy-policy').catch(() => {
-                        setError(t('auth.cannotOpenPrivacy'));
-                        setShowErrorModal(true);
-                      });
-                    }}>
-                    {t('auth.privacyPolicy')}
-                  </Text>
-                </Text>
-              </View>
 
-              {/* Register Button */}
-              <TouchableOpacity
-                style={[
-                  styles.registerButton,
-                  {
-                    backgroundColor: isFormValid() ? colors.primary : colors.textTertiary,
-                    opacity: isFormValid() ? 1 : 0.6,
-                  },
-                ]}
-                onPress={handleRegister}
-                disabled={loading || !isFormValid()}
-                activeOpacity={0.8}>
-                {loading ? (
-                  <ActivityIndicator color={colors.surface} size="small" />
-                ) : (
-                  <Text style={[styles.registerButtonText, { color: colors.surface }]}>
-                    {t('auth.signUp')}
-                  </Text>
-                )}
-              </TouchableOpacity>
+                  {/* Register Button */}
+                  <TouchableOpacity
+                    style={[
+                      styles.registerButton,
+                      {
+                        backgroundColor: isFormValid() ? colors.primary : colors.textTertiary,
+                        opacity: isFormValid() ? 1 : 0.6,
+                      },
+                    ]}
+                    onPress={handleRegister}
+                    disabled={loading || !isFormValid()}
+                    activeOpacity={0.8}>
+                    {loading ? (
+                      <ActivityIndicator color={colors.surface} size="small" />
+                    ) : (
+                      <Text style={[styles.registerButtonText, { color: colors.surface }]}>
+                        {t('auth.signUp')}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>

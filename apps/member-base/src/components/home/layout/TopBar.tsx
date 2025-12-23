@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { NotificationBing, Menu } from 'iconsax-react-nativejs';
+import { NotificationBing, HamburgerMenu } from 'iconsax-react-nativejs';
 import {
   getIconSize,
   scale,
@@ -68,7 +68,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           <NotificationBing
             size={getIconSize('medium')}
             color={colors.text}
-            variant="Outline"
+            variant="Broken"
           />
           {notificationCount > 0 && (
             <View style={[styles.badge, { backgroundColor: colors.error }]}>
@@ -78,11 +78,11 @@ export const TopBar: React.FC<TopBarProps> = ({
             </View>
           )}
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuButton} onPress={onMenuPress}>
-          <Menu
+        <TouchableOpacity style={[styles.menuButton, { backgroundColor: colors.surface }]} onPress={onMenuPress}>
+          <HamburgerMenu
             size={getIconSize('medium')}
             color={colors.text}
-            variant="Outline"
+            variant="Broken"
           />
         </TouchableOpacity>
       </View>
@@ -146,6 +146,8 @@ const styles = StyleSheet.create({
     minWidth: minTouchTarget,
     minHeight: minTouchTarget,
     justifyContent: 'center',
+    borderRadius: scale(10),
+    boxShadow: '0 0 10px 0 rgba(136, 136, 136, 0.1)',
     alignItems: 'center',
   },
 });

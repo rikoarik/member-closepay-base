@@ -10,7 +10,7 @@ import {
   saveThemePreference,
   getTheme,
 } from '../services/themeService';
-import { themeColorService } from '../services/themeColorService';
+
 import { configService } from '@core/config';
 
 interface ThemeContextValue {
@@ -30,7 +30,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [isLoading, setIsLoading] = useState(true);
-  const [accentColor, setAccentColor] = useState<string | null>(null);
 
   // Load theme preference and accent color on mount
   useEffect(() => {
@@ -38,26 +37,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       try {
         const savedMode = await loadThemePreference();
         setThemeModeState(savedMode);
-        
-        // Load accent color dari theme color service
-        // Development: akan load dari dummy service (file-based)
-        // Production: akan fetch dari backend dengan smart caching
-        if (__DEV__) {
-          // Development: load dari dummy service
-          const initialColor = themeColorService.getPrimaryColor();
-          if (initialColor) {
-            setAccentColor(initialColor);
-          }
-        } else {
-          // Production: fetch dari backend (dengan caching & cooldown)
-          await themeColorService.fetchFromBackend(true);
-          const initialColor = themeColorService.getPrimaryColor();
-          if (initialColor) {
-            setAccentColor(initialColor);
-          }
-          // Start polling untuk backend (dengan interval yang aman: 5 menit)
-          themeColorService.startPolling();
-        }
+
+        // Primary color static fallback (removed themeColorService)
       } catch (error) {
         console.error('Failed to initialize theme:', error);
       } finally {
@@ -68,22 +49,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     initializeTheme();
   }, []);
 
-  // Subscribe ke theme color service untuk realtime updates
-  useEffect(() => {
-    // Subscribe ke theme color service
-    const unsubscribe = themeColorService.subscribe((color) => {
-      setAccentColor(color);
-      console.log('[Theme] Primary color updated:', color);
-    });
 
-    // Cleanup: stop polling jika ada
-    return () => {
-      unsubscribe();
-      if (!__DEV__) {
-        themeColorService.stopPolling();
-      }
-    };
-  }, []);
 
   // Set theme mode and save to storage
   const setThemeMode = useCallback(async (mode: ThemeMode) => {
@@ -105,8 +71,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         : null;
 
     // Pass accent color ke getTheme untuk dynamic primary colors
-    return getTheme(themeMode, resolvedSystemScheme, accentColor);
-  }, [themeMode, systemColorScheme, accentColor]);
+    return getTheme(themeMode, resolvedSystemScheme, null);
+  }, [themeMode, systemColorScheme]);
 
   // Toggle between light and dark (skip system)
   const toggleTheme = useCallback(async () => {

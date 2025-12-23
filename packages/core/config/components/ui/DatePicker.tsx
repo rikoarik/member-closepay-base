@@ -2,9 +2,10 @@
  * DatePicker Component
  * Reusable date picker dengan scrollable picker untuk tahun, bulan, dan hari
  * Tidak menggunakan library eksternal
+ * Optimized with FlatList for performance
  */
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import {
@@ -23,37 +24,37 @@ export interface DatePickerProps {
    * Modal visible state
    */
   visible: boolean;
-  
+
   /**
    * Callback ketika modal ditutup
    */
   onClose: () => void;
-  
+
   /**
    * Callback ketika date dipilih (dipanggil saat OK ditekan)
    */
   onConfirm: (date: Date) => void;
-  
+
   /**
    * Initial date value
    */
   value?: Date | null;
-  
+
   /**
    * Minimum date yang bisa dipilih
    */
   minimumDate?: Date | null;
-  
+
   /**
    * Maximum date yang bisa dipilih
    */
   maximumDate?: Date | null;
-  
+
   /**
    * Title untuk picker
    */
   title?: string;
-  
+
   /**
    * Range tahun (dari tahun sekarang mundur)
    * Default: 100 tahun
@@ -73,7 +74,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const horizontalPadding = getHorizontalPadding();
 
   // Generate date options
   const generateYears = () => {
@@ -143,52 +143,23 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     return filtered;
   }, [years, minimumDate, maximumDate]);
 
-  // Refs for scroll views
-  const yearRef = useRef<ScrollView>(null);
-  const monthRef = useRef<ScrollView>(null);
-  const dayRef = useRef<ScrollView>(null);
+  // Refs for scroll list
+  const yearListRef = useRef<FlatList>(null);
+  const monthListRef = useRef<FlatList>(null);
+  const dayListRef = useRef<FlatList>(null);
 
-  // Pre-calculate scroll positions to avoid delay during modal open
-  const scrollPositions = useMemo(() => {
+  // Initial scroll indices
+  const initialScrollPositions = useMemo(() => {
     if (!visible) return null;
-    const yearIndex = filteredYears.findIndex((y) => y === dateState.year);
-    const monthIndex = dateState.month - 1;
-    const dayIndex = dateState.day - 1;
+    const yearIndex = Math.max(0, filteredYears.findIndex((y) => y === dateState.year));
+    const monthIndex = Math.max(0, dateState.month - 1);
+    const dayIndex = Math.max(0, dateState.day - 1);
     return { yearIndex, monthIndex, dayIndex };
   }, [visible, dateState.year, dateState.month, dateState.day, filteredYears]);
 
-  // Scroll to selected values when modal opens - optimized
-  useEffect(() => {
-    if (visible && scrollPositions) {
-      // Use requestAnimationFrame for smooth scroll after layout
-      requestAnimationFrame(() => {
-        const { yearIndex, monthIndex, dayIndex } = scrollPositions;
-        
-        if (yearIndex >= 0 && yearRef.current) {
-          yearRef.current.scrollTo({
-            y: yearIndex * PICKER_ITEM_HEIGHT,
-            animated: false,
-          });
-        }
-        if (monthRef.current) {
-          monthRef.current.scrollTo({
-            y: monthIndex * PICKER_ITEM_HEIGHT,
-            animated: false,
-          });
-        }
-        if (dayIndex >= 0 && dayRef.current) {
-          dayRef.current.scrollTo({
-            y: dayIndex * PICKER_ITEM_HEIGHT,
-            animated: false,
-          });
-        }
-      });
-    }
-  }, [visible, scrollPositions]);
-
   const handleConfirm = () => {
     const newDate = new Date(dateState.year, dateState.month - 1, dateState.day);
-    
+
     // Validate against min/max dates
     if (minimumDate && newDate < minimumDate) {
       return; // Don't confirm if before minimum
@@ -205,43 +176,16 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     const maxDay = generateDays(year, dateState.month).length;
     const newDay = Math.min(dateState.day, maxDay);
     setDateState({ ...dateState, year, day: newDay });
-    
-    // Scroll immediately without delay
-    requestAnimationFrame(() => {
-      const yearIndex = years.findIndex((y) => y === year);
-      if (yearIndex >= 0) {
-        yearRef.current?.scrollTo({
-          y: yearIndex * PICKER_ITEM_HEIGHT,
-          animated: true,
-        });
-      }
-    });
   };
 
   const handleMonthChange = (month: number) => {
     const maxDay = generateDays(dateState.year, month).length;
     const newDay = Math.min(dateState.day, maxDay);
     setDateState({ ...dateState, month, day: newDay });
-    
-    // Scroll immediately without delay
-    requestAnimationFrame(() => {
-      monthRef.current?.scrollTo({
-        y: (month - 1) * PICKER_ITEM_HEIGHT,
-        animated: true,
-      });
-    });
   };
 
   const handleDayChange = (day: number) => {
     setDateState({ ...dateState, day });
-    
-    // Scroll immediately without delay
-    requestAnimationFrame(() => {
-      dayRef.current?.scrollTo({
-        y: (day - 1) * PICKER_ITEM_HEIGHT,
-        animated: true,
-      });
-    });
   };
 
   // Check if date is valid
@@ -251,6 +195,37 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     if (maximumDate && newDate > maximumDate) return false;
     return true;
   };
+
+  // Optimized getItemLayout for fixed height items
+  const getItemLayout = useCallback((_data: any, index: number) => ({
+    length: PICKER_ITEM_HEIGHT,
+    offset: PICKER_ITEM_HEIGHT * index,
+    index,
+  }), []);
+
+  const renderItem = useCallback(({ item, index, isSelected, onPress, label, fontFamily }: any) => (
+    <TouchableOpacity
+      style={[
+        styles.pickerItem,
+        {
+          backgroundColor: isSelected ? colors.primaryLight || colors.surface : 'transparent',
+        },
+      ]}
+      onPress={onPress}
+    >
+      <Text
+        style={[
+          styles.pickerItemText,
+          {
+            color: isSelected ? colors.primary : colors.text,
+            fontFamily: fontFamily || (isSelected ? FontFamily.monasans.semiBold : FontFamily.monasans.regular),
+          },
+        ]}
+      >
+        {label(item)}
+      </Text>
+    </TouchableOpacity>
+  ), [colors]);
 
   if (!visible) return null;
 
@@ -291,127 +266,65 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             <View style={styles.pickerRow}>
               {/* Year Picker */}
               <View style={styles.pickerColumn}>
-                <ScrollView
-                  ref={yearRef}
-                  style={styles.pickerScrollView}
-                  contentContainerStyle={styles.pickerContent}
+                <FlatList
+                  ref={yearListRef}
+                  data={filteredYears}
+                  keyExtractor={(item) => item.toString()}
                   showsVerticalScrollIndicator={false}
                   snapToInterval={PICKER_ITEM_HEIGHT}
                   decelerationRate="fast"
-                >
-                  {filteredYears.map((year) => (
-                    <TouchableOpacity
-                      key={year}
-                      style={[
-                        styles.pickerItem,
-                        {
-                          backgroundColor:
-                            dateState.year === year ? colors.primaryLight || colors.surface : 'transparent',
-                        },
-                      ]}
-                      onPress={() => handleYearChange(year)}
-                    >
-                      <Text
-                        style={[
-                          styles.pickerItemText,
-                          {
-                            color: dateState.year === year ? colors.primary : colors.text,
-                            fontFamily:
-                              dateState.year === year
-                                ? FontFamily.monasans.semiBold
-                                : FontFamily.monasans.regular,
-                          },
-                        ]}
-                      >
-                        {year}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                  getItemLayout={getItemLayout}
+                  initialScrollIndex={initialScrollPositions?.yearIndex}
+                  contentContainerStyle={styles.pickerContent}
+                  renderItem={({ item }) => renderItem({
+                    item,
+                    isSelected: dateState.year === item,
+                    onPress: () => handleYearChange(item),
+                    label: (i: number) => i.toString()
+                  })}
+                />
               </View>
 
               {/* Month Picker */}
               <View style={styles.pickerColumn}>
-                <ScrollView
-                  ref={monthRef}
-                  style={styles.pickerScrollView}
-                  contentContainerStyle={styles.pickerContent}
+                <FlatList
+                  ref={monthListRef}
+                  data={months}
+                  keyExtractor={(item) => item.value.toString()}
                   showsVerticalScrollIndicator={false}
                   snapToInterval={PICKER_ITEM_HEIGHT}
                   decelerationRate="fast"
-                >
-                  {months.map((month, index) => (
-                    <TouchableOpacity
-                      key={month.value}
-                      style={[
-                        styles.pickerItem,
-                        {
-                          backgroundColor:
-                            dateState.month === month.value
-                              ? colors.primaryLight || colors.surface
-                              : 'transparent',
-                        },
-                      ]}
-                      onPress={() => handleMonthChange(month.value)}
-                    >
-                      <Text
-                        style={[
-                          styles.pickerItemText,
-                          {
-                            color: dateState.month === month.value ? colors.primary : colors.text,
-                            fontFamily:
-                              dateState.month === month.value
-                                ? FontFamily.monasans.semiBold
-                                : FontFamily.monasans.regular,
-                          },
-                        ]}
-                      >
-                        {month.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                  getItemLayout={getItemLayout}
+                  initialScrollIndex={initialScrollPositions?.monthIndex}
+                  contentContainerStyle={styles.pickerContent}
+                  renderItem={({ item }) => renderItem({
+                    item,
+                    isSelected: dateState.month === item.value,
+                    onPress: () => handleMonthChange(item.value),
+                    label: (i: any) => i.name
+                  })}
+                />
               </View>
 
               {/* Day Picker */}
               <View style={styles.pickerColumn}>
-                <ScrollView
-                  ref={dayRef}
-                  style={styles.pickerScrollView}
-                  contentContainerStyle={styles.pickerContent}
+                <FlatList
+                  ref={dayListRef}
+                  data={days}
+                  keyExtractor={(item) => item.toString()}
                   showsVerticalScrollIndicator={false}
                   snapToInterval={PICKER_ITEM_HEIGHT}
                   decelerationRate="fast"
-                >
-                  {days.map((day) => (
-                    <TouchableOpacity
-                      key={day}
-                      style={[
-                        styles.pickerItem,
-                        {
-                          backgroundColor:
-                            dateState.day === day ? colors.primaryLight || colors.surface : 'transparent',
-                        },
-                      ]}
-                      onPress={() => handleDayChange(day)}
-                    >
-                      <Text
-                        style={[
-                          styles.pickerItemText,
-                          {
-                            color: dateState.day === day ? colors.primary : colors.text,
-                            fontFamily:
-                              dateState.day === day
-                                ? FontFamily.monasans.semiBold
-                                : FontFamily.monasans.regular,
-                          },
-                        ]}
-                      >
-                        {day}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                  getItemLayout={getItemLayout}
+                  initialScrollIndex={initialScrollPositions?.dayIndex}
+                  contentContainerStyle={styles.pickerContent}
+                  renderItem={({ item }) => renderItem({
+                    item,
+                    isSelected: dateState.day === item,
+                    onPress: () => handleDayChange(item),
+                    label: (i: number) => i.toString()
+                  })}
+                />
               </View>
             </View>
           </View>
@@ -458,9 +371,6 @@ const styles = StyleSheet.create({
   pickerColumn: {
     flex: 1,
     position: 'relative',
-  },
-  pickerScrollView: {
-    flex: 1,
   },
   pickerContent: {
     paddingVertical: PICKER_ITEM_HEIGHT * 2, // Padding untuk center alignment
