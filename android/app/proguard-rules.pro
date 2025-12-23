@@ -143,3 +143,12 @@
     @com.facebook.react.bridge.ReactMethod *;
 }
 
+# Remove Chucker completely in release builds
+-assumenosideeffects class com.chuckerteam.chucker.** { *; }
+-assumenosideeffects class com.chucker.** { *; }
+
+# Additional security: Remove all console.log and debug statements
+-assumenosideeffects class android.util.Log {
+    public static *** println(...);
+}
+

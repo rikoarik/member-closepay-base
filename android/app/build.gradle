@@ -115,34 +115,30 @@ android {
         resValue "string", "build_config_package", "com.solusinegeri.app"
     }
 
-    // flavorDimensions "device", "environment"
+    flavorDimensions "environment"
     
-    // productFlavors {
-    //     // Device Type Dimension
-    //     phone {
-    //         dimension "device"
-    //     }
-    //     tablet {
-    //         dimension "device"
-    //     }
-    //     edc {
-    //         dimension "device"
-    //     }
-    //     
-    //     // Environment Dimension
-    //     production {
-    //         dimension "environment"
-    //     }
-    //     staging {
-    //         dimension "environment"
-    //         applicationIdSuffix ".staging"
-    //     }
-    // }
+    productFlavors {
+        staging {
+            dimension "environment"
+            applicationIdSuffix ".staging"
+            resValue "string", "app_name", "ClosePay Member (Staging)"
+            // Use .env.staging for this flavor
+            buildConfigField "String", "ENV_FILE", '".env.staging"'
+        }
+        production {
+            dimension "environment"
+            resValue "string", "app_name", "ClosePay Member"
+            // Use .env.production for this flavor
+            buildConfigField "String", "ENV_FILE", '".env.production"'
+        }
+    }
 
     splits {
         abi {
             reset()
-            enable true
+            // Disable splits for AAB builds (bundleRelease)
+            // AAB handles multi-architecture automatically
+            enable project.gradle.startParameter.taskNames.any { it.toLowerCase().contains('bundle') } ? false : true
             universalApk false
             include "armeabi-v7a", "arm64-v8a"
         }
@@ -160,6 +156,28 @@ android {
                 outputFileName = "${appName}-${abi}-${buildType}-v${version}.apk"
             } else {
                 outputFileName = "${appName}-${buildType}-v${version}.apk"
+            }
+        }
+    }
+
+    // Rename AABs after build
+    applicationVariants.all { variant ->
+        def variantName = variant.name.capitalize()
+        def bundleTask = tasks.findByName("bundle${variantName}")
+        
+        if (bundleTask != null) {
+            bundleTask.doLast {
+                def appName = "SolusiNegeriMemberBaseApp"
+                def buildType = variant.buildType.name
+                def version = variant.versionName
+                def bundleDir = file("${buildDir}/outputs/bundle/${variant.name}")
+                def oldFile = file("${bundleDir}/app-${variant.name}.aab")
+                def newFile = file("${bundleDir}/${appName}-${buildType}-v${version}.aab")
+                
+                if (oldFile.exists()) {
+                    oldFile.renameTo(newFile)
+                    println "AAB renamed to: ${newFile.name}"
+                }
             }
         }
     }

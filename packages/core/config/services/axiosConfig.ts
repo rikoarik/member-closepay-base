@@ -4,10 +4,17 @@
  */
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { tokenService } from '../../auth/services/tokenService';
+import Config from 'react-native-config';
 
-// Base URL dari environment atau default
-// TODO: Get from AppConfig when available
-const API_BASE_URL = 'https://api.stg.solusiuntuknegeri.com';
+// Base URL dari environment variable atau default ke staging
+// Production build harus set API_BASE_URL di .env.production
+const API_BASE_URL = Config.API_BASE_URL;
+
+// Log environment untuk debugging (hanya di development)
+if (__DEV__) {
+    console.log('[AxiosConfig] Environment:', Config.ENV);
+    console.log('[AxiosConfig] API Base URL:', API_BASE_URL);
+}
 
 /**
  * Create axios instance dengan default config
@@ -113,7 +120,7 @@ axiosInstance.interceptors.response.use(
 
                 // Only clear tokens if it's a clear auth error (401, 403)
                 // Don't clear on network errors or other issues
-                const isAuthError = 
+                const isAuthError =
                     (refreshError as any)?.response?.status === 401 ||
                     (refreshError as any)?.response?.status === 403 ||
                     (refreshError as any)?.message?.includes('Unauthorized') ||

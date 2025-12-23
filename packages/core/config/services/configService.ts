@@ -8,6 +8,7 @@ import { getTenantConfig, getCurrentTenantId } from './tenantService';
 import { TenantConfig } from '../tenants';
 import axiosInstance from './axiosConfig';
 import { configEventEmitter } from '../utils/configEventEmitter';
+import Config from 'react-native-config';
 
 export interface ConfigService {
   loadConfig(): Promise<AppConfig>;
@@ -45,7 +46,7 @@ const DEFAULT_CONFIG: AppConfig = {
   },
   services: {
     api: {
-      baseUrl: 'https://api.stg.solusiuntuknegeri.com',
+      baseUrl: Config.API_BASE_URL || 'localhost:3000',
       timeout: 30000,
     },
   },
@@ -77,7 +78,7 @@ class ConfigServiceImpl implements ConfigService {
     if (config.tenantId || config.companyId) {
       const tenantId = config.tenantId || config.companyId;
       const tenantConfig = getTenantConfig(tenantId);
-      
+
       if (tenantConfig) {
         // Merge tenant config into app config
         this.config = {
@@ -96,22 +97,22 @@ class ConfigServiceImpl implements ConfigService {
         return;
       }
     }
-    
+
     this.config = config;
     // Emit event untuk notify subscribers
     configEventEmitter.emit(this.config);
   }
-  
+
   /**
    * Get tenant config from current app config
    */
   getTenantConfig(): TenantConfig | null {
     const config = this.getConfig();
     if (!config) return null;
-    
+
     const tenantId = config.tenantId || config.companyId;
     if (!tenantId) return null;
-    
+
     return getTenantConfig(tenantId);
   }
 
@@ -141,13 +142,13 @@ class ConfigServiceImpl implements ConfigService {
     // Debouncing: jika ada pending refresh, return yang sama
     if (this.pendingRefresh && !force) {
       console.log('[ConfigService] Refresh already in progress, reusing pending request');
-      return this.pendingRefresh.then(() => {});
+      return this.pendingRefresh.then(() => { });
     }
 
     // Caching: skip jika masih dalam cache expiry dan tidak force
     const now = Date.now();
     const timeSinceLastRefresh = now - this.lastRefreshTime;
-    
+
     if (!force && timeSinceLastRefresh < this.cacheExpiry) {
       console.log(`[ConfigService] Using cached config (${Math.round(timeSinceLastRefresh / 1000)}s ago, ${Math.round((this.cacheExpiry - timeSinceLastRefresh) / 1000)}s remaining)`);
       return Promise.resolve();
@@ -158,21 +159,21 @@ class ConfigServiceImpl implements ConfigService {
       try {
         // Load dari backend API
         const companyId = this.config?.companyId || 'member-base';
-        
+
         // TODO: Sesuaikan endpoint dengan backend API
         // Expected endpoint: GET /config/app/{companyId}
         const response = await axiosInstance.get<AppConfig>(
           `/config/app/${companyId}`
         );
-        
+
         // Update config dengan data dari backend
         const newConfig = response.data;
-        
+
         // Merge dengan tenant config jika ada
         if (newConfig.tenantId || newConfig.companyId) {
           const tenantId = newConfig.tenantId || newConfig.companyId;
           const tenantConfig = getTenantConfig(tenantId);
-          
+
           if (tenantConfig) {
             this.config = {
               ...newConfig,
@@ -191,7 +192,7 @@ class ConfigServiceImpl implements ConfigService {
             return this.config;
           }
         }
-        
+
         this.config = newConfig;
         this.lastRefreshTime = Date.now();
         // Emit event untuk notify subscribers
@@ -215,7 +216,7 @@ class ConfigServiceImpl implements ConfigService {
       }
     })();
 
-    return this.pendingRefresh.then(() => {});
+    return this.pendingRefresh.then(() => { });
   }
 }
 

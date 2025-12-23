@@ -56,8 +56,15 @@ yarn-error.log
 # Bundle artifact
 *.jsbundle
 
+# Environment variables (keep .env.example but ignore actual env files)
+.env
+.env.staging
+.env.production
+.env.local
+.env.*.local
+
 # Ruby / CocoaPods
-**/Pods/
+/ios/Pods/
 /vendor/bundle/
 
 # Temporary files created by Metro to check the health of the file watcher

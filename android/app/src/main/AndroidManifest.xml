@@ -15,6 +15,11 @@
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+    
+    <!-- Talsec freeRASP permissions -->
+    <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
+    <uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
       android:name=".MainApplication"
@@ -44,17 +49,7 @@
         android:theme="@style/AppTheme"
         android:exported="false" />
       
-      <!-- Chucker Activities with edge-to-edge theme -->
-      <activity
-        android:name="com.chuckerteam.chucker.internal.ui.MainActivity"
-        android:theme="@style/ChuckerTheme"
-        android:exported="false"
-        tools:replace="android:theme" />
-      <activity
-        android:name="com.chuckerteam.chucker.internal.ui.TransactionActivity"
-        android:theme="@style/ChuckerTheme"
-        android:exported="false"
-        tools:replace="android:theme" />
+      <!-- Chucker Activities removed - will be added automatically in debug builds only -->
       
       <!-- FileProvider for sharing files -->
       <provider
