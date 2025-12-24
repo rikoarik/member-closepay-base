@@ -4,7 +4,7 @@
  */
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { tokenService } from '../../auth/services/tokenService';
-import Config from 'react-native-config';
+import Config from '../../native/Config';
 
 // Base URL dari environment variable atau default ke staging
 // Production build harus set API_BASE_URL di .env.production
@@ -82,7 +82,12 @@ axiosInstance.interceptors.response.use(
         });
 
         // Handle 401 Unauthorized
-        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+        // Skip token refresh for login/auth endpoints that don't require authentication
+        const isAuthEndpoint = originalRequest?.url?.includes('/auth/account/login') ||
+            originalRequest?.url?.includes('/auth/account/register') ||
+            originalRequest?.url?.includes('/auth/account/forgot-password');
+
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthEndpoint) {
             originalRequest._retry = true;
 
             try {

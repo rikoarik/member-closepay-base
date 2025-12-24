@@ -2,7 +2,7 @@
  * i18n Service
  * Mengelola language preference dan translations
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import SecureStorage from '../../native/SecureStorage';
 import type { Language, TranslationKey, TranslationParams } from '../types';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
@@ -24,7 +24,7 @@ const translations: Record<Language, Record<string, any>> = {
 const getNestedValue = (obj: any, path: string): string | undefined => {
   const keys = path.split('.');
   let value = obj;
-  
+
   for (const key of keys) {
     if (value && typeof value === 'object' && key in value) {
       value = value[key];
@@ -32,7 +32,7 @@ const getNestedValue = (obj: any, path: string): string | undefined => {
       return undefined;
     }
   }
-  
+
   return typeof value === 'string' ? value : undefined;
 };
 
@@ -44,12 +44,12 @@ const replaceParams = (text: string, params?: TranslationParams): string => {
   if (!params) {
     return text;
   }
-  
+
   let result = text;
   for (const [key, value] of Object.entries(params)) {
     result = result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value));
   }
-  
+
   return result;
 };
 
@@ -66,14 +66,14 @@ export const getTranslation = (
     console.warn(`Translation resource not found for language: ${language}`);
     return key; // Return key as fallback
   }
-  
+
   const translation = getNestedValue(resource, key);
-  
+
   if (!translation) {
     console.warn(`Translation key not found: ${key} for language: ${language}`);
     return key; // Return key as fallback
   }
-  
+
   return replaceParams(translation, params);
 };
 
@@ -82,7 +82,7 @@ export const getTranslation = (
  */
 export const loadLanguagePreference = async (): Promise<Language> => {
   try {
-    const stored = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+    const stored = await SecureStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (stored && (stored === 'id' || stored === 'en')) {
       return stored as Language;
     }
@@ -97,7 +97,7 @@ export const loadLanguagePreference = async (): Promise<Language> => {
  */
 export const saveLanguagePreference = async (language: Language): Promise<void> => {
   try {
-    await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    await SecureStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   } catch (error) {
     console.error('Failed to save language preference:', error);
     throw error;

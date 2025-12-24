@@ -203,6 +203,7 @@ def generate_config_from_tenant(tenant: Dict, tenant_id: str) -> str:
  */
 
 import type {{ AppConfig }} from '../../../packages/core/config/types/AppConfig';
+import Config from 'react-native-config';
 
 export const appConfig: AppConfig = {{
   companyId: '{tenant_id}',
@@ -239,7 +240,8 @@ export const appConfig: AppConfig = {{
   // Service configuration
   services: {{
     api: {{
-      baseUrl: 'https://api.stg.solusiuntuknegeri.com',
+      // Use environment variable from .env.staging or .env.production
+      baseUrl: Config.API_BASE_URL || 'https://api.solusiuntuknegeri.com',
       timeout: 30000,
     }},
     auth: {{

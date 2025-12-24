@@ -1,62 +1,16 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const { withNativeWind } = require('nativewind/metro');
-
-// NOTE: obfuscator-io-metro-plugin temporarily disabled due to compatibility issues with RN 0.82
-// The plugin has path resolution issues on Windows and appears unmaintained.
-// Alternative security measures:
-// 1. Hermes bytecode compilation (enabled by default in RN 0.82)
-// 2. ProGuard/R8 for Android native code obfuscation (configured in build.gradle)
-// 3. Talsec freeRASP for runtime protection (already implemented)
-//
-// TODO: Explore modern alternatives for JS obfuscation:
-// - Post-bundle obfuscation tools
-// - Alternative Metro plugins compatible with RN 0.82+
-//
-// const jsoMetroConfig = require("obfuscator-io-metro-plugin")(
-//   {
-//     // Obfuscation options
-//     compact: true,
-//     controlFlowFlattening: true,
-//     controlFlowFlatteningThreshold: 0.75,
-//     deadCodeInjection: true,
-//     deadCodeInjectionThreshold: 0.4,
-//     debugProtection: false, // Handled by Talsec
-//     debugProtectionInterval: 0,
-//     disableConsoleOutput: true,
-//     identifierNamesGenerator: 'hexadecimal',
-//     log: false,
-//     numbersToExpressions: true,
-//     renameGlobals: false,
-//     selfDefending: true,
-//     simplify: true,
-//     splitStrings: true,
-//     stringArray: true,
-//     stringArrayCallsTransform: true,
-//     stringArrayEncoding: ['rc4'],
-//     stringArrayIndexShift: true,
-//     stringArrayRotate: true,
-//     stringArrayShuffle: true,
-//     stringArrayWrappersCount: 1,
-//     stringArrayWrappersChainedCalls: true,
-//     stringArrayWrappersParametersMaxCount: 2,
-//     stringArrayWrappersType: 'variable',
-//     stringArrayThreshold: 0.75,
-//     unicodeEscapeSequence: false
-//   },
-//   {
-//     runInDev: false, // Do not obfuscate in dev mode
-//     logObfuscatedFiles: true
-//   },
-//   __dirname // Project root for proper path normalization
-// );
-
-/**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
 const path = require('path');
+
+// NOTE: @shahil_m/obfuscator-io-metro-plugin disabled due to Windows ESM path issue
+// Error: "Only URLs with a scheme in: file, data, and node are supported"
+// The plugin doesn't handle Windows drive letters (D:) correctly.
+//
+// Alternative protections still active:
+// 1. Hermes bytecode compilation (enabled by default)
+// 2. Aggressive R8/ProGuard for native code
+// 3. Talsec freeRASP for runtime protection
+// 4. SSL Pinning for network security
 
 const config = {
   resolver: {

@@ -27,6 +27,7 @@ import {
   AktivitasTab,
 } from '../components/home';
 import { useNotifications } from '@core/notification';
+import { QrScanButton } from '@core/config';
 
 export const HomeScreen = () => {
   const navigation = useNavigation();
@@ -39,7 +40,7 @@ export const HomeScreen = () => {
   // Get config (reactive via useConfig hook)
   const { config } = useConfig();
   const homeVariant = config?.homeVariant || 'dashboard';
-  
+
   // Memoize homeTabs to prevent unnecessary re-renders
   const homeTabs = React.useMemo(() => {
     return config?.homeTabs || [];
@@ -88,13 +89,13 @@ export const HomeScreen = () => {
     },
     enableConfigRefresh: true, // Auto-refresh config setiap pull-to-refresh
   });
-  
+
   // Memoized tab content renderer untuk prevent unnecessary re-renders
   const renderTabContent = useCallback((tabId: string, index: number) => {
     if (homeVariant === 'member') {
       // For member variant, render simple content or custom component
       const tabConfig = homeTabs.find(tab => tab.id === tabId);
-      
+
       // Render BerandaTab for beranda/home tab (handle both 'beranda' and 'home' id)
       if (tabId === 'beranda' || tabId === 'home') {
         return (
@@ -103,24 +104,24 @@ export const HomeScreen = () => {
           </View>
         );
       }
-      
+
       // Render AktivitasTab for activity/aktivitas tab
       if (tabId === 'activity' || tabId === 'aktivitas') {
         return (
           <View style={{ width: screenWidth, flex: 1 }}>
-            <AktivitasTab 
+            <AktivitasTab
               isActive={activeTab === tabId}
               isVisible={activeTab === tabId}
             />
           </View>
         );
       }
-      
+
       // Render NewsTab for news tab
       if (tabId === 'news') {
         return (
           <View style={{ width: screenWidth, flex: 1 }}>
-            <NewsTab 
+            <NewsTab
               isActive={activeTab === 'news'}
               isVisible={activeTab === 'news'}
               onRefreshRequested={(refreshFn) => {
@@ -130,7 +131,7 @@ export const HomeScreen = () => {
           </View>
         );
       }
-      
+
       if (tabConfig?.component) {
         // TODO: Load custom component dynamically
         // For now, render placeholder
@@ -147,7 +148,7 @@ export const HomeScreen = () => {
         </View>
       );
     }
-    
+
     // Default dashboard variant content
     return null; // Will be handled below
   }, [homeVariant, homeTabs, screenWidth, activeTab, colors, getHorizontalPadding, registerTabRefresh]);
@@ -188,10 +189,10 @@ export const HomeScreen = () => {
     if (tabChangeTimeoutRef.current) {
       clearTimeout(tabChangeTimeoutRef.current);
     }
-    
+
     // Update state immediately untuk UI feedback
     setActiveTab(tabId);
-    
+
     // Defer heavy scroll operation
     tabChangeTimeoutRef.current = setTimeout(() => {
       InteractionManager.runAfterInteractions(() => {
@@ -207,7 +208,7 @@ export const HomeScreen = () => {
       });
     }, 50);
   }, [screenWidth, tabs, getTabIndex]);
-  
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -337,7 +338,7 @@ export const HomeScreen = () => {
                     />
                   );
                 }
-                
+
                 return (
                   <View
                     key={tab.id}
@@ -396,8 +397,8 @@ export const HomeScreen = () => {
                     title="Kantin FKI UPI"
                     balance={2000000000}
                     showBalance={false}
-                    onToggleBalance={() => {}}
-                    onBalanceDetailPress={() => {}}
+                    onToggleBalance={() => { }}
+                    onBalanceDetailPress={() => { }}
                     isActive={activeTab === 'transactions'}
                     isVisible={activeTab === 'transactions'}
                     onRefreshRequested={(refreshFn) => {
@@ -445,6 +446,13 @@ export const HomeScreen = () => {
           )}
         </View>
       </ScrollView>
+
+      {/* QR Scan Button - Bottom Center above FAB */}
+      <QrScanButton
+        onPress={() => {
+          navigation.navigate('QrScan' as never);
+        }}
+      />
     </SafeAreaView>
   );
 };

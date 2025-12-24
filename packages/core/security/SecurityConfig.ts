@@ -1,6 +1,6 @@
 import { TalsecConfig } from 'freerasp-react-native';
 
-import Config from 'react-native-config';
+import Config from '../native/Config';
 
 /**
  * Security Configuration for Talsec (FreeRASP)

@@ -4,6 +4,7 @@
  */
 
 import type { AppConfig } from '../../../packages/core/config/types/AppConfig';
+import Config from 'react-native-config';
 
 /**
  * Example app configuration
@@ -13,19 +14,19 @@ export const appConfig: AppConfig = {
   companyId: 'merchant-base',
   companyName: 'Merchant Base',
   segmentId: 'balance-management',
-  
+
   // Enabled features (feature flags)
   enabledFeatures: [
     'balance',
     'payment'
   ],
-  
+
   // Enabled modules/plugins
   enabledModules: [
     'balance',
     'payment'
   ],
-  
+
   // Menu configuration
   menuConfig: [
     {
@@ -53,21 +54,22 @@ export const appConfig: AppConfig = {
       order: 3,
     },
   ],
-  
+
   // Payment methods
   paymentMethods: ['balance', 'bank_transfer', 'virtual_account'],
-  
+
   // Branding
   branding: {
     primaryColor: '#0066CC', // Accent color - Theme Service akan auto-generate primaryLight & primaryDark
     logo: '',
     appName: 'Merchant Closepay',
   },
-  
+
   // Service configuration
   services: {
     api: {
-      baseUrl: 'https://api.stg.solusiuntuknegeri.com',
+      // Use environment variable from .env.staging or .env.production
+      baseUrl: Config.API_BASE_URL || 'https://api.solusiuntuknegeri.com',
       timeout: 30000,
     },
     auth: {

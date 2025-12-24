@@ -2,7 +2,7 @@
  * Theme Service
  * Mengelola theme preference dan resolve actual theme
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import SecureStorage from '../../native/SecureStorage';
 import { useColorScheme } from 'react-native';
 import type { ThemeMode, ColorScheme, ThemeColors, Theme } from '../types';
 import {
@@ -158,7 +158,7 @@ export const getThemeColors = (
  */
 export const loadThemePreference = async (): Promise<ThemeMode> => {
   try {
-    const stored = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+    const stored = await SecureStorage.getItem(THEME_STORAGE_KEY);
     if (stored && (stored === 'light' || stored === 'dark' || stored === 'system')) {
       return stored as ThemeMode;
     }
@@ -173,7 +173,7 @@ export const loadThemePreference = async (): Promise<ThemeMode> => {
  */
 export const saveThemePreference = async (mode: ThemeMode): Promise<void> => {
   try {
-    await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
+    await SecureStorage.setItem(THEME_STORAGE_KEY, mode);
   } catch (error) {
     console.error('Failed to save theme preference:', error);
     throw error;

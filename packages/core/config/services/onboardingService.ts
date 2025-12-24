@@ -3,7 +3,7 @@
  * Service untuk manage onboarding state
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import SecureStorage from '../../native/SecureStorage';
 
 const ONBOARDING_COMPLETED_KEY = '@onboarding_completed';
 
@@ -13,7 +13,7 @@ class OnboardingService {
    */
   async isOnboardingCompleted(): Promise<boolean> {
     try {
-      const value = await AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY);
+      const value = await SecureStorage.getItem(ONBOARDING_COMPLETED_KEY);
       return value === 'true';
     } catch (error) {
       console.error('Error checking onboarding status:', error);
@@ -26,7 +26,7 @@ class OnboardingService {
    */
   async completeOnboarding(): Promise<void> {
     try {
-      await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
+      await SecureStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
     } catch (error) {
       console.error('Error completing onboarding:', error);
     }
@@ -37,7 +37,7 @@ class OnboardingService {
    */
   async resetOnboarding(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+      await SecureStorage.removeItem(ONBOARDING_COMPLETED_KEY);
     } catch (error) {
       console.error('Error resetting onboarding:', error);
     }

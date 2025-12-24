@@ -10,34 +10,37 @@ export interface AppConfig {
   companyName: string;
   tenantId?: TenantId; // Tenant ID for multi-tenant support
   segmentId: 'balance-management' | 'campus' | 'fnb' | 'umroh' | 'community' | 'retribution' | 'koperasi' | 'tourism' | 'sport-center' | 'retail';
-  
+
   // Feature flags
   enabledFeatures: string[];
   enabledModules: string[];
-  
+
   // Home variant from tenant config
   homeVariant?: 'dashboard' | 'simple' | 'member' | 'custom';
-  
+
   // Home tabs configuration (for member variant)
   homeTabs?: HomeTabConfig[];
-  
+
   // Menu configuration
   menuConfig: MenuItemConfig[];
-  
+
   // Payment methods
   paymentMethods: string[];
-  
+
   // Branding
   branding: BrandingConfig;
-  
+
   // Login configuration
   login?: LoginConfig;
-  
+
   // API services
   services: ServiceConfig;
-  
+
   // Plugin-specific configs
   plugins?: Record<string, PluginConfig>;
+
+  // QR Button configuration
+  showQrButton?: boolean; // Show/hide QR scan button on home screen
 }
 
 export interface MenuItemConfig {
@@ -93,3 +96,8 @@ export interface HomeTabConfig {
   order?: number; // Order in tabs
 }
 
+export interface QrButtonConfig {
+  backgroundColor?: string; // Background color of QR button
+  iconColor?: string; // Icon color (default: #FAFAFA)
+  size?: number; // Button size in dp
+}

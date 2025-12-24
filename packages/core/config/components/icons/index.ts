@@ -7,4 +7,5 @@ export { DetailArrowIcon } from './DetailArrowIcon';
 export { ErrorIcon } from './ErrorIcon';
 export { FilterIcon } from './FilterIcon';
 export { LogoClosepay } from './LogoClosepay';
+export { default as QrScanIcon } from './QrScanIcon';
 

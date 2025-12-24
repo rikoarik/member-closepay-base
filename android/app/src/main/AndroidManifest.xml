@@ -49,7 +49,17 @@
         android:theme="@style/AppTheme"
         android:exported="false" />
       
-      <!-- Chucker Activities removed - will be added automatically in debug builds only -->
+      <!-- Chucker HTTP Inspector Activity -->
+      <activity
+        android:name="com.chuckerteam.chucker.internal.ui.MainActivity"
+        android:theme="@style/ChuckerTheme"
+        android:exported="false"
+        tools:replace="android:theme" />
+      <activity
+        android:name="com.chuckerteam.chucker.internal.ui.TransactionActivity"
+        android:theme="@style/ChuckerTheme"
+        android:exported="false"
+        tools:replace="android:theme" />
       
       <!-- FileProvider for sharing files -->
       <provider

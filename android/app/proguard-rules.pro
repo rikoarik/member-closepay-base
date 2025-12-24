@@ -104,11 +104,27 @@
     public static *** e(...);
 }
 
-# Aggressive optimization
--optimizationpasses 5
--allowaccessmodification
--repackageclasses ''
+# Normal optimization (safe for React Native TurboModules)
+-optimizationpasses 3
 -dontpreverify
+
+# ==========================================
+# TURBOMODULE SUPPORT (Critical for New Arch)
+# ==========================================
+
+# Keep TurboModule interfaces and implementations
+-keep class * extends com.facebook.react.turbomodule.core.interfaces.TurboModule { *; }
+-keep interface com.facebook.react.turbomodule.core.interfaces.** { *; }
+
+# Keep all class NAMES in facebook.react (critical for registry lookup)
+-keepnames class com.facebook.react.** { *; }
+-keepnames class com.facebook.hermes.** { *; }
+-keepnames class com.facebook.jni.** { *; }
+
+# Keep defaults and system modules (contains PlatformConstants)
+-keep class com.facebook.react.defaults.** { *; }
+-keep class com.facebook.react.modules.systeminfo.** { *; }
+-keep class com.facebook.react.modules.core.** { *; }
 
 # React Native Config
 -keep class com.lugg.ReactNativeConfig.** { *; }
@@ -137,18 +153,13 @@
 -keep class com.facebook.react.bridge.** { *; }
 -keep class com.facebook.react.modules.** { *; }
 -keep class com.facebook.react.uimanager.** { *; }
+-keep class com.facebook.react.turbomodule.** { *; }
 
 # Prevent stripping of native module methods
 -keepclassmembers class * {
     @com.facebook.react.bridge.ReactMethod *;
 }
 
-# Remove Chucker completely in release builds
--assumenosideeffects class com.chuckerteam.chucker.** { *; }
--assumenosideeffects class com.chucker.** { *; }
-
-# Additional security: Remove all console.log and debug statements
--assumenosideeffects class android.util.Log {
-    public static *** println(...);
-}
-
+# Keep our custom app modules
+-keep class com.solusinegeri.app.** { *; }
+-keepnames class com.solusinegeri.app.** { *; }

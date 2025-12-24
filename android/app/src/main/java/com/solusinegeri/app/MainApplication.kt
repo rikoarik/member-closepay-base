@@ -20,6 +20,10 @@ class MainApplication : Application(), ReactApplication {
           // add(MyReactNativePackage())
           add(AppVersionPackage())
           add(ImagePickerPackage())
+          add(NativeCryptoPackage())
+          add(SecureStoragePackage())
+          add(ClipboardPackage())
+          add(ConfigPackage())
         },
     )
   }

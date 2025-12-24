@@ -4,7 +4,7 @@
  */
 export { BottomSheet } from './BottomSheet';
 export { TabSwitcher } from './TabSwitcher';
-export type { Tab, TabSwitcherConfig } from './TabSwitcher';
+export type { Tab } from './TabSwitcher';
 export { ErrorModal } from './ErrorModal';
 export type { ErrorModalProps } from './ErrorModal';
 export {
@@ -20,5 +20,6 @@ export type { ScreenHeaderProps } from './ScreenHeader';
 export { DatePicker } from './DatePicker';
 export type { DatePickerProps } from './DatePicker';
 export { CustomRefreshControl } from './CustomRefreshControl';
+export { QrScanButton } from './QrScanButton';
 // TopBarRefreshControl, PullToRefreshWrapper and related components removed in favor of native RefreshControl
 

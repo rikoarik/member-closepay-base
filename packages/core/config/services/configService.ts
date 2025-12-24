@@ -8,7 +8,7 @@ import { getTenantConfig, getCurrentTenantId } from './tenantService';
 import { TenantConfig } from '../tenants';
 import axiosInstance from './axiosConfig';
 import { configEventEmitter } from '../utils/configEventEmitter';
-import Config from 'react-native-config';
+import Config from '../../native/Config';
 
 export interface ConfigService {
   loadConfig(): Promise<AppConfig>;

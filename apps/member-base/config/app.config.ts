@@ -4,22 +4,23 @@
  */
 
 import type { AppConfig } from '../../../packages/core/config/types/AppConfig';
+import Config from '../../../packages/core/native/Config';
 
 export const appConfig: AppConfig = {
   companyId: 'member-base',
   companyName: 'Member Base App',
   tenantId: 'member-base',
   segmentId: 'balance-management',
-  
+
   // Enabled features (feature flags)
   enabledFeatures: [],
-  
+
   // Enabled modules/plugins
   enabledModules: [],
-  
+
   // Home variant from tenant config
   homeVariant: 'member',
-  
+
   // Home tabs configuration (for member variant)
   homeTabs: [
     {
@@ -41,7 +42,7 @@ export const appConfig: AppConfig = {
       order: 2,
     }
   ],
-  
+
   // Menu configuration
   menuConfig: [
     {
@@ -53,27 +54,29 @@ export const appConfig: AppConfig = {
       order: 1,
     }
   ],
-  
+
   // Payment methods
   paymentMethods: ['balance', 'bank_transfer', 'virtual_account'],
-  
+
   // Branding
   branding: {
     logo: '', // Set logo URL here (e.g., 'https://example.com/logo.png')
     appName: 'Member Base App',
   },
-  
+
   // Login configuration
   login: {
     showSignUp: true, // Show/hide sign up link
     showSocialLogin: true, // Show/hide social login buttons
     socialLoginProviders: ['google'], // Available social login providers (only Google, no Facebook)
   },
-  
+
   // Service configuration
   services: {
     api: {
-      baseUrl: 'https://api.stg.solusiuntuknegeri.com',
+      // Use environment variable from .env.staging or .env.production
+      // Fallback to production URL for safety
+      baseUrl: Config.API_BASE_URL || 'https://api.solusiuntuknegeri.com',
       timeout: 30000,
     },
     auth: {
@@ -85,4 +88,7 @@ export const appConfig: AppConfig = {
       crashReporting: false,
     },
   },
+
+  // QR Button configuration
+  showQrButton: true,
 };

@@ -337,3 +337,63 @@ jest.mock('react-native-encrypted-storage', () => {
   };
 });
 
+// Mock Native Modules for custom native modules (SecureStorage, Clipboard, Config)
+jest.mock('react-native', () => {
+  const RN = jest.requireActual('react-native');
+  
+  const secureStore = {};
+  
+  RN.NativeModules.SecureStorageModule = {
+    setItem: jest.fn((key, value) => {
+      secureStore[key] = value;
+      return Promise.resolve();
+    }),
+    getItem: jest.fn((key) => Promise.resolve(secureStore[key] || null)),
+    removeItem: jest.fn((key) => {
+      delete secureStore[key];
+      return Promise.resolve();
+    }),
+    clear: jest.fn(() => {
+      Object.keys(secureStore).forEach(key => delete secureStore[key]);
+      return Promise.resolve();
+    }),
+    getAllKeys: jest.fn(() => Promise.resolve(Object.keys(secureStore))),
+    multiGet: jest.fn((keys) =>
+      Promise.resolve(keys.map(key => [key, secureStore[key] || null]))
+    ),
+    multiSet: jest.fn((pairs) => {
+      pairs.forEach(([key, value]) => {
+        secureStore[key] = value;
+      });
+      return Promise.resolve();
+    }),
+    multiRemove: jest.fn((keys) => {
+      keys.forEach(key => delete secureStore[key]);
+      return Promise.resolve();
+    }),
+  };
+  
+  RN.NativeModules.ClipboardModule = {
+    setString: jest.fn(),
+    getString: jest.fn(() => Promise.resolve('')),
+    hasString: jest.fn(() => Promise.resolve(false)),
+    hasURL: jest.fn(() => Promise.resolve(false)),
+  };
+  
+  RN.NativeModules.ConfigModule = {
+    get: jest.fn(() => ''),
+    getAsync: jest.fn(() => Promise.resolve('')),
+    getAll: jest.fn(() => Promise.resolve({})),
+    getConstants: jest.fn(() => ({
+      API_URL: 'https://api.test.com',
+      API_HOSTNAME: 'api.test.com',
+      API_STG_URL: 'https://api.stg.test.com',
+      API_STG_HOSTNAME: 'api.stg.test.com',
+      PIN_LEAF_CERT: 'sha256/test',
+      PIN_INTERMEDIATE: 'sha256/test',
+    })),
+  };
+  
+  return RN;
+});
+

@@ -2,7 +2,7 @@
  * Quick Menu Service
  * Service untuk manage quick menu settings menggunakan AsyncStorage
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import SecureStorage from '../../native/SecureStorage';
 import { PluginRegistry } from '../plugins/PluginRegistry';
 
 export interface QuickMenuItem {
@@ -21,7 +21,7 @@ const QUICK_MENU_STORAGE_KEY = '@quick_menu_settings';
  */
 export const loadQuickMenuSettings = async (): Promise<QuickMenuItem[]> => {
   try {
-    const stored = await AsyncStorage.getItem(QUICK_MENU_STORAGE_KEY);
+    const stored = await SecureStorage.getItem(QUICK_MENU_STORAGE_KEY);
     if (stored) {
       return JSON.parse(stored);
     }
@@ -38,7 +38,7 @@ export const saveQuickMenuSettings = async (
   menuItems: QuickMenuItem[]
 ): Promise<void> => {
   try {
-    await AsyncStorage.setItem(QUICK_MENU_STORAGE_KEY, JSON.stringify(menuItems));
+    await SecureStorage.setItem(QUICK_MENU_STORAGE_KEY, JSON.stringify(menuItems));
   } catch (error) {
     console.error('Failed to save quick menu settings:', error);
     throw error;

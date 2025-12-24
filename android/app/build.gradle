@@ -88,6 +88,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
+
     // Optimize APK/AAB size
     packagingOptions {
         // Strip debug symbols from native libraries
@@ -110,27 +111,10 @@ android {
         applicationId "com.solusinegeri.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.3"
         resValue "string", "build_config_package", "com.solusinegeri.app"
-    }
-
-    flavorDimensions "environment"
-    
-    productFlavors {
-        staging {
-            dimension "environment"
-            applicationIdSuffix ".staging"
-            resValue "string", "app_name", "ClosePay Member (Staging)"
-            // Use .env.staging for this flavor
-            buildConfigField "String", "ENV_FILE", '".env.staging"'
-        }
-        production {
-            dimension "environment"
-            resValue "string", "app_name", "ClosePay Member"
-            // Use .env.production for this flavor
-            buildConfigField "String", "ENV_FILE", '".env.production"'
-        }
+        resValue "string", "app_name", "ClosePay Member"
     }
 
     splits {
@@ -222,4 +206,7 @@ dependencies {
     
     // FileProvider support
     implementation("androidx.core:core-ktx:1.12.0")
+    
+    // Google Tink for native crypto operations (AEAD encryption)
+    implementation("com.google.crypto.tink:tink-android:1.12.0")
 }
