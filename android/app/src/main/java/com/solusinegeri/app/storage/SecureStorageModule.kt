@@ -1,10 +1,11 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.storage
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
 import com.facebook.react.bridge.*
 import com.google.crypto.tink.Aead
+import com.solusinegeri.app.security.NativeCryptoModule
 
 /**
  * Secure Storage Module
@@ -229,8 +230,6 @@ class SecureStorageModule(private val reactContext: ReactApplicationContext) :
             
             // Remove from old storage
             removeFromOldStorage(key)
-            
-            android.util.Log.d(TAG, "Migrated key: $key from old storage")
         }
         
         return value

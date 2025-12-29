@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.config
 
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
@@ -38,4 +38,3 @@ class AppVersionModule(reactContext: ReactApplicationContext) : ReactContextBase
         }
     }
 }
-

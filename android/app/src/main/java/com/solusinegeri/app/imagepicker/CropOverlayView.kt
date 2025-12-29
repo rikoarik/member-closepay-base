@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.imagepicker
 
 import android.content.Context
 import android.graphics.Canvas

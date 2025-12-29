@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.security
 
 /**
  * Native Security Module
@@ -21,4 +21,3 @@ object NativeSecurityModule {
     fun getMasterKeyUri(): String = ""
     fun verifyIntegrity(context: android.content.Context): Boolean = true
 }
-

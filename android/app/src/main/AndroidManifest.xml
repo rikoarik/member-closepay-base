@@ -45,7 +45,7 @@
       
       <!-- Custom Crop Activity -->
       <activity
-        android:name=".CropActivity"
+        android:name=".imagepicker.CropActivity"
         android:theme="@style/AppTheme"
         android:exported="false" />
       

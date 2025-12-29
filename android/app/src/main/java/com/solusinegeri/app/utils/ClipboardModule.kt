@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.utils
 
 import android.content.ClipData
 import android.content.ClipboardManager

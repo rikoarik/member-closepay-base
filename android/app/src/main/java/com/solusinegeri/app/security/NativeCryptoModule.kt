@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.security
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec

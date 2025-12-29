@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.imagepicker
 
 import android.app.Activity
 import android.content.Intent
@@ -88,12 +88,10 @@ class ImagePickerModule(reactContext: ReactApplicationContext) : ReactContextBas
     }
 
     override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
-
         handleActivityResult(requestCode, resultCode, data)
     }
     
     override fun onNewIntent(intent: Intent) {
-   
         // Not needed for image picker
     }
     
@@ -206,8 +204,5 @@ class ImagePickerModule(reactContext: ReactApplicationContext) : ReactContextBas
         super.onCatalystInstanceDestroy()
         // Clear singleton when module is destroyed
         instance = null
-        // #region agent log
-        android.util.Log.d("ImagePickerModule", "Singleton cleared on destroy")
-        // #endregion
     }
 }

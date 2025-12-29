@@ -1,10 +1,12 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.network
 
 import android.content.Context
 import com.facebook.react.modules.network.OkHttpClientFactory
 import com.facebook.react.modules.network.OkHttpClientProvider
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
+import com.solusinegeri.app.BuildConfig
+import com.solusinegeri.app.config.SecureConfig
 
 /**
  * Custom Network Module for OkHttp Configuration

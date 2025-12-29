@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.utils
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
@@ -6,14 +6,14 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
 /**
- * React Native Package for SecureStorageModule
+ * React Native Package for ClipboardModule
  */
-class SecureStoragePackage : ReactPackage {
+class ClipboardPackage : ReactPackage {
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
         return emptyList()
     }
 
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(SecureStorageModule(reactContext))
+        return listOf(ClipboardModule(reactContext))
     }
 }

@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.imagepicker
 
 import android.app.Activity
 import android.content.Intent

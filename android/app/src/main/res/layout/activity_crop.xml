@@ -24,7 +24,7 @@
             android:scaleType="matrix" />
 
         <!-- Crop Overlay -->
-        <com.solusinegeri.app.CropOverlayView
+        <com.solusinegeri.app.imagepicker.CropOverlayView
             android:id="@+id/cropOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

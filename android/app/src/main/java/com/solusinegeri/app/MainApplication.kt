@@ -9,6 +9,15 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 
 import com.facebook.react.modules.network.OkHttpClientProvider
 
+// Import packages from organized folders
+import com.solusinegeri.app.config.AppVersionPackage
+import com.solusinegeri.app.config.ConfigPackage
+import com.solusinegeri.app.imagepicker.ImagePickerPackage
+import com.solusinegeri.app.security.NativeCryptoPackage
+import com.solusinegeri.app.storage.SecureStoragePackage
+import com.solusinegeri.app.utils.ClipboardPackage
+import com.solusinegeri.app.network.CustomNetworkModule
+
 class MainApplication : Application(), ReactApplication {
 
   override val reactHost: ReactHost by lazy {

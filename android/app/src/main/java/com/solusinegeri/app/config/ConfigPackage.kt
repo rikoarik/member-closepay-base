@@ -1,4 +1,4 @@
-package com.solusinegeri.app
+package com.solusinegeri.app.config
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
