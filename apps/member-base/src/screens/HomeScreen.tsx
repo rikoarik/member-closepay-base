@@ -125,10 +125,7 @@ export const HomeScreen = () => {
     }
   }, [shouldShowFab, fabOpacity, fabScale]);
 
-  // Scroll Management
-  const mainScrollViewRef = useRef<ScrollView>(null);
-  const scrollYValueRef = useRef<number>(0);
-  const tabOffsetsRef = useRef<{ [key: string]: number }>({});
+
 
   // Set activeTab ke tab dengan order 2 (di tengah) saat tabs pertama kali ter-load
   useEffect(() => {
@@ -200,6 +197,7 @@ export const HomeScreen = () => {
             <AktivitasTab
               isActive={activeTab === tabId}
               isVisible={activeTab === tabId}
+              scrollEnabled={true}
             />
           </View>
         );
@@ -213,6 +211,7 @@ export const HomeScreen = () => {
               isVisible={activeTab === tabId}
               searchState={newsState}
               renderHeader={false}
+              scrollEnabled={true}
             />
           </View>
         );
@@ -295,36 +294,16 @@ export const HomeScreen = () => {
     [activeTabIndex]
   );
 
-  /* 
-   * Helper untuk sync scroll position antar tab.
-   * Menyimpan posisi scroll tab lama dan mengembalikan posisi scroll tab baru via Main ScrollView.
-   */
-  const syncScrollPosition = useCallback((fromTab: string, toTab: string) => {
-    // Save current offset for the leaving tab
-    if (fromTab) {
-      tabOffsetsRef.current[fromTab] = scrollYValueRef.current;
-    }
-
-    // Restore offset for the entering tab
-    const targetOffset = tabOffsetsRef.current[toTab] || 0;
-
-    if (mainScrollViewRef.current) {
-      mainScrollViewRef.current.scrollTo({ y: targetOffset, animated: false });
-    }
-  }, []);
-
   const handlePagerMomentumEnd = useCallback(
     (event: any) => {
       const offsetX = event.nativeEvent.contentOffset.x;
       const index = Math.round(offsetX / screenWidth);
 
       if (tabs[index] && tabs[index].id !== activeTab) {
-        // Sync scroll before state update
-        syncScrollPosition(activeTab, tabs[index].id);
         setActiveTab(tabs[index].id);
       }
     },
-    [screenWidth, tabs, activeTab, syncScrollPosition]
+    [screenWidth, tabs, activeTab]
   );
 
   const tabChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -335,9 +314,6 @@ export const HomeScreen = () => {
       if (tabChangeTimeoutRef.current) {
         clearTimeout(tabChangeTimeoutRef.current);
       }
-
-      // Sync scroll position using helper
-      syncScrollPosition(activeTab, tabId);
 
       setActiveTab(tabId);
       tabChangeTimeoutRef.current = setTimeout(() => {
@@ -354,7 +330,7 @@ export const HomeScreen = () => {
         });
       }, 50);
     },
-    [screenWidth, getTabIndex, activeTab, syncScrollPosition]
+    [screenWidth, getTabIndex]
   );
 
   useEffect(() => {
@@ -443,119 +419,92 @@ export const HomeScreen = () => {
         },
       ]}
     >
-      <ScrollView
-        ref={mainScrollViewRef}
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        stickyHeaderIndices={[2]}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onScroll={(event) => {
-          scrollYValueRef.current = event.nativeEvent.contentOffset.y;
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        }
+      {/* TopBar - Static */}
+      <View
+        style={[
+          styles.topBarContainer,
+          {
+            paddingHorizontal: getHorizontalPadding(),
+            backgroundColor: colors.background,
+          },
+        ]}
       >
-        {/* Spacer for native indicator */}
-        <View style={styles.refreshIndicatorContainer} />
+        <TopBar
+          notificationCount={unreadCount}
+          onNotificationPress={handleNotificationPress}
+          onMenuPress={handleMenuPress}
+        />
+      </View>
 
-        {/* TopBar - Not sticky */}
-        <View
-          style={[
-            styles.topBarContainer,
-            {
-              paddingHorizontal: getHorizontalPadding(),
-              backgroundColor: colors.background,
-            },
-          ]}
-        >
-          <TopBar
-            notificationCount={unreadCount}
-            onNotificationPress={handleNotificationPress}
-            onMenuPress={handleMenuPress}
+      {/* Tab Switcher - Static */}
+      <View
+        style={[
+          styles.section,
+          {
+            backgroundColor: colors.background,
+            paddingHorizontal: getHorizontalPadding(),
+          },
+        ]}
+      >
+        {tabs.length > 0 && (
+          <TabSwitcher
+            variant="segmented"
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            scrollX={scrollX}
+            pagerWidth={screenWidth}
           />
-        </View>
+        )}
+        {(activeTab === 'news' || activeTab === 'berita') && (
+          <NewsSearchHeader state={newsState} />
+        )}
+      </View>
 
-        {/* Tab Switcher - Sticky (always render container for iOS stickyHeaderIndices) */}
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: colors.background,
-              paddingHorizontal: getHorizontalPadding(),
-              // iOS requires zIndex for sticky headers
-              zIndex: 1,
-            },
-          ]}
-        >
-          {tabs.length > 0 && (
-            <TabSwitcher
-              variant="segmented"
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-              scrollX={scrollX}
-              pagerWidth={screenWidth}
-            />
-          )}
-          {(activeTab === 'news' || activeTab === 'berita') && (
-            <NewsSearchHeader state={newsState} />
-          )}
-        </View>
+      {/* Pager horizontal dengan scroll vertikal per tab (INDEPENDENT SCROLL) */}
+      <Animated.ScrollView
+        ref={pagerRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        scrollEnabled={true}
+        nestedScrollEnabled={true}
+        decelerationRate="fast"
+        snapToInterval={screenWidth}
+        removeClippedSubviews={true}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: true }
+        )}
+        onMomentumScrollEnd={handlePagerMomentumEnd}
+        style={{ flex: 1 }}
+      >
+        {tabs.map((tab, index) => {
+          // Lazy loading: hanya render tab aktif dan tab adjacent
+          if (!shouldRenderTab(tab.id, index)) {
+            return (
+              <View
+                key={tab.id}
+                style={{ width: screenWidth, flex: 1 }}
+                pointerEvents="none"
+              />
+            );
+          }
 
-        {/* Pager horizontal dengan scroll vertikal per tab */}
-        <View style={{ minHeight: screenHeight }}>
-          <Animated.ScrollView
-            ref={pagerRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            scrollEventThrottle={8}
-            scrollEnabled={true}
-            nestedScrollEnabled={true}
-            directionalLockEnabled={true}
-            decelerationRate="fast"
-            snapToInterval={screenWidth}
-            removeClippedSubviews={true}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: true }
-            )}
-            onMomentumScrollEnd={handlePagerMomentumEnd}
-          >
-            {tabs.map((tab, index) => {
-              // Lazy loading: hanya render tab aktif dan tab adjacent
-              if (!shouldRenderTab(tab.id, index)) {
-                return (
-                  <View
-                    key={tab.id}
-                    style={{ width: screenWidth, flex: 1 }}
-                    pointerEvents="none"
-                  />
-                );
-              }
+          return (
+            <View
+              key={tab.id}
+              style={{ width: screenWidth, flex: 1 }}
+              pointerEvents={activeTab === tab.id ? "auto" : "none"}
+            >
+              {renderTabContent(tab.id, index)}
+            </View>
+          );
+        })}
+      </Animated.ScrollView>
 
-              return (
-                <View
-                  key={tab.id}
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents={activeTab === tab.id ? "auto" : "none"}
-                >
-                  {renderTabContent(tab.id, index)}
-                </View>
-              );
-            })}
-          </Animated.ScrollView>
-        </View>
-      </ScrollView>
-
-      {/* FAB QR Button - Only show on beranda/home tab with smooth animation */}
+      {/* FAB QR Button */}
       {config?.showQrButton !== false && (
         <Animated.View
           style={[

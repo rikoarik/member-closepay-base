@@ -3,7 +3,7 @@
  * Tab beranda dengan quick access buttons dan konten beranda
  */
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@core/theme';
 import {
@@ -92,16 +92,27 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
   }, []);
 
   return (
-    <View
+    <ScrollView
       style={[
         styles.container,
         {
           backgroundColor: colors.background,
-          paddingBottom: insets.bottom + moderateVerticalScale(24),
-          paddingHorizontal: horizontalPadding,
-          paddingTop: moderateVerticalScale(16),
         }
       ]}
+      contentContainerStyle={{
+        paddingBottom: insets.bottom + moderateVerticalScale(24),
+        paddingHorizontal: horizontalPadding,
+        paddingTop: moderateVerticalScale(16),
+      }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+      showsVerticalScrollIndicator={false}
       pointerEvents={isActive ? 'auto' : 'none'}
     >
       {/**
@@ -131,7 +142,7 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
         onViewAllPress={onNavigateToNews}
         onRefreshRequested={handleNewsRefreshRequested}
       />
-    </View>
+    </ScrollView>
   );
 });
 
