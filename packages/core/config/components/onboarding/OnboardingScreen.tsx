@@ -49,6 +49,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const phoneImageScrollRef = useRef<ScrollView>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const isNavigatingRef = useRef(false); // Track programmatic navigation to prevent scroll conflicts
 
   const getStepIndex = (step: OnboardingStep): number => {
     return ONBOARDING_STEPS.indexOf(step);
@@ -75,32 +76,31 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         result = await permissionService.requestLocationPermission();
         setPermissionStatus(prev => ({ ...prev, location: result! }));
         console.log('Location permission result:', result);
-      } else if (currentStep === 'language') {
-        // Language step doesn't need permission, just proceed
-        // Language is already set via onLanguageChange in PhoneMockup
-        console.log('Language step - no permission needed');
       }
 
-      // Permission dialog will appear automatically via permissionService
-      // State will update after user responds to permission dialog
+      // After permission dialog closes, the button will automatically change 
+      // to "Selanjutnya" because hasUserRespondedToPermission will return true
     } catch (error) {
       console.error('Error requesting permission:', error);
     }
   };
 
-  // Check if permission is granted for current step
-  const isPermissionGranted = (step: OnboardingStep): boolean => {
+  // Check if user has responded to permission request (granted, denied, or blocked)
+  const hasUserRespondedToPermission = (step: OnboardingStep): boolean => {
     // Theme and language steps don't need permission
     if (step === 'theme' || step === 'language') return true;
 
     if (step === 'notifications') {
-      return permissionStatus.notifications?.status === 'granted';
+      const status = permissionStatus.notifications?.status;
+      return status === 'granted' || status === 'denied' || status === 'blocked';
     }
     if (step === 'camera') {
-      return permissionStatus.camera?.status === 'granted';
+      const status = permissionStatus.camera?.status;
+      return status === 'granted' || status === 'denied' || status === 'blocked';
     }
     if (step === 'location') {
-      return permissionStatus.location?.status === 'granted';
+      const status = permissionStatus.location?.status;
+      return status === 'granted' || status === 'denied' || status === 'blocked';
     }
     return false;
   };
@@ -108,11 +108,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   const handleNext = async () => {
     const currentIndex = getStepIndex(currentStep);
 
-    // Check if permission is granted (or step doesn't need permission)
-    const canProceed = isPermissionGranted(currentStep);
+    // Check if user has responded to permission (or step doesn't need permission)
+    const canProceed = hasUserRespondedToPermission(currentStep);
 
     if (!canProceed) {
-      // Permission not granted, don't proceed
+      // User hasn't responded to permission yet, don't proceed
       return;
     }
 
@@ -120,18 +120,28 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     if (currentIndex < ONBOARDING_STEPS.length - 1) {
       const nextIndex = currentIndex + 1;
       const nextStep = ONBOARDING_STEPS[nextIndex];
+
+      // Set navigating flag to prevent handleScrollEnd from reverting
+      isNavigatingRef.current = true;
+
       setCurrentStep(nextStep);
       setCurrentPageIndex(nextIndex);
-      const scrollX = nextIndex * screenWidth;
+      const scrollXPos = nextIndex * screenWidth;
+
       // Smooth scroll animation - sync both scroll views
       scrollViewRef.current?.scrollTo({
-        x: scrollX,
+        x: scrollXPos,
         animated: true,
       });
       phoneImageScrollRef.current?.scrollTo({
-        x: scrollX,
+        x: scrollXPos,
         animated: true,
       });
+
+      // Reset flag after scroll animation completes
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 500);
     } else {
       // Complete onboarding
       onComplete();
@@ -139,6 +149,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   };
 
   const handleScrollEnd = async (event: any) => {
+    // Ignore scroll events triggered by programmatic navigation
+    if (isNavigatingRef.current) {
+      return;
+    }
+
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / screenWidth);
 
@@ -147,7 +162,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       // Can only swipe forward if current step permission is granted (or doesn't need permission)
       const isSwipeForward = index > currentPageIndex;
 
-      if (isSwipeForward && !isPermissionGranted(currentStep)) {
+      if (isSwipeForward && !hasUserRespondedToPermission(currentStep)) {
         // Prevent swipe forward - scroll back to current position
         const scrollX = currentPageIndex * screenWidth;
         scrollViewRef.current?.scrollTo({
@@ -489,7 +504,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
             },
           ]}
         >
-          {isPermissionGranted(currentStep) ? (
+          {hasUserRespondedToPermission(currentStep) ? (
             <TouchableOpacity
               style={[styles.nextButton, { backgroundColor: colors.primary }]}
               onPress={handleNext}

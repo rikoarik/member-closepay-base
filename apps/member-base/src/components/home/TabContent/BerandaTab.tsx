@@ -3,7 +3,7 @@
  * Tab beranda dengan quick access buttons dan konten beranda
  */
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView, StyleSheet, Text, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@core/theme';
 import {
@@ -51,7 +51,7 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
   const insets = useSafeAreaInsets();
   const horizontalPadding = getHorizontalPadding();
   const { t } = useTranslation();
-  
+
   // State untuk toggle show/hide saldo (balance)
   // Default: hidden (false)
   const [showBalance, setShowBalance] = React.useState(false);
@@ -92,30 +92,16 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
   }, []);
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: colors.background }]}
-      contentContainerStyle={[
-        styles.scrollContent,
+    <View
+      style={[
+        styles.container,
         {
+          backgroundColor: colors.background,
           paddingBottom: insets.bottom + moderateVerticalScale(24),
           paddingHorizontal: horizontalPadding,
           paddingTop: moderateVerticalScale(16),
-        },
+        }
       ]}
-      showsVerticalScrollIndicator={false}
-      nestedScrollEnabled={true}
-      scrollEnabled={isActive}
-      bounces={true}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          colors={[colors.primary]}
-          tintColor={colors.primary}
-        />
-      }
-      // directionalLockEnabled dihapus untuk allow horizontal scroll di child
-      // onScrollBeginDrag dihapus untuk allow child ScrollView menangani gesture sendiri
       pointerEvents={isActive ? 'auto' : 'none'}
     >
       {/**
@@ -134,29 +120,26 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
       </View>
 
       {/* Recent Transactions - Komponen terpisah untuk reusability */}
-      <RecentTransactions
+      {/* <RecentTransactions
         {...recentTransactionsProps}
         onRefreshRequested={handleTransactionsRefreshRequested}
-      />
+      /> */}
 
       {/* News Info - Komponen terpisah untuk reusability */}
-      <BerandaNewsInfo 
+      <BerandaNewsInfo
         {...newsInfoProps}
         onViewAllPress={onNavigateToNews}
         onRefreshRequested={handleNewsRefreshRequested}
       />
-    </ScrollView>
+    </View>
   );
 });
 
 BerandaTab.displayName = 'BerandaTab';
 
 const styles = StyleSheet.create({
-  scrollView: {
+  container: {
     flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
   },
   section: {
     marginBottom: moderateVerticalScale(16),

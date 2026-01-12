@@ -7,6 +7,9 @@ interface SecurityNativeModuleInterface {
 
 const { SecurityNativeModule } = NativeModules;
 
+// Check if native module is available
+const isNativeModuleAvailable = !!SecurityNativeModule;
+
 /**
  * Security Event Emitter
  * 
@@ -15,9 +18,20 @@ const { SecurityNativeModule } = NativeModules;
  */
 class SecurityEventEmitter extends NativeEventEmitter {
   private static instance: SecurityEventEmitter | null = null;
+  private moduleAvailable: boolean;
 
   constructor() {
-    super(SecurityNativeModule || undefined);
+    // NativeEventEmitter requires a non-null native module on iOS
+    // When module is not available (e.g., simulator), we pass the module anyway
+    // but track availability to prevent method calls
+    if (isNativeModuleAvailable) {
+      super(SecurityNativeModule);
+    } else {
+      // For platforms without native module, pass a minimal mock
+      // This prevents the invariant violation
+      super({ addListener: () => { }, removeListeners: () => { } } as any);
+    }
+    this.moduleAvailable = isNativeModuleAvailable;
   }
 
   /**

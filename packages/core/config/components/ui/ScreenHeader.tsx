@@ -12,9 +12,9 @@ import {
   moderateVerticalScale,
   getHorizontalPadding,
   getResponsiveFontSize,
-  FontFamily,
   getMinTouchTarget,
-} from '@core/config';
+} from '../../utils/responsive';
+import { FontFamily } from '../../utils/fonts';
 import { useTheme } from '@core/theme';
 
 export interface ScreenHeaderProps {

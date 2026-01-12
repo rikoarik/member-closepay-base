@@ -4,6 +4,15 @@
  */
 
 import { Platform, PermissionsAndroid, Alert, Linking } from 'react-native';
+import {
+  check,
+  request,
+  PERMISSIONS,
+  RESULTS,
+  openSettings,
+  requestNotifications,
+  checkNotifications,
+} from 'react-native-permissions';
 
 export type PermissionStatus = 'granted' | 'denied' | 'blocked' | 'unavailable';
 
@@ -11,6 +20,24 @@ export interface PermissionResult {
   status: PermissionStatus;
   message?: string;
 }
+
+/**
+ * Convert react-native-permissions result to our PermissionStatus
+ */
+const convertResult = (result: string): PermissionStatus => {
+  switch (result) {
+    case RESULTS.GRANTED:
+    case RESULTS.LIMITED:
+      return 'granted';
+    case RESULTS.DENIED:
+      return 'denied';
+    case RESULTS.BLOCKED:
+      return 'blocked';
+    case RESULTS.UNAVAILABLE:
+    default:
+      return 'unavailable';
+  }
+};
 
 class PermissionService {
   /**
@@ -30,8 +57,8 @@ class PermissionService {
   async checkNotificationPermission(): Promise<PermissionStatus> {
     try {
       if (Platform.OS === 'ios') {
-        // iOS: Permission check handled by native module
-        return 'granted';
+        const { status } = await checkNotifications();
+        return convertResult(status);
       }
 
       if (Platform.OS === 'android') {
@@ -64,15 +91,14 @@ class PermissionService {
     try {
       // iOS: Request notification permission
       if (Platform.OS === 'ios') {
-        // Note: Untuk iOS, biasanya menggunakan react-native-permissions atau native module
-        // Di sini kita return granted untuk sementara, implementasi native bisa ditambahkan nanti
-        return { status: 'granted' };
+        const { status } = await requestNotifications(['alert', 'badge', 'sound']);
+        return { status: convertResult(status) };
       }
 
       // Android: Request notification permission (Android 13+)
       if (Platform.OS === 'android') {
         const androidVersion = Number(Platform.Version);
-        
+
         // Android 13+ (API 33+): Need to request permission
         if (androidVersion >= 33) {
           try {
@@ -87,7 +113,7 @@ class PermissionService {
 
             // Request permission
             const granted = await PermissionsAndroid.request(permission);
-            
+
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
               return { status: 'granted' };
             } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
@@ -98,9 +124,9 @@ class PermissionService {
           } catch (error: any) {
             console.error('Error requesting notification permission:', error);
             // Return denied instead of unavailable to allow retry
-            return { 
-              status: 'denied', 
-              message: error?.message || 'Failed to request notification permission' 
+            return {
+              status: 'denied',
+              message: error?.message || 'Failed to request notification permission'
             };
           }
         }
@@ -112,9 +138,9 @@ class PermissionService {
       return { status: 'unavailable', message: 'Platform not supported' };
     } catch (error: any) {
       console.error('Error requesting notification permission:', error);
-      return { 
-        status: 'unavailable', 
-        message: error?.message || 'Failed to request notification permission' 
+      return {
+        status: 'unavailable',
+        message: error?.message || 'Failed to request notification permission'
       };
     }
   }
@@ -124,6 +150,11 @@ class PermissionService {
    */
   async requestCameraPermission(): Promise<PermissionResult> {
     try {
+      if (Platform.OS === 'ios') {
+        const result = await request(PERMISSIONS.IOS.CAMERA);
+        return { status: convertResult(result) };
+      }
+
       if (Platform.OS === 'android') {
         // Always request permission (will show dialog if not granted)
         const granted = await PermissionsAndroid.request(
@@ -138,12 +169,34 @@ class PermissionService {
         }
       }
 
-      // iOS: Camera permission handled by native module
-      // Return granted for now, native implementation can be added later
-      return { status: 'granted' };
+      return { status: 'unavailable', message: 'Platform not supported' };
     } catch (error) {
       console.error('Error requesting camera permission:', error);
       return { status: 'unavailable', message: 'Failed to request camera permission' };
+    }
+  }
+
+  /**
+   * Check camera permission status
+   */
+  async checkCameraPermission(): Promise<PermissionStatus> {
+    try {
+      if (Platform.OS === 'ios') {
+        const result = await check(PERMISSIONS.IOS.CAMERA);
+        return convertResult(result);
+      }
+
+      if (Platform.OS === 'android') {
+        const result = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+        );
+        return result ? 'granted' : 'denied';
+      }
+
+      return 'unavailable';
+    } catch (error) {
+      console.error('Error checking camera permission:', error);
+      return 'unavailable';
     }
   }
 
@@ -152,6 +205,11 @@ class PermissionService {
    */
   async requestLocationPermission(): Promise<PermissionResult> {
     try {
+      if (Platform.OS === 'ios') {
+        const result = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+        return { status: convertResult(result) };
+      }
+
       if (Platform.OS === 'android') {
         // Always request permission (will show dialog if not granted)
         const granted = await PermissionsAndroid.request(
@@ -166,12 +224,34 @@ class PermissionService {
         }
       }
 
-      // iOS: Location permission handled by native module
-      // Return granted for now, native implementation can be added later
-      return { status: 'granted' };
+      return { status: 'unavailable', message: 'Platform not supported' };
     } catch (error) {
       console.error('Error requesting location permission:', error);
       return { status: 'unavailable', message: 'Failed to request location permission' };
+    }
+  }
+
+  /**
+   * Check location permission status
+   */
+  async checkLocationPermission(): Promise<PermissionStatus> {
+    try {
+      if (Platform.OS === 'ios') {
+        const result = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+        return convertResult(result);
+      }
+
+      if (Platform.OS === 'android') {
+        const result = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
+        return result ? 'granted' : 'denied';
+      }
+
+      return 'unavailable';
+    } catch (error) {
+      console.error('Error checking location permission:', error);
+      return 'unavailable';
     }
   }
 
@@ -180,9 +260,15 @@ class PermissionService {
    */
   async openSettings(): Promise<void> {
     try {
-      await Linking.openSettings();
+      await openSettings();
     } catch (error) {
       console.error('Error opening settings:', error);
+      // Fallback to React Native's Linking
+      try {
+        await Linking.openSettings();
+      } catch (fallbackError) {
+        console.error('Error opening settings via Linking:', fallbackError);
+      }
     }
   }
 
@@ -214,4 +300,3 @@ class PermissionService {
 }
 
 export const permissionService = new PermissionService();
-

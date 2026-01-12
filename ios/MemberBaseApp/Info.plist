@@ -33,12 +33,25 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Lokasi membantu kami mencocokkan wilayah operasional toko dan meningkatkan keamanan akun merchant</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Kamera dibutuhkan untuk scan QR pembayaran dan unggah dokumen verifikasi supaya proses cepat dan tanpa ribet</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Lokasi membantu kami mencocokkan wilayah operasional toko dan meningkatkan keamanan akun merchant</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Dengan notifikasi aktif, kamu nggak akan ketinggalan pesanan baru, laporan harian, atau program promo spesial merchant</string>
+	<key>RCTNewArchEnabled</key>
+	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>MonaSans-Regular.ttf</string>
+		<string>MonaSans-Medium.ttf</string>
+		<string>MonaSans-MediumItalic.ttf</string>
+		<string>MonaSans-SemiBold.ttf</string>
+		<string>MonaSans-SemiBoldItalic.ttf</string>
+		<string>MonaSans-Bold.ttf</string>
+		<string>MonaSans-BoldItalic.ttf</string>
+		<string>MonaSans-Italic.ttf</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -53,16 +66,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>UIAppFonts</key>
-	<array>
-		<string>MonaSans-Regular.ttf</string>
-		<string>MonaSans-Medium.ttf</string>
-		<string>MonaSans-MediumItalic.ttf</string>
-		<string>MonaSans-SemiBold.ttf</string>
-		<string>MonaSans-SemiBoldItalic.ttf</string>
-		<string>MonaSans-Bold.ttf</string>
-		<string>MonaSans-BoldItalic.ttf</string>
-		<string>MonaSans-Italic.ttf</string>
-	</array>
 </dict>
 </plist>

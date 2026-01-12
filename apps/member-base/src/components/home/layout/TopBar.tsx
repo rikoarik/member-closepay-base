@@ -48,8 +48,8 @@ export const TopBar: React.FC<TopBarProps> = ({
           <LogoClosepay width={scale(40)} height={scale(40)} />
         </View>
         <View>
-          <Text style={styles.logoText}>{t('home.welcome')},</Text>
-          <Text style={styles.logoText}>{appConfig.companyName}</Text>
+          <Text style={[styles.logoText, { color: colors.text }]}>{t('home.welcome')},</Text>
+          <Text style={[styles.logoText, { color: colors.text }]}>{appConfig.companyName}</Text>
         </View>
       </View>
 

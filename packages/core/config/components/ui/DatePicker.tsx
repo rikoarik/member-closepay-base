@@ -13,8 +13,8 @@ import {
   moderateVerticalScale,
   getHorizontalPadding,
   getResponsiveFontSize,
-  FontFamily,
-} from '@core/config';
+} from '../../utils/responsive';
+import { FontFamily } from '../../utils/fonts';
 
 const PICKER_ITEM_HEIGHT = scale(40);
 const VISIBLE_ITEMS = 5;

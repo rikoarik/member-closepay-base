@@ -27,25 +27,27 @@ import {
 } from 'iconsax-react-nativejs';
 // Import QuickAccessButtons via wrapper (temporary solution for dependency violation)
 // TODO: Move QuickAccessButtons to core or refactor in future phase
-import { getIconSize } from '@core/config';
+import { getIconSize, useDimensions } from '../../utils/responsive';
 import { QuickAccessButtons } from './QuickAccessButtonsWrapper';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
+// Direct imports to avoid require cycle through @core/config/index.ts
 import {
   scale,
   moderateVerticalScale,
   getHorizontalPadding,
   getMinTouchTarget,
   getResponsiveFontSize,
-  FontFamily,
-  ScreenHeader,
-  BottomSheet,
+} from '../../utils/responsive';
+import { FontFamily } from '../../utils/fonts';
+import { ScreenHeader } from './ScreenHeader';
+import { BottomSheet } from './BottomSheet';
+import {
   loadQuickMenuSettings,
   saveQuickMenuSettings,
   getAllMenuItems,
-  useDimensions,
-  type QuickMenuItem,
-} from '@core/config';
+} from '../../services/quickMenuService';
+import type { QuickMenuItem } from '../../services/quickMenuService';
 
 const PREVIEW_SNAP_POINTS = [125];
 
@@ -167,7 +169,7 @@ const PreviewContent = memo<{
   return (
     <>
       <View style={headerContainerStyle}>
-       
+
         <Text style={titleStyle}>
           {previewTitleText}
         </Text>
@@ -187,8 +189,8 @@ const PreviewContent = memo<{
             <Text style={menuTitleStyle}>
               {menuTitleText}
             </Text>
-            <PreviewQuickAccessButtons 
-              buttons={previewButtons} 
+            <PreviewQuickAccessButtons
+              buttons={previewButtons}
               textColor={textColor}
               buttonWidth={buttonWidth}
             />
@@ -201,13 +203,13 @@ const PreviewContent = memo<{
   if (prevProps.previewButtons.length !== nextProps.previewButtons.length) {
     return false;
   }
-  
+
   for (let i = 0; i < prevProps.previewButtons.length; i++) {
     if (prevProps.previewButtons[i].id !== nextProps.previewButtons[i].id) {
       return false;
     }
   }
-  
+
   if (
     prevProps.previewTitleText !== nextProps.previewTitleText ||
     prevProps.headerContainerStyle !== nextProps.headerContainerStyle ||
@@ -227,7 +229,7 @@ const PreviewContent = memo<{
   ) {
     return false; // Re-render if any style changed
   }
-  
+
   return true; // Don't re-render - props are the same
 });
 
@@ -280,17 +282,17 @@ export const QuickMenuSettingsScreen: React.FC = () => {
   };
 
   const iconCacheRef = React.useRef<Map<string, React.ReactNode>>(new Map());
-  
+
   const getPreviewMenuIcon = useCallback((iconName?: string) => {
     const cacheKey = `preview-${iconName || 'default'}-${colors.info}-${colors.warning}-${colors.success}-${colors.error}`;
-    
+
     if (iconCacheRef.current.has(cacheKey)) {
       return iconCacheRef.current.get(cacheKey)!;
     }
-    
+
     const iconSize = getIconSize('medium');
     let icon: React.ReactNode;
-    
+
     switch (iconName) {
       case 'payIPL':
         icon = <ArrowDown2 size={iconSize} color={colors.info} variant="Bold" />;
@@ -325,21 +327,21 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       default:
         icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
     }
-    
+
     iconCacheRef.current.set(cacheKey, icon);
     return icon;
   }, [colors.info, colors.warning, colors.success, colors.error]);
 
   const getMenuIcon = useCallback((iconName?: string) => {
     const cacheKey = `${iconName || 'default'}-${colors.info}-${colors.warning}-${colors.success}-${colors.error}`;
-    
+
     if (iconCacheRef.current.has(cacheKey)) {
       return iconCacheRef.current.get(cacheKey)!;
     }
-    
+
     const iconSize = getIconSize('large');
     let icon: React.ReactNode;
-    
+
     switch (iconName) {
       case 'payIPL':
         icon = <ArrowDown2 size={iconSize} color={colors.info} variant="Bold" />;
@@ -374,7 +376,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       default:
         icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
     }
-    
+
     iconCacheRef.current.set(cacheKey, icon);
     return icon;
   }, [colors.info, colors.warning, colors.success, colors.error]);
@@ -420,13 +422,13 @@ export const QuickMenuSettingsScreen: React.FC = () => {
     }
 
     const enabledItems = menuItems.filter(item => item.enabled);
-    
+
     if (enabledItems.length === 0) {
       previousMenuItemsKeyRef.current = menuItemsKey;
       previousPreviewButtonsRef.current = [];
       return emptyButtonsArray;
     }
-    
+
     const buttons = enabledItems.map((item) => ({
       id: item.id,
       label: item.label,
@@ -436,7 +438,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
 
     previousMenuItemsKeyRef.current = menuItemsKey;
     previousPreviewButtonsRef.current = buttons;
-    
+
     return buttons;
   }, [menuItemsKey, menuItems, getPreviewMenuIcon, getDefaultBgColor, emptyButtonsArray]);
 
@@ -599,7 +601,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
           backgroundColor: colors.background,
         },
       ]}
-      >
+    >
       <ScreenHeader title={t('profile.quickMenu')} />
 
       <ScrollView
@@ -687,7 +689,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
             </View>
           ))
         )}
-        </ScrollView>
+      </ScrollView>
 
       {hasEnabledItems && (
         <View
@@ -767,26 +769,26 @@ export const QuickMenuSettingsScreen: React.FC = () => {
           enablePanDownToClose={true}
           disableClose={false}
         >
-        <PreviewContent
-          previewButtons={previewButtons}
-          headerContainerStyle={headerContainerStyle}
-          titleStyle={titleStyle}
-          previewTitleText={previewTitleText}
-          scrollContentStyle={scrollContentStyle}
-          cardContainerStyle={cardContainerStyle}
-          topIndicatorStyle={topIndicatorStyle}
-          placeholderSmallStyle={placeholderSmallStyle}
-          placeholderLargeStyle={placeholderLargeStyle}
-          onBack={handleClosePreview}
-          backButtonStyle={backButtonStyle}
-          backIconColor={backIconColor}
-          textColor={previewTextColor}
-          buttonWidth={previewButtonWidth}
-          menuContainerStyle={menuContainerStyle}
-          menuTitleText={menuTitleText}
-          menuTitleStyle={menuTitleStyle}
-        />
-      </BottomSheet>
+          <PreviewContent
+            previewButtons={previewButtons}
+            headerContainerStyle={headerContainerStyle}
+            titleStyle={titleStyle}
+            previewTitleText={previewTitleText}
+            scrollContentStyle={scrollContentStyle}
+            cardContainerStyle={cardContainerStyle}
+            topIndicatorStyle={topIndicatorStyle}
+            placeholderSmallStyle={placeholderSmallStyle}
+            placeholderLargeStyle={placeholderLargeStyle}
+            onBack={handleClosePreview}
+            backButtonStyle={backButtonStyle}
+            backIconColor={backIconColor}
+            textColor={previewTextColor}
+            buttonWidth={previewButtonWidth}
+            menuContainerStyle={menuContainerStyle}
+            menuTitleText={menuTitleText}
+            menuTitleStyle={menuTitleStyle}
+          />
+        </BottomSheet>
       )}
     </SafeAreaView>
   );
@@ -916,7 +918,7 @@ const styles = StyleSheet.create({
   previewCardContainer: {
     borderRadius: scale(16),
     padding: scale(20),
-  
+
   },
   previewTopIndicator: {
     width: scale(100),

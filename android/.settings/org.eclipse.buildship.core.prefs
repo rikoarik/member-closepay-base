@@ -1,11 +1,11 @@
-arguments=--init-script C\:\\Users\\rikoarik\\AppData\\Roaming\\Cursor\\User\\globalStorage\\redhat.java\\1.50.0\\config_win\\org.eclipse.osgi\\58\\0\\.cp\\gradle\\init\\init.gradle --init-script C\:\\Users\\rikoarik\\AppData\\Roaming\\Cursor\\User\\globalStorage\\redhat.java\\1.50.0\\config_win\\org.eclipse.osgi\\58\\0\\.cp\\gradle\\protobuf\\init.gradle
+arguments=--init-script /var/folders/3_/rmpt7cyj6vn97v0v5vqd_p9r0000gn/T/db3b08fc4a9ef609cb16b96b200fa13e563f396e9bb1ed0905fdab7bc3bc513b.gradle --init-script /var/folders/3_/rmpt7cyj6vn97v0v5vqd_p9r0000gn/T/52cde0cfcf3e28b8b7510e992210d9614505e0911af0c190bd590d7158574963.gradle
 auto.sync=false
 build.scans.enabled=false
 connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
 connection.project.dir=
 eclipse.preferences.version=1
-gradle.user.home=C\:/.gradle
-java.home=C\:/Users/rikoarik/.jdks/corretto-18.0.2
+gradle.user.home=
+java.home=/Users/macbookpro/Library/Java/JavaVirtualMachines/openjdk-21.0.2/Contents/Home
 jvm.arguments=
 offline.mode=false
 override.workspace.settings=true

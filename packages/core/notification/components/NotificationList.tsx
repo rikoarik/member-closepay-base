@@ -19,10 +19,10 @@ import {
   getHorizontalPadding,
   getVerticalPadding,
   getResponsiveFontSize,
-  FontFamily,
   getIconSize,
-  CustomRefreshControl,
-} from '../../../core/config';
+} from '../../config/utils/responsive';
+import { FontFamily } from '../../config/utils/fonts';
+import { CustomRefreshControl } from '../../config/components/ui/CustomRefreshControl';
 import { useTheme } from '../../../core/theme';
 import { useTranslation } from '../../../core/i18n';
 import type { ThemeColors } from '../../../core/theme';
@@ -69,7 +69,7 @@ const NotificationItem = memo<{
   colors: ThemeColors;
 }>(({ notification, isSelected, selectionMode, onPress, onLongPress, colors }) => {
   const typeStyles = useMemo(() => getTypeStyles(notification.type, colors), [notification.type, colors]);
-  const createdAt = useMemo(() => 
+  const createdAt = useMemo(() =>
     notification.createdAt instanceof Date
       ? notification.createdAt
       : new Date(notification.createdAt),
@@ -97,7 +97,7 @@ const NotificationItem = memo<{
           )}
         </View>
       )}
-      
+
       <View style={[styles.iconWrapper, { backgroundColor: typeStyles.iconBg }]}>
         <NotificationBing
           size={getIconSize('medium')}
@@ -160,7 +160,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(({
   const notificationItems = useMemo(() => {
     return notifications.map(notification => {
       const isSelected = selectedIds.has(notification.id);
-      
+
       const handlePress = () => {
         if (selectionMode && onSelectionChange) {
           onSelectionChange(notification.id, !isSelected);

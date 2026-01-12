@@ -67,7 +67,7 @@ function MemberBaseAppContent(): React.JSX.Element {
         <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
       </>
     );
-    
+
     const Navigator = createAppNavigator({
       tenantId: 'member-base',
       HomeScreen: HomeScreen,
@@ -83,11 +83,11 @@ function MemberBaseAppContent(): React.JSX.Element {
         // Load app-specific config dengan support hot reload
         const appConfig = loadAppConfig();
         configService.setConfig(appConfig);
-        
+
         // Option 2: Load from API
         // const config = await loadConfigFromAPI();
         // configService.setConfig(config);
-        
+
         // Option 3: Load from storage (with API fallback)
         // let config = await loadConfigFromStorage();
         // if (!config) {
@@ -95,7 +95,7 @@ function MemberBaseAppContent(): React.JSX.Element {
         //   await saveConfigToStorage(config);
         // }
         // configService.setConfig(config);
-        
+
         setConfigLoaded(true);
 
         // Initialize plugins based on config
@@ -136,19 +136,19 @@ function MemberBaseAppContent(): React.JSX.Element {
     if (!__DEV__) return;
 
     let lastConfig: typeof import('./config/app.config').appConfig | null = null;
-    
+
     const checkConfigUpdate = () => {
       try {
         const appConfig = loadAppConfig();
-        
+
         // Deep comparison untuk detect perubahan (termasuk primaryColor untuk development)
-        const hasChanged = !lastConfig || 
+        const hasChanged = !lastConfig ||
           lastConfig.branding.logo !== appConfig.branding.logo ||
           lastConfig.branding.appName !== appConfig.branding.appName ||
           lastConfig.branding.primaryColor !== appConfig.branding.primaryColor ||
           lastConfig.companyId !== appConfig.companyId ||
           lastConfig.companyName !== appConfig.companyName;
-        
+
         if (hasChanged) {
           logger.debug('Config file changed, updating...');
           configService.setConfig(appConfig);
@@ -184,11 +184,11 @@ function MemberBaseAppContent(): React.JSX.Element {
     };
 
     let lastThemeColor: string | null = null;
-    
+
     const checkThemeColorUpdate = () => {
       try {
         const currentColor = loadThemeColor();
-        
+
         if (currentColor && currentColor !== lastThemeColor) {
           logger.debug('Theme color file changed:', lastThemeColor, '→', currentColor);
           lastThemeColor = currentColor;
@@ -218,26 +218,28 @@ function MemberBaseAppContent(): React.JSX.Element {
   }
 
   return (
-    <SafeAreaProvider>
+    <>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={colors.background}
       />
       <AppNavigator />
       <Toast config={toastConfig} />
-    </SafeAreaProvider>
+    </>
   );
 }
 
 function MemberBaseApp(): React.JSX.Element {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <SecurityProvider>
-          <MemberBaseAppContent />
-        </SecurityProvider>
-      </I18nProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <I18nProvider>
+          <SecurityProvider>
+            <MemberBaseAppContent />
+          </SecurityProvider>
+        </I18nProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

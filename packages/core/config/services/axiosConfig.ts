@@ -6,17 +6,19 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosE
 import { tokenService } from '../../auth/services/tokenService';
 import Config from '../../native/Config';
 import {
-  isAxiosError,
-  isAuthenticationError,
-  axiosErrorToApiError,
-  AuthErrorClass,
-  NetworkErrorClass,
+    isAxiosError,
+    isAuthenticationError,
+    axiosErrorToApiError,
+    AuthErrorClass,
+    NetworkErrorClass,
 } from '../types/errors';
 import { API_CONSTANTS, TIME_CONSTANTS, ERROR_MESSAGES } from '../constants';
 
 // Base URL dari environment variable atau default ke staging
 // Production build harus set API_BASE_URL di .env.production
-const API_BASE_URL = Config.API_BASE_URL;
+// Fallback URL for iOS (native Config module only works on Android)
+const FALLBACK_API_BASE_URL = 'https://api.solusiuntuknegeri.com';
+const API_BASE_URL = Config.API_BASE_URL || FALLBACK_API_BASE_URL;
 
 import { logger } from './loggerService';
 
@@ -24,6 +26,7 @@ import { logger } from './loggerService';
 if (__DEV__) {
     logger.debug('Environment:', Config.ENV);
     logger.debug('API Base URL:', API_BASE_URL);
+    logger.debug('Using fallback:', !Config.API_BASE_URL);
 }
 
 /**

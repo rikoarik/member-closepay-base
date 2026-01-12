@@ -39,8 +39,10 @@ import {
   TopBar,
   AnalyticsTab,
   BerandaTab,
+  NewsTab,
   AktivitasTab,
 } from "../components/home";
+import { useNewsState, NewsSearchHeader } from "../components/home/TabContent/NewsTab";
 import { useNotifications } from "@core/notification";
 import Toast from 'react-native-toast-message';
 import { QrScanIcon } from "@core/config/components/icons";
@@ -50,7 +52,11 @@ export const HomeScreen = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { width: screenWidth } = useDimensions();
+  const { width: screenWidth, height: screenHeight } = useDimensions();
+
+  // State for News Tab (Lifted Up)
+  const newsState = useNewsState();
+
   const pagerRef = useRef<any>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
   const fabOpacity = useRef(new Animated.Value(0)).current;
@@ -83,7 +89,7 @@ export const HomeScreen = () => {
   const DOUBLE_BACK_PRESS_DELAY = 2000;
 
   // Animate FAB show/hide based on activeTab
-  const shouldShowFab = config?.showQrButton !== false && 
+  const shouldShowFab = config?.showQrButton !== false &&
     (activeTab === "beranda" || activeTab === "home");
 
   useEffect(() => {
@@ -118,14 +124,19 @@ export const HomeScreen = () => {
       ]).start();
     }
   }, [shouldShowFab, fabOpacity, fabScale]);
-  
+
+  // Scroll Management
+  const mainScrollViewRef = useRef<ScrollView>(null);
+  const scrollYValueRef = useRef<number>(0);
+  const tabOffsetsRef = useRef<{ [key: string]: number }>({});
+
   // Set activeTab ke tab dengan order 2 (di tengah) saat tabs pertama kali ter-load
   useEffect(() => {
     // Reset flag jika tabs berubah (misalnya config reload)
     if (tabs.length > 0 && !hasSetOrder2TabRef.current) {
       // Tab dengan order 2 (index 1) adalah tab di tengah, atau tab pertama jika < 2 tabs
       const order2TabId = tabs.length >= 2 ? tabs[1].id : tabs[0].id;
-      
+
       // Hanya update jika activeTab belum sesuai
       if (activeTab !== order2TabId) {
         setActiveTab(order2TabId);
@@ -133,7 +144,7 @@ export const HomeScreen = () => {
       hasSetOrder2TabRef.current = true;
     }
   }, [tabs, activeTab]);
-  
+
 
   const registerTabRefresh = useCallback(
     (tabId: string, refreshFn: () => void) => {
@@ -160,20 +171,23 @@ export const HomeScreen = () => {
 
       if (tabId === "beranda" || tabId === "home") {
         // Find news tab ID untuk navigasi
-        const newsTabId = tabs.find(tab => 
-          tab.id === "news" || 
-          tab.id === "berita" || 
-          tabConfig?.id === "news" || 
+        const newsTabId = tabs.find(tab =>
+          tab.id === "activity" ||
+          tab.id === "aktivitas" ||
+          tab.id === "news" ||
+          tab.id === "berita" ||
+          tabConfig?.id === "activity" ||
+          tabConfig?.id === "aktivitas" ||
+          tabConfig?.id === "news" ||
           tabConfig?.id === "berita"
         )?.id || "news";
-        
+
         return (
           <View style={{ width: screenWidth, flex: 1 }}>
-            <BerandaTab 
+            <BerandaTab
               isActive={activeTab === tabId}
               onNavigateToNews={() => {
-                // Navigate ke NewsScreen (halaman berdiri sendiri)
-                (navigation as any).navigate('News' as never);
+                navigation.navigate("News" as never);
               }}
             />
           </View>
@@ -186,6 +200,19 @@ export const HomeScreen = () => {
             <AktivitasTab
               isActive={activeTab === tabId}
               isVisible={activeTab === tabId}
+            />
+          </View>
+        );
+      }
+
+      if (tabId === "news" || tabId === "berita") {
+        return (
+          <View style={{ width: screenWidth, flex: 1 }}>
+            <NewsTab
+              isActive={activeTab === tabId}
+              isVisible={activeTab === tabId}
+              searchState={newsState}
+              renderHeader={false}
             />
           </View>
         );
@@ -233,6 +260,7 @@ export const HomeScreen = () => {
       activeTab,
       colors,
       registerTabRefresh,
+      newsState,
     ]
   );
 
@@ -267,16 +295,36 @@ export const HomeScreen = () => {
     [activeTabIndex]
   );
 
+  /* 
+   * Helper untuk sync scroll position antar tab.
+   * Menyimpan posisi scroll tab lama dan mengembalikan posisi scroll tab baru via Main ScrollView.
+   */
+  const syncScrollPosition = useCallback((fromTab: string, toTab: string) => {
+    // Save current offset for the leaving tab
+    if (fromTab) {
+      tabOffsetsRef.current[fromTab] = scrollYValueRef.current;
+    }
+
+    // Restore offset for the entering tab
+    const targetOffset = tabOffsetsRef.current[toTab] || 0;
+
+    if (mainScrollViewRef.current) {
+      mainScrollViewRef.current.scrollTo({ y: targetOffset, animated: false });
+    }
+  }, []);
+
   const handlePagerMomentumEnd = useCallback(
     (event: any) => {
       const offsetX = event.nativeEvent.contentOffset.x;
       const index = Math.round(offsetX / screenWidth);
 
       if (tabs[index] && tabs[index].id !== activeTab) {
+        // Sync scroll before state update
+        syncScrollPosition(activeTab, tabs[index].id);
         setActiveTab(tabs[index].id);
       }
     },
-    [screenWidth, tabs, activeTab]
+    [screenWidth, tabs, activeTab, syncScrollPosition]
   );
 
   const tabChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -287,6 +335,9 @@ export const HomeScreen = () => {
       if (tabChangeTimeoutRef.current) {
         clearTimeout(tabChangeTimeoutRef.current);
       }
+
+      // Sync scroll position using helper
+      syncScrollPosition(activeTab, tabId);
 
       setActiveTab(tabId);
       tabChangeTimeoutRef.current = setTimeout(() => {
@@ -303,7 +354,7 @@ export const HomeScreen = () => {
         });
       }, 50);
     },
-    [screenWidth, getTabIndex]
+    [screenWidth, getTabIndex, activeTab, syncScrollPosition]
   );
 
   useEffect(() => {
@@ -393,10 +444,15 @@ export const HomeScreen = () => {
       ]}
     >
       <ScrollView
+        ref={mainScrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         stickyHeaderIndices={[2]}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={(event) => {
+          scrollYValueRef.current = event.nativeEvent.contentOffset.y;
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -405,9 +461,6 @@ export const HomeScreen = () => {
             tintColor={colors.primary}
           />
         }
-        scrollEventThrottle={16}
-        bounces={true}
-        alwaysBounceVertical={true}
       >
         {/* Spacer for native indicator */}
         <View style={styles.refreshIndicatorContainer} />
@@ -429,15 +482,19 @@ export const HomeScreen = () => {
           />
         </View>
 
-        {/* Tab Switcher - Sticky */}
-        {tabs.length > 0 && (
-          <View
-            style={[
-              styles.section,
-              { backgroundColor: colors.background },
-              { paddingHorizontal: getHorizontalPadding() },
-            ]}
-          >
+        {/* Tab Switcher - Sticky (always render container for iOS stickyHeaderIndices) */}
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: colors.background,
+              paddingHorizontal: getHorizontalPadding(),
+              // iOS requires zIndex for sticky headers
+              zIndex: 1,
+            },
+          ]}
+        >
+          {tabs.length > 0 && (
             <TabSwitcher
               variant="segmented"
               tabs={tabs}
@@ -446,11 +503,14 @@ export const HomeScreen = () => {
               scrollX={scrollX}
               pagerWidth={screenWidth}
             />
-          </View>
-        )}
+          )}
+          {(activeTab === 'news' || activeTab === 'berita') && (
+            <NewsSearchHeader state={newsState} />
+          )}
+        </View>
 
         {/* Pager horizontal dengan scroll vertikal per tab */}
-        <View>
+        <View style={{ minHeight: screenHeight }}>
           <Animated.ScrollView
             ref={pagerRef}
             horizontal

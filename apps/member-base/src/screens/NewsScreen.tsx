@@ -1,8 +1,3 @@
-/**
- * NewsScreen
- * Full page version of NewsTab
- * Bisa digunakan sebagai screen penuh (seperti NotificationScreen)
- */
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@core/theme';
@@ -16,17 +11,12 @@ export const NewsScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
-      {/* Header */}
-      <ScreenHeader
-        title={t('home.news') || 'Berita'}
-      />
-
-      {/* NewsTab sebagai full page - sudah punya RefreshControl sendiri */}
-      <NewsTab 
-        isActive={true} 
+      <ScreenHeader title={t('home.news') || 'Berita'} />
+      <NewsTab
+        isActive={true}
         isVisible={true}
+        scrollEnabled={true}
       />
     </SafeAreaView>
   );
 };
-

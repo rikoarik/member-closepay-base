@@ -203,9 +203,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                 title={t('auth.forgotPassword')}
                 onBackPress={handleBack}
                 style={{
-                  backgroundColor: colors.surface,
                   borderRadius: scale(12),
-                  paddingVertical: verticalScale(14),
                 }}
               />
             </View>

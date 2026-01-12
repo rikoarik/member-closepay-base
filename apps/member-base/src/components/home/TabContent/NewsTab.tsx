@@ -23,18 +23,16 @@ interface NewsTabProps {
   isActive?: boolean;
   isVisible?: boolean;
   onRefreshRequested?: (refreshFn: () => void) => void;
+  scrollEnabled?: boolean;
+  searchState?: ReturnType<typeof useNewsState>;
+  renderHeader?: boolean;
 }
 
 const PAGE_SIZE = UI_CONSTANTS.DEFAULT_PAGE_SIZE;
-const BATCH_SIZE = 10; // Batch size untuk generate news data (sama dengan di useNewsData)
+const BATCH_SIZE = 10;
 
-export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = true, onRefreshRequested }) => {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
-  const horizontalPadding = getHorizontalPadding();
-
+// Exportable Hook for lifting state
+export const useNewsState = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
@@ -42,14 +40,7 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
     dateRange: { startDate: null, endDate: null },
     sortBy: null,
   });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showShimmer, setShowShimmer] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [loadedBatches, setLoadedBatches] = useState<number>(1);
-  const scrollPositionRef = useRef(0);
-  const flatListRef = useRef<FlatList>(null);
+
   const searchDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -58,7 +49,6 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
     }
     searchDebounceTimer.current = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      setCurrentPage(1);
     }, 300);
     return () => {
       if (searchDebounceTimer.current) {
@@ -67,13 +57,123 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
     };
   }, [searchQuery]);
 
-  // Menggunakan shared hook untuk data news dengan pagination
-  // Load lebih banyak data untuk pagination
+  return {
+    searchQuery,
+    setSearchQuery,
+    debouncedSearchQuery,
+    filterVisible,
+    setFilterVisible,
+    filter,
+    setFilter,
+  };
+};
+
+export const NewsSearchHeader: React.FC<{
+  state: ReturnType<typeof useNewsState>;
+}> = ({ state }) => {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const horizontalPadding = getHorizontalPadding();
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    setFilterVisible,
+    filter,
+  } = state;
+
+  return (
+    <View style={[styles.searchContainer, { paddingHorizontal: horizontalPadding }]}>
+      <View style={styles.searchRow}>
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <SearchNormal size={scale(20)} color={colors.textSecondary} variant="Linear" />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder={t('news.searchPlaceholder')}
+            placeholderTextColor={colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+              <CloseCircle size={scale(20)} color={colors.textSecondary} variant="Linear" />
+            </TouchableOpacity>
+          )}
+        </View>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            {
+              backgroundColor: filter.sortBy || filter.dateRange.startDate || filter.dateRange.endDate
+                ? colors.primary
+                : colors.surface,
+              borderColor: colors.border,
+            },
+          ]}
+          onPress={() => setFilterVisible(true)}
+        >
+          <Filter
+            size={scale(20)}
+            color={
+              filter.sortBy || filter.dateRange.startDate || filter.dateRange.endDate
+                ? colors.surface
+                : colors.text
+            }
+            variant="Linear"
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+export const NewsTab: React.FC<NewsTabProps> = ({
+  isActive = true,
+  isVisible = true,
+  onRefreshRequested,
+  scrollEnabled = false,
+  searchState,
+  renderHeader = true
+}) => {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const horizontalPadding = getHorizontalPadding();
+
+  // Internal state if NOT provided via props
+  const internalState = useNewsState();
+  const state = searchState || internalState;
+
+  const {
+    searchQuery,
+    debouncedSearchQuery,
+    filterVisible,
+    setFilterVisible,
+    filter,
+    setFilter,
+  } = state;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showShimmer, setShowShimmer] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [loadedBatches, setLoadedBatches] = useState<number>(1);
+  const scrollPositionRef = useRef(0);
+  const flatListRef = useRef<FlatList>(null);
+
+  // Reset pagination when search/filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, filter]);
+
   const allNewsData = useNewsData(loadedBatches * 20, isActive, isVisible);
 
   const processedNews = useMemo(() => {
     if (!isActive && !isVisible) return [];
-    
+
     let result = [...allNewsData];
 
     if (debouncedSearchQuery) {
@@ -126,17 +226,13 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
 
   const hasMore = paginatedNews.length < processedNews.length;
 
-  // Show shimmer when loading data (initial load or refresh, but not load more)
   useEffect(() => {
-    // Show shimmer when initial load or refresh (not load more - load more uses footer shimmer)
     if (refreshing || isInitialLoad) {
-      // Show shimmer with delay 300ms when loading data
       const timer = setTimeout(() => {
         setShowShimmer(true);
       }, 300);
       return () => clearTimeout(timer);
     } else {
-      // Hide shimmer after data is loaded
       const timer = setTimeout(() => {
         setShowShimmer(false);
         setIsInitialLoad(false);
@@ -145,10 +241,8 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
     }
   }, [refreshing, isInitialLoad]);
 
-  // Simulate initial data loading
   useEffect(() => {
     if (isInitialLoad) {
-      // Simulate data loading delay
       const timer = setTimeout(() => {
         setIsInitialLoad(false);
       }, 1000);
@@ -159,12 +253,12 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
   const loadMore = useCallback(() => {
     if (!isLoadingMore && hasMore && !refreshing && isActive && !isInitialLoad && paginatedNews.length > 0) {
       setIsLoadingMore(true);
-      
+
       const neededBatches = Math.ceil((currentPage + 1) * PAGE_SIZE / BATCH_SIZE);
       if (neededBatches > loadedBatches) {
         setLoadedBatches(neededBatches);
       }
-      
+
       setTimeout(() => {
         setCurrentPage(prev => prev + 1);
         setIsLoadingMore(false);
@@ -181,7 +275,6 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
     }, 1000);
   }, []);
 
-  // Expose refresh function to parent
   useEffect(() => {
     if (onRefreshRequested) {
       onRefreshRequested(onRefresh);
@@ -190,21 +283,20 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
 
   const handleFilterApply = useCallback((newFilter: NewsFilterState) => {
     setFilter(newFilter);
-    setCurrentPage(1); // Reset to first page when filter changes
-  }, []);
+    setCurrentPage(1);
+  }, [setFilter]);
 
   const renderItem = useCallback(({ item }: { item: News }) => (
     <NewsItem
       news={item}
       onPress={(news) => {
-        // @ts-ignore - Navigation type definition is separate
+        // @ts-ignore
         navigation.navigate('NewsDetail', { news });
       }}
     />
   ), [navigation]);
 
   const renderFooter = () => {
-    // Show shimmer saat loading more
     if (isLoadingMore && hasMore) {
       return (
         <View style={styles.footerShimmer}>
@@ -214,11 +306,9 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
         </View>
       );
     }
-    
     return null;
   };
 
-  // Render placeholder jika tab tidak aktif dan tidak visible untuk menghemat resources
   if (!isActive && !isVisible) {
     return (
       <View style={styles.container}>
@@ -229,48 +319,9 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
 
   return (
     <View style={styles.container}>
-      <View style={[styles.searchContainer, { paddingHorizontal: horizontalPadding }]}>
-        <View style={styles.searchRow}>
-          <View style={[styles.searchInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <SearchNormal size={scale(20)} color={colors.textSecondary} variant="Linear" />
-            <TextInput
-              style={[styles.searchInput, { color: colors.text }]}
-              placeholder={t('news.searchPlaceholder')}
-              placeholderTextColor={colors.textSecondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              returnKeyType="search"
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
-                <CloseCircle size={scale(20)} color={colors.textSecondary} variant="Linear" />
-              </TouchableOpacity>
-            )}
-          </View>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              {
-                backgroundColor: filter.sortBy || filter.dateRange.startDate || filter.dateRange.endDate
-                  ? colors.primary
-                  : colors.surface,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => setFilterVisible(true)}
-          >
-            <Filter
-              size={scale(20)}
-              color={
-                filter.sortBy || filter.dateRange.startDate || filter.dateRange.endDate
-                  ? colors.surface
-                  : colors.text
-              }
-              variant="Linear"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
+      {renderHeader && (
+        <NewsSearchHeader state={state} />
+      )}
 
       {showShimmer && (refreshing || isInitialLoad) && paginatedNews.length === 0 ? (
         <View
@@ -295,7 +346,6 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
           keyExtractor={(item) => item.id}
           disableVirtualization={false}
           onScroll={(event) => {
-            // Save scroll position for state preservation
             scrollPositionRef.current = event.nativeEvent.contentOffset.y;
           }}
           scrollEventThrottle={32}
@@ -317,16 +367,16 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
             />
           }
           onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.6}
           ListFooterComponent={renderFooter}
-              ListEmptyComponent={
-                showShimmer && (refreshing || isInitialLoad) ? (
-                  <View style={styles.emptyContainer}>
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <NewsItemSkeleton key={`skeleton-loading-${index}`} />
-                    ))}
-                  </View>
-                ) : paginatedNews.length === 0 && !refreshing && !isLoadingMore && !isInitialLoad ? (
+          ListEmptyComponent={
+            showShimmer && (refreshing || isInitialLoad) ? (
+              <View style={styles.emptyContainer}>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <NewsItemSkeleton key={`skeleton-loading-${index}`} />
+                ))}
+              </View>
+            ) : paginatedNews.length === 0 && !refreshing && !isLoadingMore && !isInitialLoad ? (
               <View style={styles.emptyContainer}>
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                   {t('news.noNewsFound') || 'Tidak ada berita ditemukan.'}
@@ -340,11 +390,10 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
           windowSize={2}
           removeClippedSubviews={true}
           nestedScrollEnabled={true}
-          scrollEnabled={isActive}
+          scrollEnabled={scrollEnabled}
           bounces={true}
-          directionalLockEnabled={true}
+          directionalLockEnabled={false}
           getItemLayout={(data, index) => {
-            // Tinggi item: image (56) + padding top/bottom (12*2) + margin bottom (8)
             const itemHeight = scale(56) + scale(24) + moderateVerticalScale(8);
             return {
               length: itemHeight,
@@ -368,7 +417,7 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    overflow: 'hidden', // Prevent scroll interference with parent scroll views
+    overflow: 'hidden',
   },
   searchContainer: {
     paddingTop: moderateVerticalScale(16),
@@ -404,7 +453,7 @@ const styles = StyleSheet.create({
     marginLeft: scale(8),
     fontFamily: FontFamily.monasans.regular,
     fontSize: getResponsiveFontSize('medium'),
-    paddingVertical: 0, // Remove default padding
+    paddingVertical: 0,
   },
   clearButton: {
     padding: scale(4),
