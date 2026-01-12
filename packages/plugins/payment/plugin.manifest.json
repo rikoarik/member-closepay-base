@@ -19,6 +19,7 @@
             "TopUpMemberPinScreen",
             "TopUpMemberSuccessScreen",
             "TapKartuSummaryScreen",
+            "QrScreen",
             "PinInput",
             "WithdrawConfirmModal",
             "AutoWithdrawModal"
@@ -39,7 +40,8 @@
             "TopUpMemberSummary": "TopUpMemberSummaryScreen",
             "TopUpMemberPin": "TopUpMemberPinScreen",
             "TopUpMemberSuccess": "TopUpMemberSuccessScreen",
-            "TapKartuSummary": "TapKartuSummaryScreen"
+            "TapKartuSummary": "TapKartuSummaryScreen",
+            "Qr": "QrScreen"
         }
     },
     "routes": [
@@ -52,7 +54,7 @@
             ],
             "meta": {
                 "title": "Top Up Balance",
-                "showInMenu": false
+                "showInMenu": true
             }
         },
         {
@@ -149,6 +151,18 @@
             ],
             "meta": {
                 "title": "Tap Kartu Summary",
+                "showInMenu": false
+            }
+        },
+        {
+            "name": "Qr",
+            "path": "/payment/qr",
+            "component": "QrScreen",
+            "permissions": [
+                "payment:qr"
+            ],
+            "meta": {
+                "title": "QR Code",
                 "showInMenu": false
             }
         }

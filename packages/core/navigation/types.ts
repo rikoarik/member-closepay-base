@@ -21,6 +21,7 @@ export type RootStackParamList = {
   QuickMenuSettings: undefined;
   ThemeSettings: undefined;
   NewsDetail: { newsId?: string; news?: any };
+  News: undefined;
   Notifications: undefined;
   // Plugin routes will be added dynamically
   [key: string]: any;

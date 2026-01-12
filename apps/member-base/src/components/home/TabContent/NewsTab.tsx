@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-native';
+import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SearchNormal, Filter } from 'iconsax-react-nativejs';
@@ -17,6 +17,7 @@ import { useTranslation } from '@core/i18n';
 import { CloseCircle } from 'iconsax-react-nativejs';
 import { NewsFilterBottomSheet, type NewsFilterState } from './NewsFilterBottomSheet';
 import { UI_CONSTANTS } from '@core/config/constants';
+import { useNewsData } from '../hooks/useNewsData';
 
 interface NewsTabProps {
   isActive?: boolean;
@@ -25,51 +26,7 @@ interface NewsTabProps {
 }
 
 const PAGE_SIZE = UI_CONSTANTS.DEFAULT_PAGE_SIZE;
-const BATCH_SIZE = 20;
-
-const generateNewsBatch = (startIndex: number, count: number): News[] => {
-  const titles = [
-    'Pembukaan Gedung Baru Kampus',
-    'Workshop Teknologi Terkini',
-    'Seminar Kewirausahaan',
-    'Festival Budaya Lokal',
-    'Kompetisi Olahraga Antar Fakultas',
-    'Peluncuran Program Beasiswa',
-    'Konser Musik Akhir Tahun',
-    'Pameran Seni Rupa',
-    'Diskusi Panel Isu Terkini',
-    'Acara Donor Darah',
-  ];
-
-  const descriptions = [
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-    'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-  ];
-
-  const news: News[] = [];
-  const baseDate = new Date();
-  baseDate.setFullYear(2024, 0, 1);
-  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
-  for (let i = startIndex; i < startIndex + count; i++) {
-    const date = new Date(baseDate);
-    date.setDate(date.getDate() + i);
-    const formattedDate = `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}. ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-
-    news.push({
-      id: String(i + 1),
-      title: `${titles[i % titles.length]} ${i + 1}`,
-      description: descriptions[i % descriptions.length],
-      date: formattedDate,
-      imageUrl: `https://picsum.photos/id/${1018 + (i % 20)}/200/200`,
-      createdAt: date,
-    } as News & { createdAt: Date });
-  }
-
-  return news;
-};
+const BATCH_SIZE = 10; // Batch size untuk generate news data (sama dengan di useNewsData)
 
 export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = true, onRefreshRequested }) => {
   const { colors } = useTheme();
@@ -110,15 +67,9 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
     };
   }, [searchQuery]);
 
-  const allNewsData = useMemo(() => {
-    if (!isActive && !isVisible) return [];
-    const totalItems = loadedBatches * BATCH_SIZE;
-    const news: News[] = [];
-    for (let i = 0; i < loadedBatches; i++) {
-      news.push(...generateNewsBatch(i * BATCH_SIZE, BATCH_SIZE));
-    }
-    return news;
-  }, [isActive, isVisible, loadedBatches]);
+  // Menggunakan shared hook untuk data news dengan pagination
+  // Load lebih banyak data untuk pagination
+  const allNewsData = useNewsData(loadedBatches * 20, isActive, isVisible);
 
   const processedNews = useMemo(() => {
     if (!isActive && !isVisible) return [];
@@ -357,6 +308,14 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
             },
           ]}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
+            />
+          }
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={renderFooter}
@@ -382,7 +341,7 @@ export const NewsTab: React.FC<NewsTabProps> = ({ isActive = true, isVisible = t
           removeClippedSubviews={true}
           nestedScrollEnabled={true}
           scrollEnabled={isActive}
-          bounces={false}
+          bounces={true}
           directionalLockEnabled={true}
           getItemLayout={(data, index) => {
             // Tinggi item: image (56) + padding top/bottom (12*2) + margin bottom (8)

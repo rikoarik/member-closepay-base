@@ -20,7 +20,7 @@ const THEME_STORAGE_KEY = '@closepay_theme_mode';
  * Light theme colors
  */
 const lightColors: ThemeColors = {
-  background: '#FFFFFF',
+  background: '#F5F5F5',
   surface: '#FFFFFF',
   surfaceSecondary: '#F9FAFB',
 

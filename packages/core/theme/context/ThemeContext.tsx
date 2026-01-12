@@ -11,7 +11,7 @@ import {
   getTheme,
 } from '../services/themeService';
 
-import { configService } from '@core/config';
+import { useConfig } from '@core/config';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -30,6 +30,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [isLoading, setIsLoading] = useState(true);
+  const { config: appConfig } = useConfig(); // Reactive config updates
 
   // Load theme preference and accent color on mount
   useEffect(() => {
@@ -70,9 +71,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         ? systemColorScheme
         : null;
 
+    // Get primary color dari app config branding (reactive via useConfig)
+    const accentColor = appConfig?.branding?.primaryColor || null;
+
     // Pass accent color ke getTheme untuk dynamic primary colors
-    return getTheme(themeMode, resolvedSystemScheme, null);
-  }, [themeMode, systemColorScheme]);
+    return getTheme(themeMode, resolvedSystemScheme, accentColor);
+  }, [themeMode, systemColorScheme, appConfig]);
 
   // Toggle between light and dark (skip system)
   const toggleTheme = useCallback(async () => {

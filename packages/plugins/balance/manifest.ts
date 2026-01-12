@@ -6,9 +6,10 @@
 import { CorePlugin } from '@core/config/plugins/contracts';
 import manifestJson from './plugin.manifest.json';
 
-export const CorePlugin: CorePlugin = {
+export const BalancePlugin: CorePlugin = {
   id: manifestJson.id,
   routes: manifestJson.routes || [],
   menuItems: [],
 };
 
+export default BalancePlugin;

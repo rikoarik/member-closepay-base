@@ -468,6 +468,37 @@ import { loadPluginComponent } from '@core/config';
 const Component = await loadPluginComponent('balance', 'TransactionHistoryScreen');
 ```
 
+#### Plugin Loader Management
+
+Sistem untuk mengelola plugin component loaders dengan mudah.
+
+**Files:**
+- `plugins/componentLoaderPaths.ts` - Centralized path mapping configuration
+- `plugins/pluginComponentLoader.ts` - Loader implementation
+- `plugins/PLUGIN_LOADERS.md` - Complete developer guide
+
+**Quick Start:**
+
+Menambahkan component baru (recommended):
+```bash
+# 1. Add component to plugin.manifest.json (exports.components)
+# 2. Run generate script
+npm run generate:loaders
+```
+
+Manual edit (untuk custom paths):
+```typescript
+// Edit plugins/componentLoaderPaths.ts
+export const COMPONENT_LOADER_PATHS = {
+  myPlugin: {
+    MyComponent: '../../../plugins/myPlugin/components/MyComponent',
+  },
+};
+```
+
+**See Also:**
+- [Plugin Loader Guide](plugins/PLUGIN_LOADERS.md) - Complete documentation with examples and troubleshooting
+
 ### Types
 
 #### `AppConfig`

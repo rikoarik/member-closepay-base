@@ -3,8 +3,8 @@
  * Card utama dengan balance, title, dan action buttons - Optimized
  */
 import React, { useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Eye, EyeSlash } from 'iconsax-react-nativejs';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Eye, EyeSlash, ArrowCircleRight2 } from 'iconsax-react-nativejs';
 import { useNavigation } from '@react-navigation/native';
 import {
   scale,
@@ -16,8 +16,6 @@ import {
 } from '../../../core/config';
 import { useTheme } from '../../../core/theme';
 import { useTranslation } from '../../../core/i18n';
-import { WithdrawIcon } from './WithdrawIcon';
-import { TopUpIcon } from './TopUpIcon';
 
 interface BalanceCardProps {
   title: string;
@@ -54,15 +52,10 @@ export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
 
-  // Memoized handlers
-  const handleWithdraw = useCallback(() => {
+  // Handler untuk navigate ke Detail (Transaction History)
+  const handleDetail = useCallback(() => {
     // @ts-ignore
-    navigation.navigate('Withdraw');
-  }, [navigation]);
-
-  const handleTopUp = useCallback(() => {
-    // @ts-ignore
-    navigation.navigate('TopUp');
+    navigation.navigate('TransactionHistory');
   }, [navigation]);
 
   // Memoized formatted balance
@@ -72,29 +65,11 @@ export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
       : 'Rp ********';
   }, [balance, showBalance]);
 
-  // Memoized gradient styles
-  const gradientBaseStyle = useMemo(() => [
-    styles.gradientBase,
-    { backgroundColor: isDark ? '#0A0A0F' : '#1E1B4B' }
-  ], [isDark]);
-
-  const gradientOverlay1Style = useMemo(() => [
-    styles.gradientOverlay1,
-    {
-      backgroundColor: isDark
-        ? 'rgba(236, 72, 153, 0.3)'
-        : 'rgba(236, 72, 153, 0.2)',
-    }
-  ], [isDark]);
-
-  const gradientOverlay2Style = useMemo(() => [
-    styles.gradientOverlay2,
-    {
-      backgroundColor: isDark
-        ? 'rgba(251, 191, 36, 0.2)'
-        : 'rgba(251, 191, 36, 0.15)',
-    }
-  ], [isDark]);
+  // Card background style - menggunakan theme colors
+  const cardBackgroundStyle = useMemo(() => [
+    styles.cardContainer,
+    { backgroundColor: colors.primary }
+  ], [colors.primary]);
 
   // Memoized text styles
   const balanceLabelStyle = useMemo(() => [
@@ -109,17 +84,33 @@ export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
 
   const actionLabelStyle = useMemo(() => [
     styles.balanceActionLabel,
-    { color: '#FFFFFF' }
+    { color: colors.text, fontFamily: FontFamily.monasans.bold }
+  ], []);
+
+  // Detail button background style - putih solid
+  const detailButtonStyle = useMemo(() => [
+    styles.detailButton,
+    {
+      backgroundColor: colors.background,
+    }
   ], []);
 
   return (
     <View style={styles.mainCard}>
-      <View style={styles.mainCardGradient}>
-        {/* Gradient Background Layers */}
-        <View style={gradientBaseStyle} />
-        <View style={gradientOverlay1Style} />
-        <View style={gradientOverlay2Style} />
+      <View style={cardBackgroundStyle}>
+        {/* Background Pattern Overlay */}
+        <Image
+          source={require('../../../../assets/effect/noise-bg.png')}
+          style={styles.backgroundPattern}
+          resizeMode="cover"
+        />
 
+        <Image
+          source={require('../../../../assets/effect/pattern.png')}
+          style={styles.paternPattern}
+          resizeMode="stretch"
+        />
+        
         {/* Card Content */}
         <View style={styles.cardContent}>
           {/* Balance Section */}
@@ -140,35 +131,23 @@ export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
                 </TouchableOpacity>
               </View>
             </View>
-            {/* Action Buttons */}
-            <View style={styles.balanceActionButtons}>
-              <TouchableOpacity
-                style={styles.balanceActionButton}
-                onPress={handleWithdraw}
-              >
-                <WithdrawIcon
-                  width={ICON_SIZE_SMALL}
-                  height={ICON_SIZE_SMALL}
-                  color="#FFFFFF"
+            {/* Detail Button */}
+            <TouchableOpacity
+              style={detailButtonStyle}
+              onPress={handleDetail}
+              activeOpacity={0.7}
+            >
+              <Text style={actionLabelStyle}>
+                {t('home.detail') || 'Detail'}
+              </Text>
+              <View >
+                <ArrowCircleRight2 
+                  size={ICON_SIZE_SMALL} 
+                  color={colors.text} 
+                  variant="Bold"
                 />
-                <Text style={actionLabelStyle}>
-                  {t('home.withdrawal')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.balanceActionButton}
-                onPress={handleTopUp}
-              >
-                <TopUpIcon
-                  width={ICON_SIZE_SMALL}
-                  height={ICON_SIZE_SMALL}
-                  color="#FFFFFF"
-                />
-                <Text style={actionLabelStyle}>
-                  {t('home.topUp')}
-                </Text>
-              </TouchableOpacity>
-            </View>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -183,7 +162,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     zIndex: 1,
   },
-  mainCardGradient: {
+  cardContainer: {
     borderRadius: scale(16),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: scale(4) },
@@ -195,31 +174,26 @@ const styles = StyleSheet.create({
     minHeight: scale(90),
     overflow: 'hidden',
   },
-  gradientBase: {
+  backgroundPattern: {
     position: 'absolute',
+    width: '100%',
+    height: '100%',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     borderRadius: scale(16),
+    opacity: 0.5,
+    mixBlendMode: 'overlay' as const,
   },
-  gradientOverlay1: {
+  paternPattern: {
     position: 'absolute',
-    top: 0,
-    right: 0,
+    height: '100%',
     width: '60%',
-    height: '100%',
-    borderTopRightRadius: scale(16),
-    borderBottomRightRadius: scale(16),
-  },
-  gradientOverlay2: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '40%',
-    height: '100%',
-    borderTopRightRadius: scale(16),
-    borderBottomRightRadius: scale(16),
+    top: 2,
+    right: 2,
+    bottom: 0,
+    opacity: 0.3,
   },
   cardContent: {
     padding: scale(16),
@@ -238,16 +212,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: scale(8),
   },
-  balanceActionButtons: {
+  detailButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  balanceActionButton: {
-    alignItems: 'center',
     justifyContent: 'center',
-    width: scale(70),
-    height: scale(70),
+    gap: scale(12),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(8),
+    borderRadius: scale(10),
+    minHeight: scale(30),
   },
   balanceActionLabel: {
     fontSize: getResponsiveFontSize('small'),

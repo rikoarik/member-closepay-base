@@ -2,40 +2,65 @@
  * Plugin Component Loader
  * Dynamic component loading for plugin components
  * Uses static mapping for Metro bundler compatibility
+ * 
+ * Component paths are managed in componentLoaderPaths.ts for easier maintenance.
+ * To add new components, either:
+ * - Edit componentLoaderPaths.ts manually
+ * - Run `npm run generate:loaders` to auto-generate from plugin manifests
+ * 
+ * See PLUGIN_LOADERS.md for detailed documentation.
  */
 
 import { PluginRegistry } from './PluginRegistry';
 import type { PluginManifest } from './types';
 import React from 'react';
+import { COMPONENT_LOADER_PATHS } from './componentLoaderPaths';
 
 /**
- * Static component loader mapping
- * Metro bundler requires static import paths, so we map all possible combinations
- * This should be maintained or auto-generated from plugin manifests
+ * Static component loader map for Metro bundler compatibility
+ * Metro requires static string literals for dynamic imports
+ * This map is generated from COMPONENT_LOADER_PATHS but uses static imports
  */
-const COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>>> = {
+const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>>> = {
   balance: {
-  
+    TransactionHistoryScreen: () => import('../../../plugins/balance/components/TransactionHistoryScreen'),
+    WithdrawIcon: () => import('../../../plugins/balance/components/WithdrawIcon'),
+    TopUpIcon: () => import('../../../plugins/balance/components/TopUpIcon'),
+    BalanceCard: () => import('../../../plugins/balance/components/BalanceCard'),
   },
   payment: {
-   
-    // Add other payment components as needed
+    TopUpScreen: () => import('../../../plugins/payment/components/topup/TopUpScreen'),
+    VirtualAccountScreen: () => import('../../../plugins/payment/components/virtual-account/VirtualAccountScreen'),
+    WithdrawScreen: () => import('../../../plugins/payment/components/withdraw/WithdrawScreen'),
+    WithdrawSuccessScreen: () => import('../../../plugins/payment/components/withdraw/WithdrawSuccessScreen'),
+    TopUpMemberScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberScreen'),
+    TopUpMemberSummaryScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberSummaryScreen'),
+    TopUpMemberPinScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberPinScreen'),
+    TopUpMemberSuccessScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberSuccessScreen'),
+    TapKartuSummaryScreen: () => import('../../../plugins/payment/components/topup/TapKartuSummaryScreen'),
+    QrScreen: () => import('../../../plugins/payment/components/qr/QrScreen'),
+    PinInput: () => import('../../../plugins/payment/components/shared/PinInput'),
+    WithdrawConfirmModal: () => import('../../../plugins/payment/components/withdraw/WithdrawConfirmModal'),
+    AutoWithdrawModal: () => import('../../../plugins/payment/components/withdraw/AutoWithdrawModal'),
   },
-  // Add other plugins as needed
 };
 
 /**
  * Generate component loader function from static mapping
+ * 
+ * @param pluginId - Plugin identifier
+ * @param componentName - Component name
+ * @returns Function that returns a Promise resolving to the component module
  */
 function generateComponentLoader(pluginId: string, componentName: string): () => Promise<any> {
-  const pluginLoaders = COMPONENT_LOADERS[pluginId];
+  const pluginLoaders = STATIC_COMPONENT_LOADERS[pluginId];
   if (!pluginLoaders) {
-    throw new Error(`No loaders found for plugin: ${pluginId}`);
+    throw new Error(`No loader paths found for plugin: ${pluginId}`);
   }
 
   const loader = pluginLoaders[componentName];
   if (!loader) {
-    throw new Error(`No loader found for component ${componentName} in plugin ${pluginId}`);
+    throw new Error(`No loader path found for component ${componentName} in plugin ${pluginId}`);
   }
 
   return loader;

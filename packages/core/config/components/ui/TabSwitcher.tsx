@@ -1,19 +1,23 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
+  Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Platform,
   Animated,
   Easing,
   LayoutChangeEvent,
 } from 'react-native';
-import { useTheme } from '@core/theme';
+import { useTheme } from '../../../theme';
 import {
   scale,
+  moderateScale,
   moderateVerticalScale,
   getHorizontalPadding,
   getResponsiveFontSize,
+  getMinTouchTarget,
   getTabletMenuMaxWidth,
 } from '../../utils/responsive';
 import { FontFamily } from '../../utils/fonts';
@@ -23,32 +27,157 @@ export interface Tab {
   label: string;
 }
 
+/**
+ * TabSwitcher Configuration
+ * Konfigurasi untuk kustomisasi tampilan dan behavior TabSwitcher
+ * 
+ * @example
+ * ```tsx
+ * <TabSwitcher
+ *   tabs={tabs}
+ *   activeTab={activeTab}
+ *   onTabChange={handleTabChange}
+ *   variant="segmented"
+ *   config={{
+ *     activeTextColor: '#FFFFFF',
+ *     inactiveTextColor: '#666666',
+ *     indicatorColor: '#007AFF',
+ *     fontSize: 14,
+ *     tabPaddingHorizontal: 16,
+ *     animationDuration: 300,
+ *   }}
+ * />
+ * ```
+ */
+export interface TabSwitcherConfig {
+  /**
+   * Warna untuk tab aktif
+   */
+  activeTextColor?: string;
+  /**
+   * Warna untuk tab tidak aktif
+   */
+  inactiveTextColor?: string;
+  /**
+   * Warna background untuk tab aktif (default variant)
+   */
+  activeBackgroundColor?: string;
+  /**
+   * Warna background untuk tab tidak aktif (default variant)
+   */
+  inactiveBackgroundColor?: string;
+  /**
+   * Warna indicator untuk segmented variant
+   */
+  indicatorColor?: string;
+  /**
+   * Warna background untuk segmented wrapper
+   */
+  wrapperBackgroundColor?: string;
+  /**
+   * Font size untuk tab text
+   */
+  fontSize?: number;
+  /**
+   * Font family untuk tab aktif
+   */
+  activeFontFamily?: string;
+  /**
+   * Font family untuk tab tidak aktif
+   */
+  inactiveFontFamily?: string;
+  /**
+   * Padding horizontal untuk tab
+   */
+  tabPaddingHorizontal?: number;
+  /**
+   * Padding vertical untuk tab
+   */
+  tabPaddingVertical?: number;
+  /**
+   * Border radius untuk tab (default variant)
+   */
+  tabBorderRadius?: number;
+  /**
+   * Border radius untuk segmented wrapper
+   */
+  wrapperBorderRadius?: number;
+  /**
+   * Gap antar tab (default variant)
+   */
+  tabGap?: number;
+  /**
+   * Padding horizontal untuk container
+   */
+  containerPaddingHorizontal?: number;
+  /**
+   * Durasi animasi dalam milliseconds
+   */
+  animationDuration?: number;
+  /**
+   * Tension untuk spring animation (segmented variant)
+   */
+  springTension?: number;
+  /**
+   * Friction untuk spring animation (segmented variant)
+   */
+  springFriction?: number;
+  /**
+   * Custom style untuk container
+   */
+  containerStyle?: any;
+  /**
+   * Custom style untuk wrapper (segmented variant)
+   */
+  wrapperStyle?: any;
+  /**
+   * Custom style untuk tab
+   */
+  tabStyle?: any;
+  /**
+   * Custom style untuk tab text
+   */
+  textStyle?: any;
+}
+
 interface TabSwitcherProps {
   tabs: Tab[];
   activeTab: string;
   onTabChange: (tabId: string) => void;
+  /**
+   * Variant tampilan tab.
+   * - 'default' : pill tabs individual (seperti chip).
+   * - 'segmented' : segmented control seperti pada contoh desain.
+   */
   variant?: 'default' | 'segmented';
+  /**
+   * Max width untuk menu di tablet landscape (optional)
+   * Jika tidak diatur, menu akan melebar penuh
+   */
   tabletLandscapeMaxWidth?: number;
+  /**
+   * Max width untuk menu di tablet portrait (optional)
+   * Jika tidak diatur, menu akan melebar penuh
+   */
   tabletPortraitMaxWidth?: number;
+  /**
+   * Animated value dari pager scroll (untuk realtime indicator)
+   */
   scrollX?: Animated.Value;
+  /**
+   * Lebar pager (screen width) untuk interpolasi
+   */
   pagerWidth?: number;
+  /**
+   * Konfigurasi untuk kustomisasi tampilan dan behavior
+   */
+  config?: TabSwitcherConfig;
 }
 
 interface TabLayout {
   x: number;
   width: number;
 }
-
-const getAnimatedValue = (
-  animatedValues: React.MutableRefObject<{ [key: string]: Animated.Value }>,
-  tabId: string,
-  isActive: boolean
-): Animated.Value => {
-  if (!animatedValues.current[tabId]) {
-    animatedValues.current[tabId] = new Animated.Value(isActive ? 1 : 0);
-  }
-  return animatedValues.current[tabId];
-};
 
 export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
   tabs,
@@ -59,256 +188,283 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
   tabletPortraitMaxWidth,
   scrollX,
   pagerWidth,
+  config = {},
 }) => {
   const { colors, isDark } = useTheme();
+  
+  // Merge config dengan defaults
+  const activeTextColor = config.activeTextColor ?? '#FFFFFF';
+  const inactiveTextColor = config.inactiveTextColor ?? colors.text;
+  const activeBackgroundColor = config.activeBackgroundColor ?? colors.primary;
+  const inactiveBackgroundColor = config.inactiveBackgroundColor ?? (isDark ? colors.surfaceSecondary : colors.background);
+  const indicatorColor = config.indicatorColor ?? colors.primary;
+  const wrapperBackgroundColor = config.wrapperBackgroundColor ?? colors.surface;
+  const fontSize = config.fontSize ?? getResponsiveFontSize('small');
+  const activeFontFamily = config.activeFontFamily ?? FontFamily.monasans.semiBold;
+  const inactiveFontFamily = config.inactiveFontFamily ?? FontFamily.monasans.regular;
+  const tabPaddingHorizontal = config.tabPaddingHorizontal ?? scale(8);
+  const tabPaddingVertical = config.tabPaddingVertical ?? moderateVerticalScale(8);
+  const tabBorderRadius = config.tabBorderRadius ?? scale(20);
+  const wrapperBorderRadius = config.wrapperBorderRadius ?? scale(999);
+  const tabGap = config.tabGap ?? scale(12);
+  const containerPaddingHorizontal = config.containerPaddingHorizontal ?? getHorizontalPadding();
+  const animationDuration = config.animationDuration ?? 200;
+  const springTension = config.springTension ?? 80;
+  const springFriction = config.springFriction ?? 10;
   const scrollViewRef = useRef<ScrollView>(null);
   const tabLayouts = useRef<{ [key: string]: TabLayout }>({});
   const [containerWidth, setContainerWidth] = useState(0);
-  const animatedValues = useRef<{ [key: string]: Animated.Value }>({});
+
+  // Initialize animated values hanya sekali
+  const animatedValues = useRef<{ [key: string]: Animated.Value }>(null!);
+  if (!animatedValues.current) {
+    animatedValues.current = tabs.reduce((acc, tab) => {
+      acc[tab.id] = new Animated.Value(activeTab === tab.id ? 1 : 0);
+      return acc;
+    }, {} as { [key: string]: Animated.Value });
+  }
+
+  // Animated values untuk sliding indicator
   const indicatorLeft = useRef(new Animated.Value(0)).current;
   const [indicatorWidth, setIndicatorWidth] = useState(0);
-  const layoutDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const activeTabIndex = useMemo(() => tabs.findIndex(t => t.id === activeTab), [tabs, activeTab]);
 
   const isSegmented = variant === 'segmented';
-  const hasInitializedScrollRef = useRef(false);
-
-  useEffect(() => {
-    if (!isSegmented && !hasInitializedScrollRef.current && tabs.length > 0) {
-      const checkAndScroll = () => {
-        const measuredTabs = Object.keys(tabLayouts.current).length;
-        if (scrollViewRef.current && measuredTabs === tabs.length) {
-          const middleIndex = Math.floor(tabs.length / 2);
-          const middleTab = tabs[middleIndex];
-          if (middleTab && tabLayouts.current[middleTab.id]) {
-            const layout = tabLayouts.current[middleTab.id];
-            const scrollPosition = Math.max(0, layout.x - getHorizontalPadding() * 2);
-            scrollViewRef.current.scrollTo({
-              x: scrollPosition,
-              animated: false,
-            });
-            hasInitializedScrollRef.current = true;
-          }
-        } else if (measuredTabs < tabs.length) {
-          setTimeout(checkAndScroll, 50);
-        }
-      };
-      const timer = setTimeout(checkAndScroll, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isSegmented, tabs]);
 
   useEffect(() => {
     if (scrollViewRef.current && tabLayouts.current[activeTab]) {
       const layout = tabLayouts.current[activeTab];
       const scrollPosition = Math.max(0, layout.x - getHorizontalPadding() * 2);
-      if (hasInitializedScrollRef.current || isSegmented) {
-        scrollViewRef.current.scrollTo({
-          x: scrollPosition,
-          animated: true,
-        });
-      }
+
+      scrollViewRef.current.scrollTo({
+        x: scrollPosition,
+        animated: true,
+      });
     }
-  }, [activeTab, isSegmented]);
+  }, [activeTab]);
 
   useEffect(() => {
-    const tabsToAnimate = new Set<string>();
-    tabsToAnimate.add(activeTab);
-    
-    if (activeTabIndex > 0) tabsToAnimate.add(tabs[activeTabIndex - 1].id);
-    if (activeTabIndex < tabs.length - 1) tabsToAnimate.add(tabs[activeTabIndex + 1].id);
-
-    tabsToAnimate.forEach((tabId) => {
-      const isActive = activeTab === tabId;
-      const animValue = getAnimatedValue(animatedValues, tabId, isActive);
-      Animated.timing(animValue, {
-        toValue: isActive ? 1 : 0,
-        duration: 200,
-        easing: Easing.bezier(0.4, 0.0, 0.2, 1),
-        useNativeDriver: false,
-      }).start();
+    // Animate tab opacity/scale
+    tabs.forEach((tab) => {
+      const isActive = activeTab === tab.id;
+      const values = animatedValues.current;
+      if (values && values[tab.id]) {
+        Animated.timing(values[tab.id], {
+          toValue: isActive ? 1 : 0,
+          duration: animationDuration,
+          easing: Easing.bezier(0.4, 0.0, 0.2, 1),
+          useNativeDriver: false,
+        }).start();
+      }
     });
 
-    if (isSegmented && !scrollX && tabLayouts.current[activeTab]) {
-      const layout = tabLayouts.current[activeTab];
-      Animated.spring(indicatorLeft, {
-        toValue: layout.x,
-        useNativeDriver: true,
-        tension: 80,
-        friction: 10,
-      }).start();
-      setIndicatorWidth(layout.width);
+    // Animate sliding indicator untuk segmented variant
+    // Jika scrollX ada, kita skip animasi manual activeTab karena dikontrol scrollX
+    if (isSegmented && !scrollX) {
+      if (tabLayouts.current[activeTab]) {
+        const layout = tabLayouts.current[activeTab];
+        Animated.spring(indicatorLeft, {
+          toValue: layout.x,
+          useNativeDriver: true, // Enable native driver
+          tension: springTension,
+          friction: springFriction,
+        }).start();
+        setIndicatorWidth(layout.width);
+      } else {
+        // Initialize indicator position saat pertama kali render
+        indicatorLeft.setValue(0);
+        setIndicatorWidth(0);
+      }
     }
-  }, [activeTab, activeTabIndex, tabs, isSegmented, scrollX, indicatorLeft]);
+  }, [activeTab, tabs, isSegmented, scrollX, indicatorLeft, animationDuration, springTension, springFriction]);
 
+  // Memoized handler untuk tab press
   const handleTabPress = useCallback((tabId: string) => {
     onTabChange(tabId);
   }, [onTabChange]);
 
+  // Memoized handler untuk tab layout
   const handleTabLayout = useCallback((tabId: string, event: LayoutChangeEvent) => {
-    if (layoutDebounceTimer.current) {
-      clearTimeout(layoutDebounceTimer.current);
+    const { x, width } = event.nativeEvent.layout;
+    tabLayouts.current[tabId] = { x, width };
+
+    // Initialize indicator position untuk tab pertama kali (jika tidak ada scrollX)
+    if (tabId === activeTab && isSegmented && !scrollX) {
+      indicatorLeft.setValue(x);
+      setIndicatorWidth(width);
     }
-    
-    layoutDebounceTimer.current = setTimeout(() => {
-      const { x, width } = event.nativeEvent.layout;
-      tabLayouts.current[tabId] = { x, width };
-      
-      if (tabId === activeTab && isSegmented && !scrollX) {
-        indicatorLeft.setValue(x);
-        setIndicatorWidth(width);
-      }
-    }, 50);
-  }, [activeTab, isSegmented, indicatorLeft, scrollX]);
+  }, [activeTab, isSegmented, indicatorLeft, setIndicatorWidth, scrollX]);
 
-  useEffect(() => {
-    return () => {
-      if (layoutDebounceTimer.current) {
-        clearTimeout(layoutDebounceTimer.current);
-      }
-    };
-  }, []);
-
+  // Memoized max width untuk tablet menu
   const menuMaxWidth = useMemo(
     () => getTabletMenuMaxWidth(tabletLandscapeMaxWidth, tabletPortraitMaxWidth),
     [tabletLandscapeMaxWidth, tabletPortraitMaxWidth]
   );
 
-  const interpolationRanges = useMemo(() => {
-    if (!scrollX || !pagerWidth || containerWidth <= 0 || tabs.length === 0) {
-      return null;
-    }
-    const totalPadding = scale(4) * 2;
-    const availableWidth = containerWidth - totalPadding;
-    const tabWidth = availableWidth / tabs.length;
-    const startX = scale(4);
-    
-    return {
-      inputRange: tabs.map((_, i) => i * pagerWidth),
-      outputRange: tabs.map((_, i) => startX + (i * tabWidth)),
-      tabWidth,
-    };
-  }, [scrollX, pagerWidth, containerWidth, tabs.length]);
-
-  const interpolatedIndicatorTranslateX = useMemo(() => {
-    if (interpolationRanges && scrollX) {
-      return scrollX.interpolate({
-        inputRange: interpolationRanges.inputRange,
-        outputRange: interpolationRanges.outputRange,
-        extrapolate: 'clamp',
-      });
-    }
-    return indicatorLeft;
-  }, [interpolationRanges, scrollX, indicatorLeft]);
-
-  const interpolatedIndicatorWidth = useMemo(() => {
-    if (interpolationRanges) {
-      return interpolationRanges.tabWidth;
-    }
-    if (!scrollX) {
-      return indicatorWidth;
-    }
-    if (tabLayouts.current[activeTab]) {
-      return tabLayouts.current[activeTab].width;
-    }
-    return 0;
-  }, [interpolationRanges, scrollX, indicatorWidth, activeTab]);
-
+  // Memoized segmented wrapper style
   const segmentedWrapperStyle = useMemo(
     () => [
       styles.segmentedWrapper,
       {
-        backgroundColor: colors.surface,
+        backgroundColor: wrapperBackgroundColor,
+        borderRadius: wrapperBorderRadius,
         maxWidth: menuMaxWidth,
         alignSelf: menuMaxWidth ? 'center' : 'stretch' as 'center' | 'stretch',
       },
+      config.wrapperStyle,
     ],
-    [colors.surface, menuMaxWidth]
+    [wrapperBackgroundColor, wrapperBorderRadius, menuMaxWidth, config.wrapperStyle]
   );
 
+  // Calculate interpolated indicator position if scrollX is present
+  const interpolatedIndicatorTranslateX = useMemo(() => {
+    if (scrollX && pagerWidth && containerWidth > 0 && tabs.length > 0) {
+      const totalPadding = scale(4) * 2; // Padding horizontal wrapper
+      const availableWidth = containerWidth - totalPadding;
+      const tabWidth = availableWidth / tabs.length;
+
+      // Input range: [0, pagerWidth, 2*pagerWidth, ...]
+      const inputRange = tabs.map((_, i) => i * pagerWidth);
+      // Output range: [startX, startX + tabWidth, startX + 2*tabWidth, ...]
+      // startX is usually paddingLeft which is scale(4)
+      const startX = scale(4);
+      const outputRange = tabs.map((_, i) => startX + (i * tabWidth));
+
+      return scrollX.interpolate({
+        inputRange,
+        outputRange,
+        extrapolate: 'clamp',
+      });
+    }
+    return indicatorLeft;
+  }, [scrollX, pagerWidth, containerWidth, tabs, indicatorLeft]);
+
+  // Calculate interpolated indicator width if scrollX is present (assuming equal width tabs)
+  const interpolatedIndicatorWidth = useMemo(() => {
+    if (scrollX && containerWidth > 0 && tabs.length > 0) {
+      const totalPadding = scale(4) * 2;
+      const availableWidth = containerWidth - totalPadding;
+      const tabWidth = availableWidth / tabs.length;
+      return tabWidth;
+    }
+    // For manual animation, use the state value
+    if (!scrollX) {
+      return indicatorWidth;
+    }
+    // Fallback if not ready
+    if (tabLayouts.current[activeTab]) {
+      return tabLayouts.current[activeTab].width;
+    }
+    return 0;
+  }, [scrollX, containerWidth, tabs, indicatorWidth, activeTab]);
+
+  // Memoized sliding indicator style
   const slidingIndicatorStyle = useMemo(
     () => [
       styles.slidingIndicator,
       {
-        backgroundColor: colors.primary,
+        backgroundColor: indicatorColor,
+        borderRadius: wrapperBorderRadius,
         transform: [{ translateX: interpolatedIndicatorTranslateX }],
         width: interpolatedIndicatorWidth,
+        boxShadow: '0 0 2px 0 rgba(0, 0, 0, 1)',
       },
     ],
-    [colors.primary, interpolatedIndicatorTranslateX, interpolatedIndicatorWidth]
+    [indicatorColor, wrapperBorderRadius, interpolatedIndicatorTranslateX, interpolatedIndicatorWidth]
   );
 
+  // Memoized container layout handler
   const handleContainerLayout = useCallback((event: LayoutChangeEvent) => {
     setContainerWidth(event.nativeEvent.layout.width);
   }, []);
 
-  const textInterpolations = useMemo(() => {
-    if (!scrollX || !pagerWidth) return null;
-    return tabs.map((_, index) => ({
-      inactive: scrollX.interpolate({
-        inputRange: [
-          (index - 1) * pagerWidth,
-          index * pagerWidth,
-          (index + 1) * pagerWidth,
-        ],
-        outputRange: [1, 0, 1],
-        extrapolate: 'clamp',
-      }),
-      active: scrollX.interpolate({
-        inputRange: [
-          (index - 1) * pagerWidth,
-          index * pagerWidth,
-          (index + 1) * pagerWidth,
-        ],
-        outputRange: [0, 1, 0],
-        extrapolate: 'clamp',
-      }),
-    }));
-  }, [scrollX, pagerWidth, tabs.length]);
-
+  // Segmented: fixed tabs, non-scrollable, dengan sliding indicator
   if (isSegmented) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingHorizontal: containerPaddingHorizontal }, config.containerStyle]}>
         <View style={segmentedWrapperStyle} onLayout={handleContainerLayout}>
+          {/* Sliding Indicator */}
           <Animated.View style={slidingIndicatorStyle} />
+
           {tabs.map((tab, index) => {
             const isActive = activeTab === tab.id;
-            const animatedValue = getAnimatedValue(animatedValues, tab.id, isActive);
-            const textInterp = textInterpolations?.[index];
+            const animatedValue = animatedValues.current[tab.id];
+
+            // const textColor = animatedValue.interpolate({
+            //   inputRange: [0, 1],
+            //   outputRange: [colors.text, '#FFFFFF'],
+            // });
+
+            // const textStyle = [
+            //   styles.tabText,
+            //   {
+            //     color: textColor,
+            //     fontFamily: isActive
+            //       ? FontFamily.monasans.semiBold
+            //       : FontFamily.monasans.regular,
+            //   },
+            // ];
 
             return (
               <TouchableOpacity
                 key={tab.id}
-                style={styles.segmentedTab}
+                style={[styles.segmentedTab, { borderRadius: wrapperBorderRadius }, config.tabStyle]}
                 activeOpacity={0.9}
                 onPress={() => handleTabPress(tab.id)}
                 onLayout={(event) => handleTabLayout(tab.id, event)}>
-                <View style={styles.tab}>
+                <View style={[styles.tab, {
+                  paddingHorizontal: tabPaddingHorizontal,
+                  paddingVertical: tabPaddingVertical,
+                }, config.tabStyle]}>
+                  {/* Inactive Text (Base) */}
                   <Animated.Text
                     style={[
                       styles.tabText,
                       {
-                        color: colors.text,
-                        fontFamily: FontFamily.monasans.medium,
-                        opacity: textInterp
-                          ? textInterp.inactive
+                        fontSize,
+                        color: inactiveTextColor,
+                        fontFamily: inactiveFontFamily,
+                        opacity: scrollX && pagerWidth
+                          ? scrollX.interpolate({
+                              inputRange: [
+                                (index - 1) * pagerWidth,
+                                index * pagerWidth,
+                                (index + 1) * pagerWidth,
+                              ],
+                              outputRange: [1, 0, 1],
+                              extrapolate: 'clamp',
+                            })
                           : animatedValue.interpolate({
                               inputRange: [0, 1],
                               outputRange: [1, 0],
                             }),
                       },
+                      config.textStyle,
                     ]}>
                     {tab.label}
                   </Animated.Text>
+
+                  {/* Active Text (Overlay) */}
                   <Animated.Text
                     style={[
                       styles.tabText,
                       {
                         position: 'absolute',
-                        color: colors.surface,
-                        fontFamily: FontFamily.monasans.semiBold,
-                        opacity: textInterp ? textInterp.active : animatedValue,
+                        fontSize,
+                        color: activeTextColor,
+                        fontFamily: activeFontFamily,
+                        opacity: scrollX && pagerWidth
+                          ? scrollX.interpolate({
+                              inputRange: [
+                                (index - 1) * pagerWidth,
+                                index * pagerWidth,
+                                (index + 1) * pagerWidth,
+                              ],
+                              outputRange: [0, 1, 0],
+                              extrapolate: 'clamp',
+                            })
+                          : animatedValue,
                       },
+                      config.textStyle,
                     ]}>
                     {tab.label}
                   </Animated.Text>
@@ -321,8 +477,9 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
     );
   }
 
+  // Default variant: scrollable pill tabs
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingHorizontal: containerPaddingHorizontal }, config.containerStyle]}>
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -330,26 +487,24 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
         contentContainerStyle={[
           styles.scrollContent,
           isSegmented && styles.segmentedScrollContent,
+          { gap: tabGap },
         ]}
         style={styles.scrollView}>
-        {tabs.map((tab, index) => {
+        {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
-          const shouldAnimate = Math.abs(index - activeTabIndex) <= 1;
-          const animatedValue = shouldAnimate
-            ? getAnimatedValue(animatedValues, tab.id, isActive)
-            : new Animated.Value(isActive ? 1 : 0);
+          const animatedValue = animatedValues.current[tab.id];
 
           const backgroundColor = animatedValue.interpolate({
             inputRange: [0, 1],
             outputRange: [
-              isDark ? colors.surfaceSecondary : colors.background,
-              colors.primary,
+              inactiveBackgroundColor,
+              activeBackgroundColor,
             ],
           });
 
           const textColor = animatedValue.interpolate({
             inputRange: [0, 1],
-            outputRange: [colors.text, colors.surface],
+            outputRange: [inactiveTextColor, activeTextColor],
           });
 
           const scale = animatedValue.interpolate({
@@ -362,31 +517,58 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
             outputRange: [0.7, 1],
           });
 
+          // Shadow opacity untuk iOS (animated)
+          const shadowOpacity = animatedValue.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [0, 0, 0.25],
+          });
+
+          // Base style dengan shadow properties untuk iOS
+          const iosShadowStyle = Platform.OS === 'ios' ? {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: shadowOpacity as any, // Animated value
+            shadowRadius: 4,
+          } : {};
+
+          // Android elevation (conditional)
+          const androidElevation = Platform.OS === 'android' ? {
+            elevation: isActive ? 4 : 0,
+          } : {};
+
+          const tabDynamicStyle = [
+            styles.tab,
+            {
+              paddingHorizontal: tabPaddingHorizontal,
+              paddingVertical: tabPaddingVertical,
+              borderRadius: tabBorderRadius,
+              backgroundColor,
+              transform: [{ scale }],
+              opacity,
+              ...iosShadowStyle,
+              ...androidElevation,
+            },
+            config.tabStyle,
+          ];
+
+          const textStyle = [
+            styles.tabText,
+            {
+              fontSize,
+              color: textColor,
+              fontFamily: isActive ? activeFontFamily : inactiveFontFamily,
+            },
+            config.textStyle,
+          ];
+
           return (
             <TouchableOpacity
               key={tab.id}
               onPress={() => handleTabPress(tab.id)}
               activeOpacity={0.8}
               onLayout={(event) => handleTabLayout(tab.id, event)}>
-              <Animated.View
-                style={[
-                  styles.tab,
-                  {
-                    backgroundColor,
-                    transform: [{ scale }],
-                    opacity,
-                  },
-                ]}>
-                <Animated.Text
-                  style={[
-                    styles.tabText,
-                    {
-                      color: textColor,
-                      fontFamily: isActive
-                        ? FontFamily.monasans.semiBold
-                        : FontFamily.monasans.regular,
-                    },
-                  ]}>
+              <Animated.View style={tabDynamicStyle}>
+                <Animated.Text style={textStyle}>
                   {tab.label}
                 </Animated.Text>
               </Animated.View>
@@ -401,6 +583,7 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
 TabSwitcher.displayName = 'TabSwitcher';
 
 const horizontalPadding = getHorizontalPadding();
+const minTouchTarget = getMinTouchTarget();
 
 const styles = StyleSheet.create({
   container: {
@@ -411,8 +594,18 @@ const styles = StyleSheet.create({
     borderRadius: scale(999),
     paddingHorizontal: scale(4),
     paddingVertical: moderateVerticalScale(4),
-    boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
     position: 'relative',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
   slidingIndicator: {
     position: 'absolute',
@@ -427,7 +620,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexDirection: 'row',
-    gap: scale(12),
     paddingRight: horizontalPadding,
   },
   segmentedScrollContent: {
@@ -436,10 +628,7 @@ const styles = StyleSheet.create({
     gap: 0,
   },
   tab: {
-    paddingHorizontal: scale(8),
-    paddingVertical: moderateVerticalScale(8),
-    borderRadius: scale(20),
-    minHeight: scale(30),
+    minHeight: scale(40),
     justifyContent: 'center',
     alignItems: 'center',
   },

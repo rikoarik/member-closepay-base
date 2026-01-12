@@ -27,6 +27,9 @@ export * from './components/withdraw/AutoWithdrawModal';
 // Virtual Account Components
 export { VirtualAccountScreen } from './components/virtual-account/VirtualAccountScreen';
 
+// QR Components
+export { QrScreen } from './components/qr/QrScreen';
+
 // Shared Components
 export { BluetoothDeviceSelector } from './components/shared/BluetoothDeviceSelector';
 export { NFCLoadingModal } from './components/shared/NFCLoadingModal';

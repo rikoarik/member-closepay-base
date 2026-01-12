@@ -15,12 +15,23 @@ import type { PluginManifest } from './types';
  * Static manifest loaders - Metro requires static import paths
  * This maps plugin IDs to their manifest loaders
  * 
- * NOTE: Metro bundler requires static imports, so this must be maintained manually
- * or generated at build time. In the future, this could be auto-generated from
- * filesystem scan during build.
+ * NOTE: Metro bundler requires static imports, so this must be maintained manually.
+ * This is simpler than component loaders because we only need to import JSON files.
+ * 
+ * To add a new plugin:
+ * 1. Create plugin.manifest.json in packages/plugins/{pluginId}/
+ * 2. Add entry here:
+ *    '{pluginId}': () => import('../../../plugins/{pluginId}/plugin.manifest.json').then(m => m as { default: PluginManifest }),
+ * 3. Plugin will be automatically registered via PLUGIN_REGISTRY
+ * 4. Enable plugin in app.config.ts (enabledModules)
+ * 
+ * Example:
+ *   'my-plugin': () => import('../../../plugins/my-plugin/plugin.manifest.json').then(m => m as { default: PluginManifest }),
  */
 export const MANIFEST_LOADERS: Record<string, () => Promise<{ default: PluginManifest } | PluginManifest>> = {
-  
+  balance: () => import('../../../plugins/balance/plugin.manifest.json').then(m => m as { default: PluginManifest }),
+  payment: () => import('../../../plugins/payment/plugin.manifest.json').then(m => m as { default: PluginManifest }),
+  // Add other plugins as needed
 };
 
 /**

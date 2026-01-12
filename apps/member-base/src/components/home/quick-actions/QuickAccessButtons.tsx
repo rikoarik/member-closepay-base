@@ -53,7 +53,7 @@ interface QuickAccessButtonsProps {
 }
 
 // Icon mapping untuk setiap menu - returns icon dengan dynamic color
-const getMenuIcon = (iconName?: string, iconColor: string): React.ReactNode => {
+const getMenuIcon = (iconColor: string, iconName?: string): React.ReactNode => {
   const size = getIconSize('large');
   switch (iconName) {
     case 'payIPL':
@@ -82,7 +82,7 @@ const getMenuIcon = (iconName?: string, iconColor: string): React.ReactNode => {
 };
 
 // Default background colors untuk setiap menu
-const getDefaultBgColor = (iconName?: string, colors: ThemeColors): string => {
+const getDefaultBgColor = (colors: ThemeColors, iconName?: string): string => {
   switch (iconName) {
     case 'payIPL':
       return colors.infoLight;
@@ -179,41 +179,10 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
   const { enabledItems, isLoading, refresh } = useQuickMenu();
   const { width: screenWidth } = useDimensions();
   
-  // Refresh menu ketika screen di-focus (misalnya setelah kembali dari settings)
-  // Tapi hanya refresh jika sudah pernah load sebelumnya (untuk mencegah flicker saat initial load)
-  const hasLoadedRef = React.useRef(false);
-  const refreshTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  
-  useFocusEffect(
-    React.useCallback(() => {
-      // Set flag bahwa sudah pernah load
-      if (!isLoading) {
-        hasLoadedRef.current = true;
-      }
-      
-      // Hanya refresh jika sudah pernah load sebelumnya dan tidak sedang loading
-      // Delay sedikit untuk mencegah flicker
-      if (hasLoadedRef.current && !isLoading) {
-        // Clear previous timeout jika ada
-        if (refreshTimeoutRef.current) {
-          clearTimeout(refreshTimeoutRef.current);
-        }
-        
-        // Delay refresh sedikit untuk mencegah flicker saat transisi
-        refreshTimeoutRef.current = setTimeout(() => {
-          refresh();
-        }, 100);
-      }
-      
-      // Cleanup timeout saat unmount atau focus out
-      return () => {
-        if (refreshTimeoutRef.current) {
-          clearTimeout(refreshTimeoutRef.current);
-          refreshTimeoutRef.current = null;
-        }
-      };
-    }, [refresh, isLoading])
-  );
+  // Stabilize colors untuk mencegah re-render yang tidak perlu
+  const primaryColor = colors.primary;
+  const surfaceColor = colors.surface;
+  const textColor = colors.text;
   
   // Stabilize screenWidth dengan rounding untuk mencegah re-render kecil
   const stableScreenWidth = useMemo(() => {
@@ -247,20 +216,20 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
     return enabledItems;
   }, [enabledItems]);
   
-  // Memoized menu label getter - tidak depend pada t() untuk mencegah re-render
-  const menuLabelMap = useMemo(() => {
-    const menuIdToTranslationKey: Record<string, string> = {};
-    return menuIdToTranslationKey;
-  }, []);
+  // Memoized menu label getter - menggunakan ref untuk mencegah re-render
+  const menuLabelMapRef = React.useRef<Record<string, string>>({});
   
   const getMenuLabel = useCallback((menuId: string, fallbackLabel: string): string => {
-    const translationKey = menuLabelMap[menuId];
+    const translationKey = menuLabelMapRef.current[menuId];
     return translationKey ? t(translationKey) : fallbackLabel;
-  }, [t, menuLabelMap]);
+  }, [t]);
 
   // Convert enabled menu items ke format QuickAccessButton
   // Hanya recalculate jika enabledItems benar-benar berubah
   const previousMenuButtonsRef = React.useRef<QuickAccessButton[]>([]);
+  const colorsRef = React.useRef(colors);
+  colorsRef.current = colors; // Update ref tanpa trigger re-render
+  
   const menuButtons = useMemo((): QuickAccessButton[] => {
     // Jika masih loading, jangan render apa-apa dulu, biarkan skeleton yang tampil
     if (isLoading) {
@@ -270,8 +239,8 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
     const buttons: QuickAccessButton[] = items.map((item) => ({
       id: item.id,
       label: getMenuLabel(item.id, item.label),
-      icon: getMenuIcon(item.icon as string, colors.primary),
-      iconBgColor: item.iconBgColor || getDefaultBgColor(item.icon as string, colors),
+      icon: getMenuIcon(primaryColor, item.icon as string),
+      iconBgColor: item.iconBgColor || getDefaultBgColor(colorsRef.current, item.icon as string),
       onPress: (item as unknown as QuickMenuItem).route
         ? () => {
             // @ts-ignore - navigation type akan di-setup nanti
@@ -290,7 +259,7 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
     
     previousMenuButtonsRef.current = buttons;
     return buttons;
-  }, [stableEnabledItems, getMenuLabel, isLoading, navigation, colors.primary, colors]);
+  }, [stableEnabledItems, getMenuLabel, isLoading, navigation, primaryColor]);
 
   const buttonsToRender = buttons || menuButtons;
   const buttonCount = buttonsToRender.length;
@@ -346,7 +315,7 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
           <Text
             style={[
               styles.aksesCepatLabel,
-              { color: colors.text },
+              { color: textColor },
             ]}
             numberOfLines={2}
           >

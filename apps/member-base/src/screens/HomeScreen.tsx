@@ -20,6 +20,7 @@ import {
   InteractionManager,
   BackHandler,
   Platform,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -36,14 +37,14 @@ import {
 } from "@core/config";
 import {
   TopBar,
-  TransactionsTab,
   AnalyticsTab,
-  NewsTab,
   BerandaTab,
   AktivitasTab,
 } from "../components/home";
 import { useNotifications } from "@core/notification";
 import Toast from 'react-native-toast-message';
+import { QrScanIcon } from "@core/config/components/icons";
+import { scale, moderateScale } from "@core/config";
 
 export const HomeScreen = () => {
   const navigation = useNavigation();
@@ -52,54 +53,87 @@ export const HomeScreen = () => {
   const { width: screenWidth } = useDimensions();
   const pagerRef = useRef<any>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const fabOpacity = useRef(new Animated.Value(0)).current;
+  const fabScale = useRef(new Animated.Value(0)).current;
 
   const { config } = useConfig();
-  const homeVariant = config?.homeVariant || "dashboard";
-
   const homeTabs = React.useMemo(() => {
     return config?.homeTabs || [];
   }, [config?.homeTabs]);
 
   const tabs: Tab[] = React.useMemo(() => {
-    if (homeVariant === "member" && homeTabs.length > 0) {
-      return homeTabs
-        .filter((tab) => tab.visible !== false)
-        .sort((a, b) => (a.order || 0) - (b.order || 0))
-        .map((tab) => {
-          const i18nKey = `home.${tab.id}`;
-          const translatedLabel = t(i18nKey);
-          const label =
-            translatedLabel && translatedLabel !== i18nKey
-              ? translatedLabel
-              : tab.label;
-          return { id: tab.id, label };
-        });
-    }
-    // Default tabs for dashboard variant
-    return [
-      { id: "beranda", label: t("home.home") || "Beranda" },
-      { id: "transactions", label: t("home.transactions") },
-      { id: "analytics", label: t("home.analytics") },
-      { id: "news", label: t("home.news") },
-    ];
-  }, [homeVariant, homeTabs, t]);
+    return homeTabs
+      .filter((tab) => tab.visible !== false)
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map((tab) => {
+        const i18nKey = `home.${tab.id}`;
+        const translatedLabel = t(i18nKey);
+        const label =
+          translatedLabel && translatedLabel !== i18nKey
+            ? translatedLabel
+            : tab.label;
+        return { id: tab.id, label };
+      });
+  }, [homeTabs, t]);
 
   const [activeTab, setActiveTab] = useState<string>("home");
   const tabRefreshFunctionsRef = useRef<{ [key: string]: () => void }>({});
   const hasSetOrder2TabRef = useRef(false);
   const backPressTimeRef = useRef<number>(0);
   const DOUBLE_BACK_PRESS_DELAY = 2000;
-  
+
+  // Animate FAB show/hide based on activeTab
+  const shouldShowFab = config?.showQrButton !== false && 
+    (activeTab === "beranda" || activeTab === "home");
+
   useEffect(() => {
-    if (tabs.length >= 2) {
-      const order2TabId = tabs[1].id;
-      setActiveTab(order2TabId);
-      hasSetOrder2TabRef.current = true;
-    } else if (tabs.length > 0 && !hasSetOrder2TabRef.current) {
-      setActiveTab(tabs[0].id);
+    if (shouldShowFab) {
+      // Show animation
+      Animated.parallel([
+        Animated.timing(fabOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(fabScale, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Hide animation
+      Animated.parallel([
+        Animated.timing(fabOpacity, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fabScale, {
+          toValue: 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [shouldShowFab, fabOpacity, fabScale]);
+  
+  // Set activeTab ke tab dengan order 2 (di tengah) saat tabs pertama kali ter-load
+  useEffect(() => {
+    // Reset flag jika tabs berubah (misalnya config reload)
+    if (tabs.length > 0 && !hasSetOrder2TabRef.current) {
+      // Tab dengan order 2 (index 1) adalah tab di tengah, atau tab pertama jika < 2 tabs
+      const order2TabId = tabs.length >= 2 ? tabs[1].id : tabs[0].id;
+      
+      // Hanya update jika activeTab belum sesuai
+      if (activeTab !== order2TabId) {
+        setActiveTab(order2TabId);
+      }
       hasSetOrder2TabRef.current = true;
     }
-  }, [tabs]);
+  }, [tabs, activeTab]);
+  
 
   const registerTabRefresh = useCallback(
     (tabId: string, refreshFn: () => void) => {
@@ -122,73 +156,78 @@ export const HomeScreen = () => {
 
   const renderTabContent = useCallback(
     (tabId: string, index: number) => {
-      if (homeVariant === "member") {
-        const tabConfig = homeTabs.find((tab) => tab.id === tabId);
+      const tabConfig = homeTabs.find((tab) => tab.id === tabId);
 
-        if (tabId === "beranda" || tabId === "home") {
-          return (
-            <View style={{ width: screenWidth, flex: 1 }}>
-              <BerandaTab isActive={activeTab === tabId} />
-            </View>
-          );
-        }
-
-        if (tabId === "activity" || tabId === "aktivitas") {
-          return (
-            <View style={{ width: screenWidth, flex: 1 }}>
-              <AktivitasTab
-                isActive={activeTab === tabId}
-                isVisible={activeTab === tabId}
-              />
-            </View>
-          );
-        }
-
-        if (tabId === "news") {
-          return (
-            <View style={{ width: screenWidth, flex: 1 }}>
-              <NewsTab
-                isActive={activeTab === "news"}
-                isVisible={activeTab === "news"}
-                onRefreshRequested={(refreshFn) => {
-                  registerTabRefresh("news", refreshFn);
-                }}
-              />
-            </View>
-          );
-        }
-
-        if (tabConfig?.component) {
-          return (
-            <View
-              style={{ width: screenWidth, padding: getHorizontalPadding() }}
-            >
-              <Text style={{ color: colors.text }}>{tabConfig.label}</Text>
-            </View>
-          );
-        }
-        // Default: simple text content
+      if (tabId === "beranda" || tabId === "home") {
+        // Find news tab ID untuk navigasi
+        const newsTabId = tabs.find(tab => 
+          tab.id === "news" || 
+          tab.id === "berita" || 
+          tabConfig?.id === "news" || 
+          tabConfig?.id === "berita"
+        )?.id || "news";
+        
         return (
-          <View
-            style={{
-              width: screenWidth,
-              padding: getHorizontalPadding(),
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: colors.text, fontSize: 16 }}>
-              {tabConfig?.label || tabId}
-            </Text>
+          <View style={{ width: screenWidth, flex: 1 }}>
+            <BerandaTab 
+              isActive={activeTab === tabId}
+              onNavigateToNews={() => {
+                // Navigate ke NewsScreen (halaman berdiri sendiri)
+                (navigation as any).navigate('News' as never);
+              }}
+            />
           </View>
         );
       }
 
-      // Default dashboard variant content
-      return null; // Will be handled below
+      if (tabId === "activity" || tabId === "aktivitas") {
+        return (
+          <View style={{ width: screenWidth, flex: 1 }}>
+            <AktivitasTab
+              isActive={activeTab === tabId}
+              isVisible={activeTab === tabId}
+            />
+          </View>
+        );
+      }
+
+      if (tabId === "analytics" || tabId === "analitik") {
+        return (
+          <View style={{ width: screenWidth, flex: 1 }}>
+            <AnalyticsTab
+              isActive={activeTab === tabId}
+              isVisible={activeTab === tabId}
+            />
+          </View>
+        );
+      }
+
+      if (tabConfig?.component) {
+        return (
+          <View
+            style={{ width: screenWidth, padding: getHorizontalPadding() }}
+          >
+            <Text style={{ color: colors.text }}>{tabConfig.label}</Text>
+          </View>
+        );
+      }
+      // Default: simple text content
+      return (
+        <View
+          style={{
+            width: screenWidth,
+            padding: getHorizontalPadding(),
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: colors.text, fontSize: 16 }}>
+            {tabConfig?.label || tabId}
+          </Text>
+        </View>
+      );
     },
     [
-      homeVariant,
       homeTabs,
       screenWidth,
       activeTab,
@@ -203,6 +242,10 @@ export const HomeScreen = () => {
 
   const handleNotificationPress = () => {
     navigation.navigate("Notifications" as never);
+  };
+
+  const handleQrPress = () => {
+    navigation.navigate("Qr" as never);
   };
 
   const getTabIndex = useCallback(
@@ -408,155 +451,76 @@ export const HomeScreen = () => {
 
         {/* Pager horizontal dengan scroll vertikal per tab */}
         <View>
-          {homeVariant === "member" ? (
-            // Member variant: simple tabs without balance card, menu, transaction history
-            <Animated.ScrollView
-              ref={pagerRef}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              scrollEventThrottle={8}
-              scrollEnabled={true}
-              nestedScrollEnabled={true}
-              directionalLockEnabled={true}
-              decelerationRate="fast"
-              snapToInterval={screenWidth}
-              removeClippedSubviews={true}
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                { useNativeDriver: true }
-              )}
-              onMomentumScrollEnd={handlePagerMomentumEnd}
-            >
-              {tabs.map((tab, index) => {
-                // Lazy loading: hanya render tab aktif dan tab adjacent
-                if (!shouldRenderTab(tab.id, index)) {
-                  return (
-                    <View
-                      key={tab.id}
-                      style={{ width: screenWidth, flex: 1 }}
-                      pointerEvents="none"
-                    />
-                  );
-                }
-
+          <Animated.ScrollView
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={8}
+            scrollEnabled={true}
+            nestedScrollEnabled={true}
+            directionalLockEnabled={true}
+            decelerationRate="fast"
+            snapToInterval={screenWidth}
+            removeClippedSubviews={true}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
+            )}
+            onMomentumScrollEnd={handlePagerMomentumEnd}
+          >
+            {tabs.map((tab, index) => {
+              // Lazy loading: hanya render tab aktif dan tab adjacent
+              if (!shouldRenderTab(tab.id, index)) {
                 return (
                   <View
                     key={tab.id}
                     style={{ width: screenWidth, flex: 1 }}
-                    pointerEvents={activeTab === tab.id ? "auto" : "none"}
-                  >
-                    {renderTabContent(tab.id, index)}
-                  </View>
+                    pointerEvents="none"
+                  />
                 );
-              })}
-            </Animated.ScrollView>
-          ) : (
-            // Dashboard variant: default with balance card, transactions, etc.
-            <Animated.ScrollView
-              ref={pagerRef}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              scrollEventThrottle={16}
-              scrollEnabled={true}
-              nestedScrollEnabled={true}
-              directionalLockEnabled={true}
-              decelerationRate="fast"
-              snapToInterval={screenWidth}
-              removeClippedSubviews={true}
-              onScroll={Animated.event(
-                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                { useNativeDriver: true }
-              )}
-              onMomentumScrollEnd={handlePagerMomentumEnd}
-            >
-              {/* Beranda Page */}
-              {shouldRenderTab("beranda", getTabIndex("beranda")) ? (
-                <View
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents={activeTab === "beranda" ? "auto" : "none"}
-                >
-                  <BerandaTab
-                    isActive={activeTab === "beranda"}
-                    isVisible={activeTab === "beranda"}
-                  />
-                </View>
-              ) : (
-                <View
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents="none"
-                />
-              )}
+              }
 
-              {/* Transactions Page */}
-              {shouldRenderTab("transactions", getTabIndex("transactions")) ? (
+              return (
                 <View
+                  key={tab.id}
                   style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents={activeTab === "transactions" ? "auto" : "none"}
+                  pointerEvents={activeTab === tab.id ? "auto" : "none"}
                 >
-                  <TransactionsTab
-                    title="Kantin FKI UPI"
-                    balance={2000000000}
-                    showBalance={false}
-                    onToggleBalance={() => {}}
-                    onBalanceDetailPress={() => {}}
-                    isActive={activeTab === "transactions"}
-                    isVisible={activeTab === "transactions"}
-                    onRefreshRequested={(refreshFn) => {
-                      registerTabRefresh("transactions", refreshFn);
-                    }}
-                  />
+                  {renderTabContent(tab.id, index)}
                 </View>
-              ) : (
-                <View
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents="none"
-                />
-              )}
-
-              {/* Analytics Page */}
-              {shouldRenderTab("analytics", getTabIndex("analytics")) ? (
-                <View
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents={activeTab === "analytics" ? "auto" : "none"}
-                >
-                  <AnalyticsTab
-                    isActive={activeTab === "analytics"}
-                    isVisible={activeTab === "analytics"}
-                  />
-                </View>
-              ) : (
-                <View
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents="none"
-                />
-              )}
-
-              {/* News Page */}
-              {shouldRenderTab("news", getTabIndex("news")) ? (
-                <View
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents={activeTab === "news" ? "auto" : "none"}
-                >
-                  <NewsTab
-                    isActive={activeTab === "news"}
-                    isVisible={activeTab === "news"}
-                    onRefreshRequested={(refreshFn) => {
-                      registerTabRefresh("news", refreshFn);
-                    }}
-                  />
-                </View>
-              ) : (
-                <View
-                  style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents="none"
-                />
-              )}
-            </Animated.ScrollView>
-          )}
+              );
+            })}
+          </Animated.ScrollView>
         </View>
       </ScrollView>
+
+      {/* FAB QR Button - Only show on beranda/home tab with smooth animation */}
+      {config?.showQrButton !== false && (
+        <Animated.View
+          style={[
+            styles.fab,
+            {
+              backgroundColor: colors.primary,
+              opacity: fabOpacity,
+              transform: [{ scale: fabScale }],
+            },
+          ]}
+          pointerEvents={shouldShowFab ? 'auto' : 'none'}
+        >
+          <TouchableOpacity
+            onPress={handleQrPress}
+            activeOpacity={0.8}
+            style={styles.fabTouchable}
+          >
+            <QrScanIcon
+              width={scale(26)}
+              height={scale(26)}
+              fill={colors.surface}
+            />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 };
@@ -587,5 +551,32 @@ const styles = StyleSheet.create({
   section: {
     paddingTop: moderateVerticalScale(16),
     paddingBottom: moderateVerticalScale(16),
+  },
+  fab: {
+    position: 'absolute',
+    bottom: moderateVerticalScale(54),
+    alignSelf: 'center',
+    width: scale(80),
+    height: scale(55),
+    borderRadius: scale(2000),
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  fabTouchable: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

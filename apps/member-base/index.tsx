@@ -22,7 +22,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { NotificationScreen } from './src/screens/NotificationScreen';
 import { NewsDetailScreen } from './src/screens/NewsDetailScreen';
+import { NewsScreen } from './src/screens/NewsScreen';
 import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/components/CustomToast';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +63,7 @@ function MemberBaseAppContent(): React.JSX.Element {
     const appScreens = (
       <>
         <Stack.Screen name="Notifications" component={NotificationScreen} />
+        <Stack.Screen name="News" component={NewsScreen} />
         <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
       </>
     );
@@ -138,10 +141,11 @@ function MemberBaseAppContent(): React.JSX.Element {
       try {
         const appConfig = loadAppConfig();
         
-        // Deep comparison untuk detect perubahan (tidak termasuk primaryColor karena sekarang dari backend)
+        // Deep comparison untuk detect perubahan (termasuk primaryColor untuk development)
         const hasChanged = !lastConfig || 
           lastConfig.branding.logo !== appConfig.branding.logo ||
           lastConfig.branding.appName !== appConfig.branding.appName ||
+          lastConfig.branding.primaryColor !== appConfig.branding.primaryColor ||
           lastConfig.companyId !== appConfig.companyId ||
           lastConfig.companyName !== appConfig.companyName;
         
@@ -220,7 +224,7 @@ function MemberBaseAppContent(): React.JSX.Element {
         backgroundColor={colors.background}
       />
       <AppNavigator />
-      <Toast />
+      <Toast config={toastConfig} />
     </SafeAreaProvider>
   );
 }

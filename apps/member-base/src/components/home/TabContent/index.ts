@@ -7,4 +7,6 @@ export { AnalyticsTab } from './AnalyticsTab';
 export { NewsTab } from './NewsTab';
 export { BerandaTab } from './BerandaTab';
 export { AktivitasTab } from './AktivitasTab';
+export { BerandaNewsInfo, type BerandaNewsInfoProps } from './BerandaNewsInfo';
+export { RecentTransactions, type RecentTransactionsProps } from './RecentTransactions';
 

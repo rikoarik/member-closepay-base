@@ -87,7 +87,7 @@ class ConfigServiceImpl implements ConfigService {
     // Merge tenant config if tenantId is present
     if (config.tenantId || config.companyId) {
       const tenantId = config.tenantId || config.companyId;
-      const tenantConfig = getTenantConfig(tenantId);
+      const tenantConfig = getTenantConfig(tenantId as string);
 
       if (tenantConfig) {
         // Merge tenant config into app config
@@ -100,6 +100,8 @@ class ConfigServiceImpl implements ConfigService {
             ...config.branding,
             logo: tenantConfig.theme.logo || config.branding.logo,
             appName: tenantConfig.theme.appName || config.branding.appName,
+            // Preserve primaryColor dari app config (tidak di-override oleh tenant)
+            primaryColor: config.branding.primaryColor,
           },
         };
         // Emit event untuk notify subscribers
@@ -182,7 +184,7 @@ class ConfigServiceImpl implements ConfigService {
         // Merge dengan tenant config jika ada
         if (newConfig.tenantId || newConfig.companyId) {
           const tenantId = newConfig.tenantId || newConfig.companyId;
-          const tenantConfig = getTenantConfig(tenantId);
+          const tenantConfig = getTenantConfig(tenantId as string);
 
           if (tenantConfig) {
             this.config = {

@@ -17,7 +17,7 @@ export const appConfig: AppConfig = {
   enabledFeatures: [],
 
   // Enabled modules/plugins
-  enabledModules: [],
+  enabledModules: ['balance', 'payment'],
 
   // Home variant from tenant config
   homeVariant: 'member',
@@ -37,8 +37,8 @@ export const appConfig: AppConfig = {
       order: 2,
     },
     {
-      id: 'news',
-      label: 'Berita',
+      id: 'analytics',
+      label: 'Analitik',
       visible: true,
       order: 3,
     }
@@ -63,6 +63,7 @@ export const appConfig: AppConfig = {
   branding: {
     logo: 'assets/logo.png', // Set logo URL here (e.g., 'https://example.com/logo.png')
     appName: 'Member Base App',
+    primaryColor: '#076409', // Accent color - akan digunakan untuk background card dan semua warna interaktif
   },
 
   // Login configuration

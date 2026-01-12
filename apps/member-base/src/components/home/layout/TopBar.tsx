@@ -3,7 +3,7 @@
  * Header bar dengan logo, notification, dan menu
  */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { NotificationBing, HamburgerMenu } from 'iconsax-react-nativejs';
 import {
   getIconSize,
@@ -14,6 +14,9 @@ import {
   FontFamily,
 } from '@core/config';
 import { useTheme } from '@core/theme';
+import { LogoClosepay } from '@core/config/components/icons/LogoClosepay';
+import { appConfig } from 'apps/member-base/config/app.config';
+import { useTranslation } from '@core/i18n';
 
 interface TopBarProps {
   notificationCount?: number;
@@ -28,6 +31,7 @@ export const TopBar: React.FC<TopBarProps> = ({
 }) => {
   const { colors } = useTheme();
   const minTouchTarget = getMinTouchTarget();
+  const { t } = useTranslation();
 
   return (
     <View
@@ -41,21 +45,11 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Logo */}
       <View style={styles.logoContainer}>
         <View style={styles.logoCircle}>
-          <View
-            style={[styles.logoLayer, { backgroundColor: '#3B82F6' }]}
-          />
-          <View
-            style={[
-              styles.logoLayer,
-              { backgroundColor: '#8B5CF6', top: 4, left: 4 },
-            ]}
-          />
-          <View
-            style={[
-              styles.logoLayer,
-              { backgroundColor: '#EC4899', top: 8, left: 8 },
-            ]}
-          />
+          <LogoClosepay width={scale(40)} height={scale(40)} />
+        </View>
+        <View>
+          <Text style={styles.logoText}>{t('home.welcome')},</Text>
+          <Text style={styles.logoText}>{appConfig.companyName}</Text>
         </View>
       </View>
 
@@ -99,8 +93,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoContainer: {
-    width: scale(40),
-    height: scale(40),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(12),
   },
   logoCircle: {
     width: scale(40),
@@ -112,6 +107,11 @@ const styles = StyleSheet.create({
     height: scale(32),
     borderRadius: scale(16),
     position: 'absolute',
+  },
+
+  logoText: {
+    fontSize: getResponsiveFontSize('medium'),
+    fontFamily: FontFamily.monasans.semiBold,
   },
   topBarRight: {
     flexDirection: 'row',

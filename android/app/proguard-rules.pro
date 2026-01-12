@@ -168,3 +168,10 @@
 # Keep our custom app modules
 -keep class com.solusinegeri.app.** { *; }
 -keepnames class com.solusinegeri.app.** { *; }
+
+# React Native Vision Camera
+-keep class com.mrousavy.camera.** { *; }
+-keepclassmembers class com.mrousavy.camera.** { *; }
+-keep class com.mrousavy.camera.core.** { *; }
+-keep class com.mrousavy.camera.react.** { *; }
+

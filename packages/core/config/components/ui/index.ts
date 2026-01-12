@@ -20,5 +20,7 @@ export type { ScreenHeaderProps } from './ScreenHeader';
 export { DatePicker } from './DatePicker';
 export type { DatePickerProps } from './DatePicker';
 export { CustomRefreshControl } from './CustomRefreshControl';
+export { NewsInfo } from './NewsInfo';
+export type { NewsInfoProps, NewsItem } from './NewsInfo';
 // TopBarRefreshControl, PullToRefreshWrapper and related components removed in favor of native RefreshControl
 

@@ -53,7 +53,16 @@ export interface ScreenHeaderProps {
   /**
    * Custom container style
    */
+  /**
+   * Custom container style
+   */
   style?: any;
+
+  /**
+   * Custom text color (overrides theme color)
+   * Affects both title and back button
+   */
+  textColor?: string;
 }
 
 export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
@@ -64,12 +73,14 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   paddingHorizontal,
   paddingVertical,
   style,
+  textColor,
 }) => {
   const { colors } = useTheme();
   const navigation = useNavigation();
   const minTouchTarget = getMinTouchTarget();
   const horizontalPadding = paddingHorizontal ?? getHorizontalPadding();
   const verticalPadding = paddingVertical ?? moderateVerticalScale(14);
+  const effectiveTextColor = textColor ?? colors.text;
 
   const handleBackPress = () => {
     if (onBackPress) {
@@ -99,7 +110,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       >
         <ArrowLeft2
           size={getIconSize('medium')}
-          color={colors.text}
+          color={effectiveTextColor}
           variant="Linear"
         />
       </TouchableOpacity>
@@ -108,7 +119,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
         style={[
           styles.title,
           {
-            color: colors.text,
+            color: effectiveTextColor,
           },
         ]}
 
