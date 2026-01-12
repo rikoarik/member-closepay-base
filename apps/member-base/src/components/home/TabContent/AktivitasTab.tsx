@@ -17,12 +17,14 @@ interface AktivitasTabProps {
   isActive?: boolean;
   isVisible?: boolean;
   scrollEnabled?: boolean;
+  onScroll?: (event: any) => void;
 }
 
 export const AktivitasTab: React.FC<AktivitasTabProps> = React.memo(({
   isActive = true,
   isVisible = true,
   scrollEnabled = false,
+  onScroll,
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -187,6 +189,8 @@ export const AktivitasTab: React.FC<AktivitasTabProps> = React.memo(({
         ListEmptyComponent={renderEmpty}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

@@ -26,6 +26,7 @@ interface NewsTabProps {
   scrollEnabled?: boolean;
   searchState?: ReturnType<typeof useNewsState>;
   renderHeader?: boolean;
+  onScroll?: (event: any) => void;
 }
 
 const PAGE_SIZE = UI_CONSTANTS.DEFAULT_PAGE_SIZE;
@@ -134,7 +135,8 @@ export const NewsTab: React.FC<NewsTabProps> = ({
   onRefreshRequested,
   scrollEnabled = false,
   searchState,
-  renderHeader = true
+  renderHeader = true,
+  onScroll,
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();

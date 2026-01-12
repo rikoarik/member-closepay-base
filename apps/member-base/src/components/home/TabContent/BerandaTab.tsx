@@ -38,6 +38,14 @@ interface BerandaTabProps {
    * Semua props recent transactions di-forward ke RecentTransactions
    */
   recentTransactionsProps?: Omit<RecentTransactionsProps, 'onViewAllPress'>;
+  /**
+   * Callback untuk scroll event (untuk collapsible header)
+   */
+  onScroll?: (event: any) => void;
+  /**
+   * Enable/disable scroll
+   */
+  scrollEnabled?: boolean;
 }
 
 export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
@@ -46,6 +54,8 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
   onNavigateToNews,
   newsInfoProps,
   recentTransactionsProps,
+  onScroll,
+  scrollEnabled = true,
 }) => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -114,6 +124,9 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
       }
       showsVerticalScrollIndicator={false}
       pointerEvents={isActive ? 'auto' : 'none'}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      scrollEnabled={scrollEnabled}
     >
       {/**
         * Toggle show/hide saldo (balance)
