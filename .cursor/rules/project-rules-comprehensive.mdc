@@ -420,6 +420,138 @@ const data: ApiResponse<UserProfile> = response; // ✅
 
 ---
 
+## 💬 Code Comments Rules
+
+### Prinsip Dasar
+- **Minimal Comments**: Jangan terlalu banyak komentar di code
+- **Hanya yang Penting**: Hanya tambahkan komentar untuk logic yang kompleks atau tidak jelas
+- **Self-Documenting Code**: Gunakan nama variabel/fungsi yang jelas daripada komentar
+
+### ✅ DO - Komentar yang Diperbolehkan
+
+#### 1. Komentar untuk Logic Kompleks
+```typescript
+// ✅ BENAR - Komentar untuk logic yang kompleks
+// Calculate ideal zoom berdasarkan ukuran code
+// Semakin kecil code, semakin besar zoom yang dibutuhkan
+const idealZoom = Math.min(1 + (0.03 - ratio) * 50, maxZoom);
+```
+
+#### 2. Komentar untuk Business Logic yang Tidak Jelas
+```typescript
+// ✅ BENAR - Komentar untuk business logic
+// Auto-reset zoom ketika tidak ada deteksi selama 500ms
+// Shopee menggunakan reset yang lebih cepat untuk UX yang lebih baik
+if (now - lastScanned.current > 500 && targetZoom.current > 1) {
+  animateZoom(1);
+}
+```
+
+#### 3. Komentar untuk Workaround atau Temporary Fix
+```typescript
+// ✅ BENAR - Komentar untuk workaround
+// TODO: Fix issue dengan overlay menghalangi touch events
+// Temporary: menggunakan pointerEvents="box-none"
+<View style={styles.overlay} pointerEvents="box-none" />
+```
+
+#### 4. Komentar untuk Public API atau Export
+```typescript
+// ✅ BENAR - Komentar untuk public API
+/**
+ * QrScanScreen Component
+ * Handles QR/barcode scanning with camera
+ * @param isActive - Whether the screen is currently active
+ * @param onScanned - Callback when QR/barcode is scanned
+ */
+export const QrScanScreen: React.FC<QrScanScreenProps> = ({ isActive, onScanned }) => {
+  // ...
+};
+```
+
+### ❌ DON'T - Komentar yang Tidak Diperlukan
+
+#### Jangan Komentar untuk Code yang Sudah Jelas
+```typescript
+// ❌ SALAH - Komentar tidak perlu, code sudah jelas
+// Set active tab to scan
+setActiveTab('scan');
+
+// ✅ BENAR - Code sudah jelas, tidak perlu komentar
+setActiveTab('scan');
+```
+
+#### Jangan Komentar untuk Setiap Baris
+```typescript
+// ❌ SALAH - Terlalu banyak komentar
+const [activeTab, setActiveTab] = useState<QrTab>('scan'); // State untuk active tab
+const [flashEnabled, setFlashEnabled] = useState(false); // State untuk flash
+const [zoom, setZoom] = useState(1); // State untuk zoom level
+
+// ✅ BENAR - Tidak perlu komentar, code sudah jelas
+const [activeTab, setActiveTab] = useState<QrTab>('scan');
+const [flashEnabled, setFlashEnabled] = useState(false);
+const [zoom, setZoom] = useState(1);
+```
+
+#### Jangan Komentar untuk Import atau Simple Operations
+```typescript
+// ❌ SALAH - Komentar tidak perlu
+import { useTheme } from '@core/theme'; // Import theme hook
+import { useTranslation } from '@core/i18n'; // Import translation hook
+
+const { colors } = useTheme(); // Get colors from theme
+const { t } = useTranslation(); // Get translation function
+
+// ✅ BENAR - Tidak perlu komentar
+import { useTheme } from '@core/theme';
+import { useTranslation } from '@core/i18n';
+
+const { colors } = useTheme();
+const { t } = useTranslation();
+```
+
+#### Jangan Komentar yang Hanya Mengulang Code
+```typescript
+// ❌ SALAH - Komentar hanya mengulang code
+// Check if camera permission is granted
+if (cameraPermission === 'granted') {
+  // Show camera
+  showCamera();
+}
+
+// ✅ BENAR - Code sudah jelas, tidak perlu komentar
+if (cameraPermission === 'granted') {
+  showCamera();
+}
+```
+
+### Guidelines untuk Komentar
+
+1. **Gunakan nama yang jelas**: Lebih baik nama variabel/fungsi jelas daripada komentar
+   ```typescript
+   // ❌ SALAH
+   const x = calculateZoom(codeSize); // x is zoom level
+   
+   // ✅ BENAR
+   const zoomLevel = calculateZoom(codeSize);
+   ```
+
+2. **Komentar menjelaskan "mengapa", bukan "apa"**: Code sudah menjelaskan "apa", komentar harus menjelaskan "mengapa"
+   ```typescript
+   // ✅ BENAR - Menjelaskan "mengapa"
+   // Cooldown untuk menghindari zoom terlalu sering yang menyebabkan jitter
+   if (now - lastZoomTime.current > 400) {
+     animateZoom(desiredZoom);
+   }
+   ```
+
+3. **Hapus komentar yang sudah tidak relevan**: Jangan biarkan komentar lama yang tidak sesuai dengan code saat ini
+
+4. **Gunakan JSDoc untuk public API**: Hanya untuk fungsi/komponen yang di-export dan digunakan oleh module lain
+
+---
+
 ## 📛 Naming Conventions
 
 | Type | Convention | Example |
@@ -734,6 +866,8 @@ const { width, height, isTablet } = useDimensions();
 - [ ] Dependency rules dipatuhi (Plugins → Core)
 - [ ] Component menggunakan responsive utilities
 - [ ] Translations tersedia untuk ID & EN
+- [ ] Komentar hanya untuk logic kompleks atau penting saja
+- [ ] Tidak ada komentar yang hanya mengulang code
 
 ### Sebelum PR
 - [ ] `npm run lint` pass

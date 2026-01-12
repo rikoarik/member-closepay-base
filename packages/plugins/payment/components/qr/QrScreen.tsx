@@ -4,39 +4,28 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Linking,
-    ActivityIndicator,
     Animated,
     Easing,
-    Platform,
-    PermissionsAndroid,
     Dimensions,
-    LayoutAnimation,
+    Platform,
     UIManager,
+    ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { Gallery, Flash, ArrowDown2, ArrowLeft, Scanner, ScanBarcode, TickCircle } from 'iconsax-react-nativejs';
+import { ArrowDown2, ArrowLeft2, Scanner, ScanBarcode, TickCircle } from 'iconsax-react-nativejs';
 import {
     scale,
-    getHorizontalPadding,
     ScreenHeader,
-    getVerticalPadding,
     FontFamily,
+    getHorizontalPadding,
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import {
-    Camera,
-    useCameraDevice,
-    useCodeScanner,
-    CameraPermissionStatus,
-    requestCameraPermission,
-    getCameraPermissionStatus,
-} from 'react-native-vision-camera';
-import { launchImageLibrary, type ImageLibraryOptions } from 'react-native-image-picker';
+import { QrScanScreen } from './QrScanScreen';
+import { QrDisplayScreen } from './QrDisplayScreen';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 type QrTab = 'display' | 'scan';
 type BalanceType = 'plafon' | 'makan' | 'utama';
@@ -54,21 +43,15 @@ export const QrScreen = () => {
     const insets = useSafeAreaInsets();
 
     const [activeTab, setActiveTab] = useState<QrTab>('scan');
-    const [flashEnabled, setFlashEnabled] = useState(false);
-    const [cameraPermission, setCameraPermission] = useState<CameraPermissionStatus>('not-determined');
-    const [isRequestingPermission, setIsRequestingPermission] = useState(false);
-    const [scannedValue, setScannedValue] = useState<string | null>(null);
-    const [galleryResult, setGalleryResult] = useState<string | null>(null);
     const [selectedBalance, setSelectedBalance] = useState<BalanceType>('plafon');
     const [showBalanceDropdown, setShowBalanceDropdown] = useState(false);
-    const [scanType, setScanType] = useState<'qr' | 'barcode'>('qr');
-    const [isCameraInitializing, setIsCameraInitializing] = useState(true);
-    const [zoom, setZoom] = useState(1);
+    const [scanHeaderActions, setScanHeaderActions] = useState<React.ReactNode>(null);
 
-    const scanAnim = useRef(new Animated.Value(0)).current;
-    const overlayHeightAnim = useRef(new Animated.Value(260)).current;
-    const tabIndicatorAnim = useRef(new Animated.Value(0)).current;
     const dropdownAnim = useRef(new Animated.Value(0)).current;
+    const scrollX = useRef(new Animated.Value(0)).current;
+    const pagerRef = useRef<ScrollView | null>(null);
+    const tabLayouts = useRef<{ [key: string]: { x: number; width: number } }>({});
+    const isScrollingRef = useRef(false);
 
     // Enable LayoutAnimation on Android
     useEffect(() => {
@@ -93,53 +76,74 @@ export const QrScreen = () => {
         });
     }, [dropdownAnim]);
 
-    // Animate tab indicator when activeTab changes
-    useEffect(() => {
-        Animated.spring(tabIndicatorAnim, {
-            toValue: activeTab === 'scan' ? 0 : 1,
-            tension: 80,
-            friction: 10,
-            useNativeDriver: true,
-        }).start();
-    }, [activeTab, tabIndicatorAnim]);
+    // Animate tab indicator berdasarkan scroll position (smooth saat swipe dan klik)
+    const tabIndicatorTranslateX = scrollX.interpolate({
+        inputRange: [0, width],
+        outputRange: [
+            tabLayouts.current['scan']?.x || 0,
+            tabLayouts.current['display']?.x || scale(160),
+        ],
+        extrapolate: 'clamp',
+    });
 
-    // Animate overlay height when scanType changes
-    useEffect(() => {
-        Animated.timing(overlayHeightAnim, {
-            toValue: scanType === 'barcode' ? scale(140) : scale(260),
-            duration: 200,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: false, // height cannot use native driver
-        }).start();
-    }, [scanType, overlayHeightAnim]);
+    // Interpolasi untuk Scan Tab (index 0)
+    const scanTabActiveOpacity = scrollX.interpolate({
+        inputRange: [-width, 0, width],
+        outputRange: [0, 1, 0],
+        extrapolate: 'clamp',
+    });
 
-    // Animation Loop
-    useEffect(() => {
-        const startAnimation = () => {
-            Animated.loop(
-                Animated.sequence([
-                    Animated.timing(scanAnim, {
-                        toValue: 1,
-                        duration: 2000,
-                        easing: Easing.inOut(Easing.quad),
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(scanAnim, {
-                        toValue: 0,
-                        duration: 2000,
-                        easing: Easing.inOut(Easing.quad),
-                        useNativeDriver: true,
-                    }),
-                ])
-            ).start();
-        };
+    const scanTabInactiveOpacity = scrollX.interpolate({
+        inputRange: [-width, 0, width],
+        outputRange: [1, 0, 1],
+        extrapolate: 'clamp',
+    });
 
-        if (activeTab === 'scan') {
-            startAnimation();
-        } else {
-            scanAnim.setValue(0);
+    // Interpolasi untuk Display Tab (index 1)
+    const displayTabActiveOpacity = scrollX.interpolate({
+        inputRange: [0, width, width * 2],
+        outputRange: [0, 1, 0],
+        extrapolate: 'clamp',
+    });
+
+    const displayTabInactiveOpacity = scrollX.interpolate({
+        inputRange: [0, width, width * 2],
+        outputRange: [1, 0, 1],
+        extrapolate: 'clamp',
+    });
+
+    // Handle pager scroll end untuk update activeTab
+    const handlePagerMomentumEnd = useCallback(
+        (event: any) => {
+            const offsetX = event.nativeEvent.contentOffset.x;
+            const index = Math.round(offsetX / width);
+            const newTab: QrTab = index === 0 ? 'scan' : 'display';
+            if (newTab !== activeTab) {
+                setActiveTab(newTab);
+            }
+        },
+        [activeTab]
+    );
+
+    // Sync scroll position saat activeTab berubah
+    useEffect(() => {
+        if (pagerRef.current && !isScrollingRef.current) {
+            const index = activeTab === 'scan' ? 0 : 1;
+            const targetX = index * width;
+            
+            isScrollingRef.current = true;
+            pagerRef.current.scrollTo({
+                x: targetX,
+                animated: true,
+            });
+            
+            // Reset scrolling flag after animation completes
+            setTimeout(() => {
+                isScrollingRef.current = false;
+            }, 300);
         }
-    }, [activeTab]);
+    }, [activeTab, width]);
+
 
     const balanceOptions: BalanceOption[] = useMemo(
         () => [
@@ -155,315 +159,118 @@ export const QrScreen = () => {
         [balanceOptions, selectedBalance]
     );
 
-    const cameraDevice = useCameraDevice('back');
-    // Auto-select best format for scanning (1080p @ 60fps preferred)
-    const format = useMemo(() => {
-        return cameraDevice?.formats.find((f: { videoWidth: number; videoHeight: number; maxFps: number; }) =>
-            f.videoWidth === 1920 && f.videoHeight === 1080 && f.maxFps >= 60
-        ) || cameraDevice?.formats[0];
-    }, [cameraDevice]);
-
-    // Check if camera device is ready
-    useEffect(() => {
-        if (cameraDevice) {
-            setIsCameraInitializing(false);
-        } else {
-            const timer = setTimeout(() => {
-                setIsCameraInitializing(false);
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [cameraDevice]);
-
-    // Permission Check
-    useEffect(() => {
-        const checkAndRequestPermission = async () => {
-            try {
-                // On Android, use PermissionsAndroid API directly
-                if (Platform.OS === 'android') {
-                    const androidPermission = await PermissionsAndroid.check(
-                        PermissionsAndroid.PERMISSIONS.CAMERA
-                    );
-
-                    if (!androidPermission) {
-                        setIsRequestingPermission(true);
-                        try {
-                            const result = await PermissionsAndroid.request(
-                                PermissionsAndroid.PERMISSIONS.CAMERA,
-                                {
-                                    title: 'Izin Kamera',
-                                    message: 'Aplikasi membutuhkan akses kamera untuk memindai kode QR',
-                                    buttonPositive: 'Izinkan',
-                                    buttonNegative: 'Tolak',
-                                }
-                            );
-                            if (result === PermissionsAndroid.RESULTS.GRANTED) {
-                                setCameraPermission('granted');
-                            } else {
-                                setCameraPermission('denied');
-                            }
-                        } catch (err) {
-                            console.error('[QrScreen] Android permission error:', err);
-                        } finally {
-                            setIsRequestingPermission(false);
-                        }
-                    } else {
-                        setCameraPermission('granted');
-                    }
-                } else {
-                    // iOS
-                    const status = await getCameraPermissionStatus();
-                    setCameraPermission(status);
-                    if (status === 'not-determined') {
-                        setIsRequestingPermission(true);
-                        try {
-                            const newStatus = await requestCameraPermission();
-                            setCameraPermission(newStatus);
-                        } finally {
-                            setIsRequestingPermission(false);
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error('[QrScreen] Permission check error:', e);
-            }
-        };
-
-        if (activeTab === 'scan') {
-            checkAndRequestPermission();
-        }
-    }, [activeTab]);
-
-    const lastScanned = useRef(0);
-    const targetZoom = useRef(1);
-    const zoomAnim = useRef(new Animated.Value(1)).current;
-
-    // Listen for zoom animation changes and update the actual zoom state
-    useEffect(() => {
-        const listenerId = zoomAnim.addListener(({ value }) => {
-            setZoom(value);
-        });
-        return () => zoomAnim.removeListener(listenerId);
-    }, [zoomAnim]);
-
-    // Animate zoom towards target
-    const animateZoom = useCallback((target: number) => {
-        targetZoom.current = target;
-        Animated.timing(zoomAnim, {
-            toValue: target,
-            duration: 150,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: false,
-        }).start();
-    }, [zoomAnim]);
-
-    // Auto-reset zoom effect
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const now = Date.now();
-            // If inactive for > 1s and zoom is active, animate back to 1
-            if (now - lastScanned.current > 1000 && targetZoom.current > 1) {
-                animateZoom(1);
-            }
-        }, 100);
-
-        return () => clearInterval(interval);
-    }, [animateZoom]);
-
-    const codeScanner = useCodeScanner({
-        codeTypes: ['qr', 'ean-13', 'ean-8', 'code-128'],
-        onCodeScanned: (codes) => {
-            if (!codes.length) return;
-
-            const first = codes[0];
-            lastScanned.current = Date.now();
-
-            // Auto-zoom logic
-            if (first.frame) {
-                const { width: codeWidth, height: codeHeight } = first.frame;
-                const screenArea = width * height;
-                const codeArea = codeWidth * codeHeight;
-                const ratio = codeArea / screenArea;
-
-                // If code is small, calculate ideal zoom
-                if (ratio < 0.08 && targetZoom.current < 4) {
-                    const desiredZoom = Math.min(targetZoom.current + 0.5, 4);
-                    animateZoom(desiredZoom);
-                }
-            }
-
-            setScannedValue(first?.value ?? null);
-            if (first?.type === 'qr') setScanType('qr');
-            else setScanType('barcode');
-        },
-    });
-
-    const handlePickFromGallery = useCallback(async () => {
-        const options: ImageLibraryOptions = {
-            mediaType: 'photo',
-            selectionLimit: 1,
-            includeBase64: false,
-        };
-        const result = await launchImageLibrary(options);
-        if (result.didCancel || !result.assets?.length) return;
-
-        const asset = result.assets[0];
-        const label = asset.fileName || asset.uri || 'Gambar dipilih';
-        setGalleryResult(label);
-        setScannedValue(label);
+    const handleScanned = useCallback((value: string, type: 'qr' | 'barcode') => {
+        // Handle scanned QR/barcode
+        console.log('Scanned:', value, type);
     }, []);
 
-    const permissionDenied = cameraPermission === 'denied' || cameraPermission === 'restricted';
-    const canShowCamera =
-        activeTab === 'scan' &&
-        !isCameraInitializing &&
-        cameraDevice &&
-        cameraPermission === 'granted';
-
-    const renderScanTab = () => {
-        if (isRequestingPermission) {
-            return (
-                <View style={[styles.centerBox, styles.absoluteCenter]}>
-                    <ActivityIndicator color={colors.primary} size="large" />
-                    <Text style={{ color: 'white', marginTop: 12 }}>
-                        {t('qr.requestingPermission') || 'Meminta izin kamera...'}
-                    </Text>
-                </View>
-            );
-        }
-
-        if (permissionDenied) {
-            return (
-                <View style={[styles.centerBox, styles.absoluteCenter, { backgroundColor: 'black' }]}>
-                    <Text style={[styles.permissionText, { color: 'white' }]}>
-                        {t('qr.permissionDenied') || 'Izin kamera ditolak. Buka pengaturan.'}
-                    </Text>
-                    <TouchableOpacity
-                        style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
-                        onPress={() => Linking.openSettings()}
-                    >
-                        <Text style={[styles.primaryBtnText, { color: colors.surface }]}>
-                            {t('qr.openSettings') || 'Buka Settings'}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            );
-        }
-
-        return (
-            <View style={StyleSheet.absoluteFill}>
-                {canShowCamera ? (
-                    <Camera
-                        style={StyleSheet.absoluteFill}
-                        device={cameraDevice}
-                        isActive={activeTab === 'scan'}
-                        codeScanner={codeScanner}
-                        torch={flashEnabled ? 'on' : 'off'}
-                        zoom={zoom}
-                        format={format}
-                    />
-                ) : (
-                    <View style={[styles.cameraFallback, { backgroundColor: 'black' }]}>
-                        <ActivityIndicator color={colors.primary} size="large" />
-                        <Text style={{ color: 'white', marginTop: 12 }}>
-                            {isCameraInitializing ? 'Memuat Kamera...' : 'Kamera tidak tersedia'}
-                        </Text>
-                    </View>
-                )}
-
-                {/* Dark Overlay with Scan Window Hole */}
-                <View style={styles.overlayContainer}>
-                    <View style={styles.overlayTop} />
-                    <Animated.View style={[styles.overlayMiddle, { height: overlayHeightAnim }]}>
-                        <View style={styles.overlaySide} />
-                        <View style={[
-                            styles.scanWindow,
-                            scanType === 'barcode' ? styles.scanWindowBarcode : styles.scanWindowQr
-                        ]}>
-                            {/* Corner Markers */}
-                            <View style={[styles.corner, styles.topLeft, { borderColor: colors.primary }]} />
-                            <View style={[styles.corner, styles.topRight, { borderColor: colors.primary }]} />
-                            <View style={[styles.corner, styles.bottomLeft, { borderColor: colors.primary }]} />
-                            <View style={[styles.corner, styles.bottomRight, { borderColor: colors.primary }]} />
-
-                            {/* Scan Line */}
-                            <Animated.View
-                                style={[
-                                    styles.scanLine,
-                                    {
-                                        backgroundColor: colors.primary,
-                                        transform: [{
-                                            translateY: scanAnim.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [0, scanType === 'barcode' ? scale(140) : scale(260)],
-                                            }),
-                                        }],
-                                    },
-                                ]}
-                            />
-                        </View>
-                        <View style={styles.overlaySide} />
-                    </Animated.View>
-                    <View style={styles.overlayBottom} />
-                </View>
-
-                {/* Floating Controls */}
-                <View style={[styles.floatingControls, { paddingBottom: insets.bottom + 80 }]}>
-
-
-                    {(scannedValue || galleryResult) && (
-                        <View style={[styles.resultToast, { backgroundColor: 'rgba(0,0,0,0.8)', borderColor: colors.primary }]}>
-                            <Text style={[styles.resultLabel, { color: '#ccc' }]}>
-                                {t('qr.scanResult') || 'Hasil:'}
-                            </Text>
-                            <Text style={[styles.resultValue, { color: 'white' }]} numberOfLines={1}>
-                                {scannedValue || galleryResult}
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </View >
-        );
-    };
-
     return (
-        <View style={[styles.container]}>
-            {/* Full Screen Camera Layer */}
-            {activeTab === 'scan' ? renderScanTab() : (
-                <View style={[styles.centerBox, { backgroundColor: colors.background }]}>
-                    <Text style={{ color: colors.text }}>QR Display UI Placeholder</Text>
+        <View style={styles.container}>
+            {/* Horizontal Pager untuk Swipe */}
+            <Animated.ScrollView
+                ref={pagerRef}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                scrollEventThrottle={8}
+                scrollEnabled={true}
+                nestedScrollEnabled={true}
+                directionalLockEnabled={true}
+                decelerationRate="fast"
+                snapToInterval={width}
+                removeClippedSubviews={true}
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                    { useNativeDriver: true }
+                )}
+                onMomentumScrollEnd={handlePagerMomentumEnd}
+                style={StyleSheet.absoluteFill}
+            >
+                {/* Scan Tab */}
+                <View style={{ width }} pointerEvents={activeTab === 'scan' ? 'auto' : 'none'}>
+                    <QrScanScreen 
+                        isActive={activeTab === 'scan'} 
+                        onScanned={handleScanned}
+                        onHeaderActionsReady={setScanHeaderActions}
+                    />
                 </View>
-            )}
+
+                {/* Display Tab */}
+                <View style={{ width }} pointerEvents={activeTab === 'display' ? 'auto' : 'none'}>
+                    <QrDisplayScreen isActive={activeTab === 'display'} selectedBalance={selectedBalance} />
+                </View>
+            </Animated.ScrollView>
 
             {/* Header Overlay */}
             <SafeAreaView style={styles.headerOverlay}>
-                <ScreenHeader
-                    title={t('qr.title')}
-                    onBackPress={() => navigation.goBack()}
-                    textColor={activeTab === 'scan' ? 'white' : colors.text}
-                    rightComponent={activeTab === 'scan' ? (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: scale(8) }}>
-                            <TouchableOpacity onPress={() => setFlashEnabled((p) => !p)}>
-                                <Flash
+                <View style={[styles.headerContainer, { paddingEnd: getHorizontalPadding() }]}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => navigation.goBack()}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <View style={{ position: 'relative', width: scale(24), height: scale(24), alignItems: 'center', justifyContent: 'center' }}>
+                            {/* White icon (for scan tab) */}
+                            <Animated.View style={{ opacity: scanTabActiveOpacity, position: 'absolute' }}>
+                                <ArrowLeft2
                                     size={scale(24)}
-                                    color={flashEnabled ? '#FFD700' : 'white'}
-                                    variant={flashEnabled ? "Bold" : "Linear"}
+                                    color="white"
+                                    variant="Linear"
                                 />
-                            </TouchableOpacity>
-                            <View style={{ width: scale(16) }} />
-                            <TouchableOpacity onPress={handlePickFromGallery}>
-                                <Gallery size={scale(24)} color="white" />
-                            </TouchableOpacity>
+                            </Animated.View>
+                            {/* Dark icon (for display tab) */}
+                            <Animated.View style={{ opacity: displayTabActiveOpacity }}>
+                                <ArrowLeft2
+                                    size={scale(24)}
+                                    color={colors.text}
+                                    variant="Linear"
+                                />
+                            </Animated.View>
                         </View>
-                    ) : undefined}
-                />
-
+                    </TouchableOpacity>
+                    
+                    <View style={{ flex: 1, position: 'relative', alignItems: 'flex-start', justifyContent: 'center' }}>
+                        {/* White title (for scan tab) */}
+                        <Animated.Text
+                            style={[
+                                styles.headerTitle,
+                                {
+                                    color: 'white',
+                                    opacity: scanTabActiveOpacity,
+                                    position: 'absolute',
+                                },
+                            ]}
+                        >
+                            {t('qr.title')}
+                        </Animated.Text>
+                        {/* Dark title (for display tab) */}
+                        <Animated.Text
+                            style={[
+                                styles.headerTitle,
+                                {
+                                    color: colors.text,
+                                    opacity: displayTabActiveOpacity,
+                                },
+                            ]}
+                        >
+                            {t('qr.title')}
+                        </Animated.Text>
+                    </View>
+                    
+                    {activeTab === 'scan' && scanHeaderActions && (
+                        <View style={styles.rightComponent}>
+                            {scanHeaderActions}
+                        </View>
+                    )}
+                </View>
             </SafeAreaView>
 
             {/* Bottom Tab Switcher Overlay */}
-            <View style={[styles.bottomTabOverlay, { backgroundColor: colors.background, paddingBottom: insets.bottom + 20 }]}>
+            <View 
+                style={[styles.bottomTabOverlay, { backgroundColor: colors.background, paddingBottom: insets.bottom + 20 }]}
+            >
                 {/* Balance Selection Section */}
-                <View style={{ marginBottom: scale(16) }}>
+                <View style={{ marginBottom: scale(16) }} pointerEvents="auto">
                     <TouchableOpacity
                         onPress={toggleBalanceDropdown}
                         style={{
@@ -478,12 +285,12 @@ export const QrScreen = () => {
                             borderBottomRightRadius: showBalanceDropdown ? 0 : scale(16),
                             borderWidth: 1,
                             borderBottomWidth: showBalanceDropdown ? 0 : 1,
-                            borderColor: '#E2E8F0', // Slate-200
+                            borderColor: '#E2E8F0',
                         }}
                     >
                         <View>
                             <Text style={{
-                                color: '#94A3B8', // Slate-400
+                                color: '#94A3B8',
                                 fontSize: scale(12),
                                 fontFamily: FontFamily.monasans.medium,
                                 marginBottom: scale(2)
@@ -566,7 +373,7 @@ export const QrScreen = () => {
                 </View>
 
                 {/* Custom Tabs with Icons */}
-                <View style={[styles.customTabsContainer]}>
+                <View style={styles.customTabsContainer}>
                     <View style={[styles.customTabsWrapper, { backgroundColor: colors.surface }]}>
                         {/* Sliding Indicator */}
                         <Animated.View
@@ -574,52 +381,139 @@ export const QrScreen = () => {
                                 styles.customTabIndicator,
                                 {
                                     backgroundColor: colors.primary,
+                                    width: tabLayouts.current[activeTab]?.width || scale(160),
                                     transform: [{
-                                        translateX: tabIndicatorAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [0, scale(160)],
-                                        })
+                                        translateX: tabIndicatorTranslateX
                                     }]
                                 }
                             ]}
+                            pointerEvents="none"
                         />
 
                         {/* Scan Tab */}
                         <TouchableOpacity
+                            key="scan"
                             style={styles.customTab}
-                            onPress={() => setActiveTab('scan')}
-                            activeOpacity={0.8}
+                            onPress={() => {
+                                if (activeTab !== 'scan') {
+                                    setActiveTab('scan');
+                                }
+                            }}
+                            activeOpacity={0.9}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            onLayout={(event) => {
+                                const { x, width: tabWidth } = event.nativeEvent.layout;
+                                tabLayouts.current['scan'] = { x, width: tabWidth };
+                            }}
                         >
-                            <Scanner
-                                size={scale(20)}
-                                color={activeTab === 'scan' ? 'white' : colors.text}
-                                variant={activeTab === 'scan' ? 'Bold' : 'Linear'}
-                            />
-                            <Text style={[
-                                styles.customTabText,
-                                { color: activeTab === 'scan' ? 'white' : colors.text }
-                            ]}>
-                                {t('qr.scan') || 'Pindai'}
-                            </Text>
+                            <View style={[styles.tab, {
+                                paddingHorizontal: scale(8),
+                                paddingVertical: scale(12),
+                            }]} pointerEvents="box-none">
+                                {/* Icon Container */}
+                                <View style={styles.iconContainer} pointerEvents="none">
+                                    <Animated.View style={[styles.iconOverlay, { opacity: scanTabInactiveOpacity }]} pointerEvents="none">
+                                        <Scanner
+                                            size={scale(20)}
+                                            color={colors.text}
+                                            variant="Linear"
+                                        />
+                                    </Animated.View>
+                                    <Animated.View style={[styles.iconOverlay, { opacity: scanTabActiveOpacity }]} pointerEvents="none">
+                                        <Scanner
+                                            size={scale(20)}
+                                            color="white"
+                                            variant="Bold"
+                                        />
+                                    </Animated.View>
+                                </View>
+                                
+                                {/* Text Container */}
+                                <View style={styles.textContainer} pointerEvents="none">
+                                    <Animated.Text style={[
+                                        styles.customTabText,
+                                        {
+                                            color: colors.text,
+                                            opacity: scanTabInactiveOpacity,
+                                        }
+                                    ]}>
+                                        {t('qr.scan') || 'Pindai'}
+                                    </Animated.Text>
+                                    <Animated.Text style={[
+                                        styles.customTabText,
+                                        styles.activeTabText,
+                                        {
+                                            color: 'white',
+                                            opacity: scanTabActiveOpacity,
+                                        }
+                                    ]}>
+                                        {t('qr.scan') || 'Pindai'}
+                                    </Animated.Text>
+                                </View>
+                            </View>
                         </TouchableOpacity>
 
                         {/* Display Tab */}
                         <TouchableOpacity
+                            key="display"
                             style={styles.customTab}
-                            onPress={() => setActiveTab('display')}
-                            activeOpacity={0.8}
+                            onPress={() => {
+                                if (activeTab !== 'display') {
+                                    setActiveTab('display');
+                                }
+                            }}
+                            activeOpacity={0.9}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            onLayout={(event) => {
+                                const { x, width: tabWidth } = event.nativeEvent.layout;
+                                tabLayouts.current['display'] = { x, width: tabWidth };
+                            }}
                         >
-                            <ScanBarcode
-                                size={scale(20)}
-                                color={activeTab === 'display' ? 'white' : colors.text}
-                                variant={activeTab === 'display' ? 'Bold' : 'Linear'}
-                            />
-                            <Text style={[
-                                styles.customTabText,
-                                { color: activeTab === 'display' ? 'white' : colors.text }
-                            ]}>
-                                {t('qr.display') || 'Kode QR'}
-                            </Text>
+                            <View style={[styles.tab, {
+                                paddingHorizontal: scale(8),
+                                paddingVertical: scale(12),
+                            }]} pointerEvents="box-none">
+                                {/* Icon Container */}
+                                <View style={styles.iconContainer} pointerEvents="none">
+                                    <Animated.View style={[styles.iconOverlay, { opacity: displayTabInactiveOpacity }]} pointerEvents="none">
+                                        <ScanBarcode
+                                            size={scale(20)}
+                                            color={colors.text}
+                                            variant="Linear"
+                                        />
+                                    </Animated.View>
+                                    <Animated.View style={[styles.iconOverlay, { opacity: displayTabActiveOpacity }]} pointerEvents="none">
+                                        <ScanBarcode
+                                            size={scale(20)}
+                                            color="white"
+                                            variant="Bold"
+                                        />
+                                    </Animated.View>
+                                </View>
+                                
+                                {/* Text Container */}
+                                <View style={styles.textContainer} pointerEvents="none">
+                                    <Animated.Text style={[
+                                        styles.customTabText,
+                                        {
+                                            color: colors.text,
+                                            opacity: displayTabInactiveOpacity,
+                                        }
+                                    ]}>
+                                        {t('qr.display') || 'Kode QR'}
+                                    </Animated.Text>
+                                    <Animated.Text style={[
+                                        styles.customTabText,
+                                        styles.activeTabText,
+                                        {
+                                            color: 'white',
+                                            opacity: displayTabActiveOpacity,
+                                        }
+                                    ]}>
+                                        {t('qr.display') || 'Kode QR'}
+                                    </Animated.Text>
+                                </View>
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -632,94 +526,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    centerBox: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    absoluteCenter: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 0,
-    },
-    cameraFallback: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    overlayContainer: {
-        ...StyleSheet.absoluteFillObject,
-        zIndex: 1,
-    },
-    overlayTop: {
-        flex: 0.7,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    },
-    overlayMiddle: {
-        flexDirection: 'row',
-        height: scale(260),
-    },
-    overlayBottom: {
-        flex: 1.3,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    },
-    overlaySide: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    },
-    scanWindow: {
-        borderColor: 'transparent',
-    },
-    scanWindowQr: {
-        width: scale(260),
-        height: scale(260)
-    },
-    scanWindowBarcode: {
-        width: scale(300),
-        height: scale(140)
-    },
-    corner: {
-        position: 'absolute',
-        width: scale(20),
-        height: scale(20),
-        borderWidth: 4,
-        borderColor: 'white'
-    },
-    topLeft: {
-        top: 0,
-        left: 0,
-        borderRightWidth: 0,
-        borderBottomWidth: 0
-    },
-    topRight: {
-        top: 0,
-        right: 0,
-        borderLeftWidth: 0,
-        borderBottomWidth: 0
-    },
-    bottomLeft: {
-        bottom: 0,
-        left: 0,
-        borderRightWidth: 0,
-        borderTopWidth: 0
-    },
-    bottomRight: {
-        bottom: 0,
-        right: 0,
-        borderLeftWidth: 0,
-        borderTopWidth: 0
-    },
-    scanLine: {
-        width: '100%',
-        height: 2,
-        shadowColor: '#00ff00',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 4,
-        shadowRadius: scale(10),
-    },
     headerOverlay: {
         position: 'absolute',
         top: 0,
@@ -727,104 +533,34 @@ const styles = StyleSheet.create({
         right: 0,
         zIndex: 10
     },
-    headerRow: {
+    headerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: getHorizontalPadding(),
-        paddingVertical: getVerticalPadding()
     },
     backButton: {
-        padding: 8,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        borderRadius: scale(20)
+        padding: scale(8),
+        minWidth: scale(40),
+        minHeight: scale(40),
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     headerTitle: {
-        color: 'white',
-        fontSize: 18,
-        fontFamily: FontFamily.monasans.semiBold
+        fontSize: scale(18),
+        fontFamily: FontFamily.monasans.bold,
+        marginLeft: scale(8),
     },
-    balanceContainer: {
-        alignItems: 'center',
-        marginTop: scale(8)
-    },
-    balancePill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: scale(16),
-        paddingVertical: scale(8),
-        borderRadius: scale(20),
-        gap: scale(8)
-    },
-    balanceLabelSmall: {
-        color: '#ddd',
-        fontSize: scale(10),
-        fontFamily: FontFamily.monasans.medium
-    },
-    balanceValueText: {
-        color: 'white',
-        fontSize: scale(14),
-        fontFamily: FontFamily.monasans.bold
-    },
-    floatingControls: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-        alignItems: 'center'
-    },
-    actionRow: {
-        flexDirection: 'row',
-        gap: scale(40),
-        marginBottom: scale(20)
-    },
-    circleButton: {
-        alignItems: 'center',
-        gap: scale(4)
-    },
-    circleButtonText: {
-        color: 'white',
-        fontSize: scale(12),
-        fontFamily: FontFamily.monasans.medium
-    },
-    resultToast: {
-        position: 'absolute',
-        bottom: scale(120),
-        padding: scale(16),
-        borderRadius: scale(12),
-        borderLeftWidth: scale(4),
-        width: '90%',
-    },
-    resultLabel: {
-        fontSize: scale(12),
-        fontFamily: FontFamily.monasans.medium
-    },
-    resultValue: {
-        fontSize: scale(16),
-        fontFamily: FontFamily.monasans.bold
+    rightComponent: {
+        minWidth: scale(40),
+        alignItems: 'flex-end',
     },
     bottomTabOverlay: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 20,
-        padding: scale(20)
-    },
-    permissionText: {
-        textAlign: 'center',
-        fontSize: scale(14),
-        marginBottom: scale(14)
-    },
-    primaryBtn: {
-        paddingVertical: scale(12),
-        paddingHorizontal: getHorizontalPadding(),
-        borderRadius: scale(12)
-    },
-    primaryBtnText: {
-        fontSize: scale(14),
-        fontFamily: FontFamily.monasans.semiBold
+        zIndex: 1000,
+        elevation: 1000,
+        padding: scale(20),
     },
     customTabsContainer: {
         width: '100%',
@@ -835,7 +571,7 @@ const styles = StyleSheet.create({
         borderRadius: scale(100),
         padding: scale(4),
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'visible',
     },
     customTabIndicator: {
         position: 'absolute',
@@ -848,17 +584,38 @@ const styles = StyleSheet.create({
     },
     customTab: {
         flex: 1,
+        borderRadius: scale(999),
+        zIndex: 1,
+    },
+    tab: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: scale(8),
-        paddingVertical: scale(12),
-        borderRadius: scale(999),
-        zIndex: 1,
+        minHeight: scale(40),
+    },
+    iconContainer: {
+        width: scale(20),
+        height: scale(20),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    iconOverlay: {
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    textContainer: {
+        minHeight: scale(20),
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     customTabText: {
         fontSize: scale(14),
         fontFamily: FontFamily.monasans.semiBold
+    },
+    activeTabText: {
+        position: 'absolute',
     },
 });
 
