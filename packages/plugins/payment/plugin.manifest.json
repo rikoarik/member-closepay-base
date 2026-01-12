@@ -20,6 +20,7 @@
             "TopUpMemberSuccessScreen",
             "TapKartuSummaryScreen",
             "QrScreen",
+            "EditQuickAmountScreen",
             "PinInput",
             "WithdrawConfirmModal",
             "AutoWithdrawModal"
@@ -41,7 +42,8 @@
             "TopUpMemberPin": "TopUpMemberPinScreen",
             "TopUpMemberSuccess": "TopUpMemberSuccessScreen",
             "TapKartuSummary": "TapKartuSummaryScreen",
-            "Qr": "QrScreen"
+            "Qr": "QrScreen",
+            "EditQuickAmount": "EditQuickAmountScreen"
         }
     },
     "routes": [
@@ -163,6 +165,18 @@
             ],
             "meta": {
                 "title": "QR Code",
+                "showInMenu": false
+            }
+        },
+        {
+            "name": "EditQuickAmount",
+            "path": "/payment/qr/edit-quick-amount",
+            "component": "EditQuickAmountScreen",
+            "permissions": [
+                "payment:qr"
+            ],
+            "meta": {
+                "title": "Edit Quick Amount",
                 "showInMenu": false
             }
         }

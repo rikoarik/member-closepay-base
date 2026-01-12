@@ -39,6 +39,7 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     TopUpMemberSuccessScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberSuccessScreen'),
     TapKartuSummaryScreen: () => import('../../../plugins/payment/components/topup/TapKartuSummaryScreen'),
     QrScreen: () => import('../../../plugins/payment/components/qr/QrScreen'),
+    EditQuickAmountScreen: () => import('../../../plugins/payment/components/qr/EditQuickAmountScreen'),
     PinInput: () => import('../../../plugins/payment/components/shared/PinInput'),
     WithdrawConfirmModal: () => import('../../../plugins/payment/components/withdraw/WithdrawConfirmModal'),
     AutoWithdrawModal: () => import('../../../plugins/payment/components/withdraw/AutoWithdrawModal'),

@@ -2,7 +2,7 @@
  * BottomSheet Component
  * Reusable bottom sheet dengan drag gesture untuk membuka/menutup
  */
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,7 +11,11 @@ import {
   Platform,
   PanResponder,
   Animated,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Keyboard,
 } from 'react-native';
+import { BlurView } from '@react-native-community/blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../../theme';  
 import {
@@ -59,24 +63,39 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const initialPosition = snapPointsInPixels[initialSnapPoint] || snapPointsInPixels[0];
 
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const backdropOpacity = useRef(new Animated.Value(10)).current;
 
   useEffect(() => {
     if (visible) {
-      Animated.spring(translateY, {
-        toValue: initialPosition,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }).start();
+      Animated.parallel([
+        Animated.spring(translateY, {
+          toValue: initialPosition,
+          useNativeDriver: true,
+          tension: 50,
+          friction: 7,
+        }),
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
     } else {
-      Animated.spring(translateY, {
-        toValue: SCREEN_HEIGHT,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }).start();
+      Animated.parallel([
+        Animated.spring(translateY, {
+          toValue: SCREEN_HEIGHT,
+          useNativeDriver: true,
+          tension: 50,
+          friction: 7,
+        }),
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
-  }, [visible, initialPosition, translateY]);
+  }, [visible, initialPosition, translateY, backdropOpacity]);
 
   const startY = useRef(0);
   const currentY = useRef(initialPosition);
@@ -172,6 +191,29 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         onRequestClose={disableClose ? undefined : onClose}
         statusBarTranslucent>
       <View style={styles.container}>
+        {/* Backdrop with Blur */}
+        <TouchableWithoutFeedback onPress={disableClose ? undefined : onClose}>
+          <Animated.View
+            style={[
+              styles.backdrop,
+              {
+                opacity: backdropOpacity,
+              },
+            ]}
+          >
+            {Platform.OS === 'ios' ? (
+              <BlurView
+                style={StyleSheet.absoluteFill}
+                blurType="dark"
+                blurAmount={40}
+                reducedTransparencyFallbackColor="rgba(0, 0, 0, 0.5)"
+              />
+            ) : (
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
+            )}
+          </Animated.View>
+        </TouchableWithoutFeedback>
+
         <Animated.View
           style={[
             styles.sheet,
@@ -200,6 +242,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     position: 'absolute',

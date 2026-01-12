@@ -413,6 +413,17 @@ export const id = {
     scanResult: 'Hasil Scan',
     cameraNotAvailable: 'Kamera tidak tersedia pada perangkat ini.',
     initializingCamera: 'Menginisialisasi kamera...',
+    amount: 'Masukkan Nominal',
+    quickAmount: 'Nominal Cepat',
+    editQuickAmount: 'Edit Nominal Cepat',
+    addQuickAmount: 'Tambah Nominal',
+    editAmount: 'Edit Nominal',
+    deleteAmount: 'Hapus Nominal',
+    save: 'Simpan',
+    cancel: 'Batal',
+    add: 'Tambah',
+    qrCodePreview: 'Preview QR Code',
+    generateQR: 'Buat Kode QR',
   },
 };
 

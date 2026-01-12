@@ -413,6 +413,17 @@ export const en = {
     scanResult: 'Scan Result',
     cameraNotAvailable: 'Camera is not available on this device.',
     initializingCamera: 'Initializing camera...',
+    amount: 'Enter Amount',
+    quickAmount: 'Quick Amount',
+    editQuickAmount: 'Edit Quick Amount',
+    addQuickAmount: 'Add Amount',
+    editAmount: 'Edit Amount',
+    deleteAmount: 'Delete Amount',
+    save: 'Save',
+    cancel: 'Cancel',
+    add: 'Add',
+    qrCodePreview: 'QR Code Preview',
+    generateQR: 'Generate QR Code',
   },
 };
 

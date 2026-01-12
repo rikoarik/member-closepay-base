@@ -28,6 +28,7 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     TopUpMemberSuccessScreen: '../../../plugins/payment/components/topup/TopUpMemberSuccessScreen',
     TapKartuSummaryScreen: '../../../plugins/payment/components/topup/TapKartuSummaryScreen',
     QrScreen: '../../../plugins/payment/components/qr/QrScreen',
+    EditQuickAmountScreen: '../../../plugins/payment/components/qr/EditQuickAmountScreen',
     PinInput: '../../../plugins/payment/components/shared/PinInput',
     WithdrawConfirmModal: '../../../plugins/payment/components/withdraw/WithdrawConfirmModal',
     AutoWithdrawModal: '../../../plugins/payment/components/withdraw/AutoWithdrawModal',

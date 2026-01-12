@@ -29,6 +29,7 @@ export { VirtualAccountScreen } from './components/virtual-account/VirtualAccoun
 
 // QR Components
 export { QrScreen } from './components/qr/QrScreen';
+export { EditQuickAmountScreen } from './components/qr/EditQuickAmountScreen';
 
 // Shared Components
 export { BluetoothDeviceSelector } from './components/shared/BluetoothDeviceSelector';
