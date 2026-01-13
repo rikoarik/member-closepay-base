@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, ScrollView, Text, StyleSheet, FlatList, RefreshControl, TextInput, TouchableOpacity } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, FlatList, RefreshControl, TextInput, TouchableOpacity, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
@@ -191,15 +191,28 @@ export const AktivitasTab: React.FC<AktivitasTabProps> = React.memo(({
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        }
+        nestedScrollEnabled={true}
         scrollEnabled={scrollEnabled}
+        bounces={true}
+        directionalLockEnabled={true}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        onScrollBeginDrag={(e) => {
+          // Prevent parent scroll interference di iOS
+          if (Platform.OS === 'ios') {
+            e.stopPropagation();
+          }
+        }}
+        refreshControl={
+          scrollEnabled ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
+            />
+          ) : undefined
+        }
       />
     </View>
   );

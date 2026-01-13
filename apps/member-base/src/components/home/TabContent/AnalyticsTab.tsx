@@ -15,12 +15,12 @@ import { useTranslation } from '@core/i18n';
 
 interface AnalyticsTabProps {
   isActive?: boolean; // Add prop to know if tab is active
-  isVisible?: boolean; // Add prop to know if tab is visible (for lifecycle)
+  scrollEnabled?: boolean; // Enable/disable scroll (false = use parent scroll)
 }
 
 export const AnalyticsTab: React.FC<AnalyticsTabProps> = React.memo(({
   isActive = true,
-  isVisible = true,
+  scrollEnabled = true,
 }) => {
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
@@ -34,26 +34,8 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = React.memo(({
   const iconBgColor = colors.warningLight;
   const iconColor = colors.warning;
 
-  return (
-    <ScrollView
-      style={styles.scrollView}
-      contentContainerStyle={[
-        styles.scrollContent,
-        {
-          paddingBottom: insets.bottom + moderateVerticalScale(24),
-          paddingHorizontal: horizontalPadding,
-        },
-      ]}
-      showsVerticalScrollIndicator={false}
-      nestedScrollEnabled={true}
-      scrollEnabled={isActive} // Only enable scroll when tab is active
-      bounces={false} // Disable bounce untuk mencegah scroll interference
-      directionalLockEnabled={true} // Lock scroll direction
-      onScrollBeginDrag={(e) => {
-        // Prevent parent scroll when dragging in this list
-        e.stopPropagation();
-      }}
-    >
+  const content = (
+    <>
       {/* Header Section */}
       <View style={styles.headerSection}>
         <View style={styles.titleContainer}>
@@ -180,6 +162,51 @@ export const AnalyticsTab: React.FC<AnalyticsTabProps> = React.memo(({
           </View>
         </View>
       </View>
+    </>
+  );
+
+  // Jika scrollEnabled={false}, render konten tanpa ScrollView wrapper
+  // (untuk digunakan dengan parent ScrollView dengan sticky header)
+  if (!scrollEnabled) {
+    return (
+      <View
+        style={[
+          styles.contentContainer,
+          {
+            backgroundColor: colors.background,
+            paddingBottom: insets.bottom + moderateVerticalScale(24),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: moderateVerticalScale(16),
+          },
+        ]}
+        pointerEvents={isActive ? 'auto' : 'none'}
+      >
+        {content}
+      </View>
+    );
+  }
+
+  // Default: render dengan ScrollView
+  return (
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={[
+        styles.scrollContent,
+        {
+          paddingBottom: insets.bottom + moderateVerticalScale(24),
+          paddingHorizontal: horizontalPadding,
+        },
+      ]}
+      showsVerticalScrollIndicator={false}
+      nestedScrollEnabled={true}
+      scrollEnabled={isActive}
+      bounces={false}
+      directionalLockEnabled={true}
+      onScrollBeginDrag={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      {content}
     </ScrollView>
   );
 });
@@ -191,6 +218,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingTop: moderateVerticalScale(16),
+  },
+  contentContainer: {
+    flex: 1,
   },
   headerSection: {
     flexDirection: 'row',

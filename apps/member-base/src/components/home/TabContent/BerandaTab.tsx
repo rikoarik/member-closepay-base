@@ -101,6 +101,60 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
     refreshRecentTransactionsRef.current = refreshFn;
   }, []);
 
+  const content = (
+    <>
+      {/**
+        * Toggle show/hide saldo (balance)
+        */}
+      <BalanceCard
+        title="Balance"
+        balance={10000000000}
+        showBalance={showBalance}
+        onToggleBalance={() => setShowBalance(v => !v)}
+      />
+      {/* Quick Access Buttons */}
+      <View style={styles.menuItem}>
+        <Text style={styles.menuItemTitle}>{t('home.quickAccess')}</Text>
+        <QuickAccessButtons />
+      </View>
+
+      {/* Recent Transactions - Komponen terpisah untuk reusability */}
+      <RecentTransactions
+        {...recentTransactionsProps}
+        onRefreshRequested={handleTransactionsRefreshRequested}
+      />
+
+      {/* News Info - Komponen terpisah untuk reusability */}
+      <BerandaNewsInfo
+        {...newsInfoProps}
+        onViewAllPress={onNavigateToNews}
+        onRefreshRequested={handleNewsRefreshRequested}
+      />
+    </>
+  );
+
+  // Jika scrollEnabled={false}, render konten tanpa ScrollView wrapper
+  // (untuk digunakan dengan parent ScrollView dengan sticky header)
+  if (!scrollEnabled) {
+    return (
+      <View
+        style={[
+          styles.contentContainer,
+          {
+            backgroundColor: colors.background,
+            paddingBottom: insets.bottom + moderateVerticalScale(24),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: moderateVerticalScale(16),
+          },
+        ]}
+        pointerEvents={isActive ? 'auto' : 'none'}
+      >
+        {content}
+      </View>
+    );
+  }
+
+  // Default: render dengan ScrollView
   return (
     <ScrollView
       style={[
@@ -128,33 +182,7 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
       scrollEventThrottle={16}
       scrollEnabled={scrollEnabled}
     >
-      {/**
-        * Toggle show/hide saldo (balance)
-        */}
-      <BalanceCard
-        title="Balance"
-        balance={10000000000}
-        showBalance={showBalance}
-        onToggleBalance={() => setShowBalance(v => !v)}
-      />
-      {/* Quick Access Buttons */}
-      <View style={styles.menuItem}>
-        <Text style={styles.menuItemTitle}>{t('home.quickAccess')}</Text>
-        <QuickAccessButtons />
-      </View>
-
-      {/* Recent Transactions - Komponen terpisah untuk reusability */}
-      {/* <RecentTransactions
-        {...recentTransactionsProps}
-        onRefreshRequested={handleTransactionsRefreshRequested}
-      /> */}
-
-      {/* News Info - Komponen terpisah untuk reusability */}
-      <BerandaNewsInfo
-        {...newsInfoProps}
-        onViewAllPress={onNavigateToNews}
-        onRefreshRequested={handleNewsRefreshRequested}
-      />
+      {content}
     </ScrollView>
   );
 });
@@ -163,6 +191,9 @@ BerandaTab.displayName = 'BerandaTab';
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  contentContainer: {
     flex: 1,
   },
   section: {

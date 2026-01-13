@@ -25,8 +25,8 @@ export const appConfig: AppConfig = {
   // Home tabs configuration (for member variant)
   homeTabs: [
     {
-      id: 'activity',
-      label: 'Aktivitas',
+      id: 'news',
+      label: 'Berita',
       visible: true,
       order: 1,
     },

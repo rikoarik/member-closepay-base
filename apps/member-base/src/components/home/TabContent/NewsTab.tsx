@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text, RefreshControl } from 'react-native';
+import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text, RefreshControl, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SearchNormal, Filter } from 'iconsax-react-nativejs';
@@ -349,8 +349,11 @@ export const NewsTab: React.FC<NewsTabProps> = ({
           disableVirtualization={false}
           onScroll={(event) => {
             scrollPositionRef.current = event.nativeEvent.contentOffset.y;
+            if (onScroll) {
+              onScroll(event);
+            }
           }}
-          scrollEventThrottle={32}
+          scrollEventThrottle={16}
           contentContainerStyle={[
             styles.scrollContent,
             {
@@ -360,13 +363,27 @@ export const NewsTab: React.FC<NewsTabProps> = ({
             },
           ]}
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
+          scrollEnabled={scrollEnabled}
+          bounces={true}
+          directionalLockEnabled={true}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          onScrollBeginDrag={(e) => {
+            // Prevent parent scroll interference di iOS
+            if (Platform.OS === 'ios') {
+              e.stopPropagation();
+            }
+          }}
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[colors.primary]}
-              tintColor={colors.primary}
-            />
+            scrollEnabled ? (
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[colors.primary]}
+                tintColor={colors.primary}
+              />
+            ) : undefined
           }
           onEndReached={loadMore}
           onEndReachedThreshold={0.6}
@@ -391,10 +408,6 @@ export const NewsTab: React.FC<NewsTabProps> = ({
           updateCellsBatchingPeriod={100}
           windowSize={2}
           removeClippedSubviews={true}
-          nestedScrollEnabled={true}
-          scrollEnabled={scrollEnabled}
-          bounces={true}
-          directionalLockEnabled={false}
           getItemLayout={(data, index) => {
             const itemHeight = scale(56) + scale(24) + moderateVerticalScale(8);
             return {

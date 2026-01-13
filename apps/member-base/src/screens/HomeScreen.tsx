@@ -2,11 +2,6 @@
  * HomeScreen Component
  * Dashboard screen sesuai design
  * Responsive untuk semua device termasuk EDC
- * 
- * Arsitektur:
- * - TopBar: Collapsible (animasi hide/show berdasarkan scroll)
- * - TabSwitcher: Static (selalu visible)
- * - Tab Content: Independent scroll per tab
  */
 import React, {
   useState,
@@ -17,18 +12,15 @@ import React, {
 } from "react";
 import {
   View,
+  ScrollView,
   StyleSheet,
   Animated,
   Text,
-  RefreshControl,
-  InteractionManager,
   BackHandler,
   Platform,
   TouchableOpacity,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "@core/theme";
 import { useTranslation } from "@core/i18n";
@@ -52,17 +44,13 @@ import { useNewsState, NewsSearchHeader } from "../components/home/TabContent/Ne
 import { useNotifications } from "@core/notification";
 import Toast from 'react-native-toast-message';
 import { QrScanIcon } from "@core/config/components/icons";
-import { scale } from "@core/config";
-
-// Tinggi TopBar untuk animasi
-const TOPBAR_HEIGHT = moderateVerticalScale(60);
+import { scale, moderateScale } from "@core/config";
 
 export const HomeScreen = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { width: screenWidth } = useDimensions();
-  const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useDimensions();
 
   // State for News Tab (Lifted Up)
   const newsState = useNewsState();
@@ -71,11 +59,6 @@ export const HomeScreen = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const fabOpacity = useRef(new Animated.Value(0)).current;
   const fabScale = useRef(new Animated.Value(0)).current;
-
-  // Animated value untuk TopBar collapsible (height-based)
-  const topBarHeight = useRef(new Animated.Value(TOPBAR_HEIGHT)).current;
-  const isHeaderHidden = useRef(false);
-  const lastScrollY = useRef(0);
 
   const { config } = useConfig();
   const homeTabs = React.useMemo(() => {
@@ -109,6 +92,7 @@ export const HomeScreen = () => {
 
   useEffect(() => {
     if (shouldShowFab) {
+      // Show animation
       Animated.parallel([
         Animated.timing(fabOpacity, {
           toValue: 1,
@@ -123,6 +107,7 @@ export const HomeScreen = () => {
         }),
       ]).start();
     } else {
+      // Hide animation
       Animated.parallel([
         Animated.timing(fabOpacity, {
           toValue: 0,
@@ -138,52 +123,23 @@ export const HomeScreen = () => {
     }
   }, [shouldShowFab, fabOpacity, fabScale]);
 
-  // Handler scroll dari tab manapun - untuk collapsible header
-  const handleTabScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const currentScrollY = event.nativeEvent.contentOffset.y;
-    const diff = currentScrollY - lastScrollY.current;
-    const SCROLL_THRESHOLD = 8;
 
-    if (Math.abs(diff) < SCROLL_THRESHOLD) {
-      lastScrollY.current = currentScrollY;
-      return;
-    }
-
-    if (diff > 0 && currentScrollY > 50) {
-      // Scrolling DOWN - collapse header (height -> 0)
-      if (!isHeaderHidden.current) {
-        isHeaderHidden.current = true;
-        Animated.timing(topBarHeight, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: false, // height animation requires false
-        }).start();
-      }
-    } else if (diff < -SCROLL_THRESHOLD) {
-      // Scrolling UP - expand header (height -> TOPBAR_HEIGHT)
-      if (isHeaderHidden.current) {
-        isHeaderHidden.current = false;
-        Animated.timing(topBarHeight, {
-          toValue: TOPBAR_HEIGHT,
-          duration: 200,
-          useNativeDriver: false,
-        }).start();
-      }
-    }
-
-    lastScrollY.current = currentScrollY;
-  }, [topBarHeight]);
 
   // Set activeTab ke tab dengan order 2 (di tengah) saat tabs pertama kali ter-load
   useEffect(() => {
+    // Reset flag jika tabs berubah (misalnya config reload)
     if (tabs.length > 0 && !hasSetOrder2TabRef.current) {
+      // Tab dengan order 2 (index 1) adalah tab di tengah, atau tab pertama jika < 2 tabs
       const order2TabId = tabs.length >= 2 ? tabs[1].id : tabs[0].id;
+
+      // Hanya update jika activeTab belum sesuai
       if (activeTab !== order2TabId) {
         setActiveTab(order2TabId);
       }
       hasSetOrder2TabRef.current = true;
     }
   }, [tabs, activeTab]);
+
 
   const registerTabRefresh = useCallback(
     (tabId: string, refreshFn: () => void) => {
@@ -195,6 +151,7 @@ export const HomeScreen = () => {
   const { refresh: handleRefresh, isRefreshing: refreshing } =
     useRefreshWithConfig({
       onRefresh: async () => {
+        // Call refresh function of active tab
         const refreshFn = tabRefreshFunctionsRef.current[activeTab];
         if (refreshFn) {
           refreshFn();
@@ -203,97 +160,63 @@ export const HomeScreen = () => {
       enableConfigRefresh: true,
     });
 
-  const handleMenuPress = () => {
-    navigation.navigate("Profile" as never);
-  };
-
-  const handleNotificationPress = () => {
-    navigation.navigate("Notifications" as never);
-  };
-
-  const handleQrPress = () => {
-    navigation.navigate("Qr" as never);
-  };
-
-  const getTabIndex = useCallback(
-    (tabId: string) => {
-      return tabs.findIndex((tab) => tab.id === tabId);
-    },
-    [tabs]
-  );
-
-  const activeTabIndex = useMemo(
-    () => tabs.findIndex((t) => t.id === activeTab),
-    [tabs, activeTab]
-  );
-
-  const shouldRenderTab = useCallback(
-    (tabId: string, index: number) => {
-      return Math.abs(index - activeTabIndex) <= 1;
-    },
-    [activeTabIndex]
-  );
-
   const renderTabContent = useCallback(
     (tabId: string, index: number) => {
       const tabConfig = homeTabs.find((tab) => tab.id === tabId);
-      const isActive = activeTab === tabId;
 
       if (tabId === "beranda" || tabId === "home") {
         return (
-          <View style={{ width: screenWidth, flex: 1 }}>
-            <BerandaTab
-              isActive={isActive}
-              onNavigateToNews={() => {
-                navigation.navigate("News" as never);
-              }}
-              onScroll={handleTabScroll}
-              scrollEnabled={true}
-            />
-          </View>
+          <BerandaTab
+            isActive={activeTab === tabId}
+            onNavigateToNews={() => {
+              navigation.navigate("News" as never);
+            }}
+            scrollEnabled={false}
+          />
         );
       }
 
       if (tabId === "activity" || tabId === "aktivitas") {
         return (
-          <View style={{ width: screenWidth, flex: 1 }}>
-            <AktivitasTab
-              isActive={isActive}
-              isVisible={isActive}
-              scrollEnabled={true}
-              onScroll={handleTabScroll}
-            />
-          </View>
+          <AktivitasTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
         );
       }
 
       if (tabId === "news" || tabId === "berita") {
         return (
-          <View style={{ width: screenWidth, flex: 1 }}>
-            <NewsTab
-              isActive={isActive}
-              isVisible={isActive}
-              searchState={newsState}
-              renderHeader={false}
-              scrollEnabled={true}
-              onScroll={handleTabScroll}
-            />
-          </View>
+          <NewsTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            searchState={newsState}
+            renderHeader={false}
+            scrollEnabled={false}
+          />
         );
       }
 
       if (tabId === "analytics" || tabId === "analitik") {
         return (
-          <View style={{ width: screenWidth, flex: 1 }}>
-            <AnalyticsTab
-              isActive={isActive}
-              isVisible={isActive}
-            />
-          </View>
+          <AnalyticsTab
+            isActive={activeTab === tabId}
+            scrollEnabled={false}
+          />
         );
       }
 
-      // Default content
+      if (tabConfig?.component) {
+        return (
+          <View
+            style={{ width: screenWidth, padding: getHorizontalPadding() }}
+          >
+            <Text style={{ color: colors.text }}>{tabConfig.label}</Text>
+          </View>
+        );
+      }
+      // Default: simple text content
       return (
         <View
           style={{
@@ -309,7 +232,46 @@ export const HomeScreen = () => {
         </View>
       );
     },
-    [homeTabs, screenWidth, activeTab, colors, newsState, handleTabScroll]
+    [
+      homeTabs,
+      screenWidth,
+      activeTab,
+      colors,
+      registerTabRefresh,
+      newsState,
+      navigation,
+    ]
+  );
+
+  const handleMenuPress = () => {
+    navigation.navigate("Profile" as never);
+  };
+
+  const handleNotificationPress = () => {
+    navigation.navigate("Notifications" as never);
+  };
+
+  const handleQrPress = () => {
+    navigation.navigate("Qr" as never);
+  };
+
+  const activeTabIndex = useMemo(
+    () => tabs.findIndex((t) => t.id === activeTab),
+    [tabs, activeTab]
+  );
+
+  const getTabIndex = useCallback(
+    (tabId: string) => {
+      return tabs.findIndex((tab) => tab.id === tabId);
+    },
+    [tabs]
+  );
+
+  const shouldRenderTab = useCallback(
+    (tabId: string, index: number) => {
+      return Math.abs(index - activeTabIndex) <= 1;
+    },
+    [activeTabIndex]
   );
 
   const handlePagerMomentumEnd = useCallback(
@@ -319,14 +281,14 @@ export const HomeScreen = () => {
 
       if (tabs[index] && tabs[index].id !== activeTab) {
         setActiveTab(tabs[index].id);
-        lastScrollY.current = 0;
       }
     },
     [screenWidth, tabs, activeTab]
   );
 
-  const tabChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const tabChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const handleTabChange = useCallback(
     (tabId: string) => {
       if (tabChangeTimeoutRef.current) {
@@ -334,20 +296,16 @@ export const HomeScreen = () => {
       }
 
       setActiveTab(tabId);
-      lastScrollY.current = 0;
-
       tabChangeTimeoutRef.current = setTimeout(() => {
-        InteractionManager.runAfterInteractions(() => {
-          if (pagerRef.current) {
-            const index = getTabIndex(tabId);
-            if (index >= 0) {
-              pagerRef.current.scrollTo({
-                x: index * screenWidth,
-                animated: true,
-              });
-            }
+        if (pagerRef.current) {
+          const index = getTabIndex(tabId);
+          if (index >= 0) {
+            pagerRef.current.scrollTo({
+              x: index * screenWidth,
+              animated: true,
+            });
           }
-        });
+        }
       }, 50);
     },
     [screenWidth, getTabIndex]
@@ -376,6 +334,8 @@ export const HomeScreen = () => {
       hasInitializedRef.current = true;
     }
   }, [screenWidth, tabs, activeTab]);
+
+
 
   const { unreadCount, refresh: refreshNotifications } = useNotifications();
 
@@ -432,94 +392,117 @@ export const HomeScreen = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={['top', 'left', 'right']}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
     >
-      {/* TopBar - Collapsible dengan height animation */}
-      <Animated.View
-        style={[
-          styles.topBarContainer,
-          {
-            paddingHorizontal: getHorizontalPadding(),
-            backgroundColor: colors.background,
-            height: topBarHeight,
-            overflow: 'hidden',
-          },
-        ]}
-      >
-        <TopBar
-          notificationCount={unreadCount}
-          onNotificationPress={handleNotificationPress}
-          onMenuPress={handleMenuPress}
-        />
-      </Animated.View>
-
-      {/* Tab Switcher - Static (selalu visible) */}
-      <View
-        style={[
-          styles.tabSwitcherContainer,
-          {
-            backgroundColor: colors.background,
-            paddingHorizontal: getHorizontalPadding(),
-          },
-        ]}
-      >
-        {tabs.length > 0 && (
-          <TabSwitcher
-            variant="segmented"
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            scrollX={scrollX}
-            pagerWidth={screenWidth}
-          />
-        )}
-        {(activeTab === 'news' || activeTab === 'berita') && (
-          <NewsSearchHeader state={newsState} />
-        )}
-      </View>
-
-      {/* Pager - setiap tab punya scroll sendiri */}
-      <Animated.ScrollView
-        ref={pagerRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        scrollEnabled={true}
-        nestedScrollEnabled={true}
-        decelerationRate="fast"
-        snapToInterval={screenWidth}
-        removeClippedSubviews={true}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
-        )}
-        onMomentumScrollEnd={handlePagerMomentumEnd}
-        style={styles.pager}
-      >
-        {tabs.map((tab, index) => {
-          if (!shouldRenderTab(tab.id, index)) {
-            return (
-              <View
-                key={tab.id}
-                style={{ width: screenWidth, flex: 1 }}
-                pointerEvents="none"
-              />
-            );
-          }
-
-          return (
-            <View
-              key={tab.id}
-              style={{ width: screenWidth, flex: 1 }}
-              pointerEvents={activeTab === tab.id ? "auto" : "none"}
-            >
-              {renderTabContent(tab.id, index)}
-            </View>
-          );
+      {/* Main ScrollView dengan sticky header di TabSwitcher */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        stickyHeaderIndices={[1]}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        directionalLockEnabled={true}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        {...(Platform.OS === 'ios' && {
+          contentInsetAdjustmentBehavior: 'automatic',
+          automaticallyAdjustContentInsets: false,
+          automaticallyAdjustKeyboardInsets: false,
         })}
-      </Animated.ScrollView>
+      >
+        {/* TopBar - Bisa di-scroll */}
+        <View
+          style={[
+            styles.topBarContainer,
+            {
+              paddingHorizontal: getHorizontalPadding(),
+              backgroundColor: colors.background,
+            },
+          ]}
+        >
+          <TopBar
+            notificationCount={unreadCount}
+            onNotificationPress={handleNotificationPress}
+            onMenuPress={handleMenuPress}
+          />
+        </View>
+
+        {/* Tab Switcher - Sticky Header */}
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: colors.background,
+              paddingHorizontal: getHorizontalPadding(),
+            },
+          ]}
+        >
+          {tabs.length > 0 && (
+            <TabSwitcher
+              variant="segmented"
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              scrollX={scrollX}
+              pagerWidth={screenWidth}
+            />
+          )}
+          {(activeTab === 'news' || activeTab === 'berita') && (
+            <NewsSearchHeader state={newsState} />
+          )}
+        </View>
+
+        {/* Tab Content - Horizontal Pager untuk swipe antar tab */}
+        <View style={styles.tabContentContainer}>
+          <Animated.ScrollView
+            ref={pagerRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            scrollEnabled={true}
+            nestedScrollEnabled={true}
+            decelerationRate="fast"
+            snapToInterval={screenWidth}
+            removeClippedSubviews={true}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
+            )}
+            onMomentumScrollEnd={handlePagerMomentumEnd}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            {tabs.map((tab, index) => {
+              // Lazy loading: hanya render tab aktif dan tab adjacent
+              if (!shouldRenderTab(tab.id, index)) {
+                return (
+                  <View
+                    key={tab.id}
+                    style={{ width: screenWidth, flex: 1 }}
+                    pointerEvents="none"
+                  />
+                );
+              }
+
+              return (
+                <View
+                  key={tab.id}
+                  style={{ width: screenWidth, flex: 1 }}
+                  pointerEvents={activeTab === tab.id ? "auto" : "none"}
+                >
+                  {renderTabContent(tab.id, index)}
+                </View>
+              );
+            })}
+          </Animated.ScrollView>
+        </View>
+      </ScrollView>
 
       {/* FAB QR Button */}
       {config?.showQrButton !== false && (
@@ -555,14 +538,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  headerContent: {
+    width: "100%",
+  },
+  refreshIndicatorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: moderateVerticalScale(8),
+  },
   topBarContainer: {
     paddingBottom: moderateVerticalScale(8),
   },
-  tabSwitcherContainer: {
-    paddingTop: moderateVerticalScale(8),
+  section: {
+    paddingTop: moderateVerticalScale(16),
     paddingBottom: moderateVerticalScale(16),
   },
-  pager: {
+  tabContentContainer: {
     flex: 1,
   },
   fab: {
