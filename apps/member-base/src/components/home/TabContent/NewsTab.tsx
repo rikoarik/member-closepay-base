@@ -25,7 +25,6 @@ interface NewsTabProps {
   onRefreshRequested?: (refreshFn: () => void) => void;
   scrollEnabled?: boolean;
   searchState?: ReturnType<typeof useNewsState>;
-  renderHeader?: boolean;
   onScroll?: (event: any) => void;
 }
 
@@ -135,7 +134,6 @@ export const NewsTab: React.FC<NewsTabProps> = ({
   onRefreshRequested,
   scrollEnabled = false,
   searchState,
-  renderHeader = true,
   onScroll,
 }) => {
   const { colors } = useTheme();
@@ -321,9 +319,7 @@ export const NewsTab: React.FC<NewsTabProps> = ({
 
   return (
     <View style={styles.container}>
-      {renderHeader && (
-        <NewsSearchHeader state={state} />
-      )}
+      <NewsSearchHeader state={state} />
 
       {showShimmer && (refreshing || isInitialLoad) && paginatedNews.length === 0 ? (
         <View

@@ -40,7 +40,7 @@ import {
   NewsTab,
   AktivitasTab,
 } from "../components/home";
-import { useNewsState, NewsSearchHeader } from "../components/home/TabContent/NewsTab";
+import { useNewsState } from "../components/home/TabContent/NewsTab";
 import { useNotifications } from "@core/notification";
 import Toast from 'react-native-toast-message';
 import { QrScanIcon } from "@core/config/components/icons";
@@ -188,13 +188,12 @@ export const HomeScreen = () => {
 
       if (tabId === "news" || tabId === "berita") {
         return (
-          <NewsTab
-            isActive={activeTab === tabId}
-            isVisible={activeTab === tabId}
-            searchState={newsState}
-            renderHeader={false}
-            scrollEnabled={false}
-          />
+            <NewsTab
+              isActive={activeTab === tabId}
+              isVisible={activeTab === tabId}
+              searchState={newsState}
+              scrollEnabled={false}
+            />
         );
       }
 
@@ -451,9 +450,6 @@ export const HomeScreen = () => {
               scrollX={scrollX}
               pagerWidth={screenWidth}
             />
-          )}
-          {(activeTab === 'news' || activeTab === 'berita') && (
-            <NewsSearchHeader state={newsState} />
           )}
         </View>
 
