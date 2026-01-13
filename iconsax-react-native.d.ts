@@ -58,5 +58,7 @@ declare module 'iconsax-react-nativejs' {
   export class Scanner extends Component<IconProps> { }
   export class Flash extends Component<IconProps> { }
   export class ScanBarcode extends Component<IconProps> { }
+  export class Star1 extends Component<IconProps> { }
+  export class ShoppingCart extends Component<IconProps> { }
 }
 

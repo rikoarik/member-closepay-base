@@ -31,17 +31,18 @@ export const appConfig: AppConfig = {
       order: 1,
     },
     {
+      id: 'marketplace',
+      label: 'Marketplace',
+      visible: true,
+      order: 3,
+    },
+    {
       id: 'home',
       label: 'Beranda',
       visible: true,
       order: 2,
     },
-    {
-      id: 'analytics',
-      label: 'Analitik',
-      visible: true,
-      order: 3,
-    }
+   
   ],
 
   // Menu configuration

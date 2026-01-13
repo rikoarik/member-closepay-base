@@ -39,6 +39,7 @@ import {
   BerandaTab,
   NewsTab,
   AktivitasTab,
+  MarketplaceTab,
 } from "../components/home";
 import { useNewsState } from "../components/home/TabContent/NewsTab";
 import { useNotifications } from "@core/notification";
@@ -197,10 +198,20 @@ export const HomeScreen = () => {
         );
       }
 
-      if (tabId === "analytics" || tabId === "analitik") {
+      // if (tabId === "analytics" || tabId === "analitik") {
+      //   return (
+      //     <AnalyticsTab
+      //       isActive={activeTab === tabId}
+      //       scrollEnabled={false}
+      //     />
+      //   );
+      // }
+
+      if (tabId === "marketplace") {
         return (
-          <AnalyticsTab
+          <MarketplaceTab
             isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
             scrollEnabled={false}
           />
         );

@@ -341,9 +341,11 @@ export const getTabletGap = (
  * Tablet: menggunakan moderateScale (bisa diatur manual nanti)
  * Device kecil: bisa diperkecil sedikit dengan moderateScale
  */
-export const getResponsiveFontSize = (type: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'): number => {
+export const getResponsiveFontSize = (type: 'xxxsmall' | 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'): number => {
   const screenProps = getScreenDimensions();
   const fontSizes = {
+    xxxsmall: 6,
+    xxsmall: 8,
     xsmall: 10,
     small: 12,
     medium: 14,
