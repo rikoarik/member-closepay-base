@@ -44,6 +44,17 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     WithdrawConfirmModal: () => import('../../../plugins/payment/components/withdraw/WithdrawConfirmModal'),
     AutoWithdrawModal: () => import('../../../plugins/payment/components/withdraw/AutoWithdrawModal'),
   },
+  'marketplace-fnb': {
+    FnBMerchantDetailScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBMerchantDetailScreen'),
+    FnBScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScreen'),
+    FnBCheckoutScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBCheckoutScreen'),
+    FnBScanScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScanScreen'),
+    FnBItemCard: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemCard'),
+    FnBCategoryTabs: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCategoryTabs'),
+    FnBCartBar: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCartBar'),
+    FnBItemDetailSheet: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemDetailSheet'),
+    MerchantHeader: () => import('../../../plugins/marketplace-fnb/components/shared/MerchantHeader'),
+  },
 };
 
 /**
@@ -88,9 +99,12 @@ export async function loadPluginComponent(
     throw new Error(`Plugin ${pluginId} not found`);
   }
 
-  // Check if component is exported
+  // Check if component is exported (check both components and screens)
   const exports = plugin.exports;
-  if (!exports.components?.includes(componentName)) {
+  const isScreen = exports.screens && Object.values(exports.screens).includes(componentName);
+  const isComponent = exports.components?.includes(componentName);
+
+  if (!isScreen && !isComponent) {
     throw new Error(`Component ${componentName} not exported by plugin ${pluginId}`);
   }
 

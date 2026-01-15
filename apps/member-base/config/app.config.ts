@@ -17,7 +17,7 @@ export const appConfig: AppConfig = {
   enabledFeatures: [],
 
   // Enabled modules/plugins
-  enabledModules: ['balance', 'payment'],
+  enabledModules: ['balance', 'payment', 'marketplace', 'marketplace-fnb'],
 
   // Home variant from tenant config
   homeVariant: 'member',
@@ -25,8 +25,8 @@ export const appConfig: AppConfig = {
   // Home tabs configuration (for member variant)
   homeTabs: [
     {
-      id: 'news',
-      label: 'Berita',
+      id: 'fnb',
+      label: 'Pesan Makanan',
       visible: true,
       order: 1,
     },
@@ -42,7 +42,7 @@ export const appConfig: AppConfig = {
       visible: true,
       order: 2,
     },
-   
+
   ],
 
   // Menu configuration

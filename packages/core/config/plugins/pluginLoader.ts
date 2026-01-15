@@ -31,7 +31,8 @@ import type { PluginManifest } from './types';
 export const MANIFEST_LOADERS: Record<string, () => Promise<{ default: PluginManifest } | PluginManifest>> = {
   balance: () => import('../../../plugins/balance/plugin.manifest.json').then(m => m as { default: PluginManifest }),
   payment: () => import('../../../plugins/payment/plugin.manifest.json').then(m => m as { default: PluginManifest }),
-  // Add other plugins as needed
+  marketplace: () => import('../../../plugins/marketplace/plugin.manifest.json').then(m => m as { default: PluginManifest }),
+  'marketplace-fnb': () => import('../../../plugins/marketplace-fnb/plugin.manifest.json').then(m => m as { default: PluginManifest }),
 };
 
 /**

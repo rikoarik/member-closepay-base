@@ -17,6 +17,17 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     TopUpIcon: '../../../plugins/balance/components/TopUpIcon',
     BalanceCard: '../../../plugins/balance/components/BalanceCard',
   },
+  marketplace: {
+    ProductCard: '../../../plugins/marketplace/components/shared/ProductCard',
+    ProductCardSkeleton: '../../../plugins/marketplace/components/shared/ProductCardSkeleton',
+  },
+  marketplace-fnb: {
+    FnBItemCard: '../../../plugins/marketplace-fnb/components/shared/FnBItemCard',
+    FnBCategoryTabs: '../../../plugins/marketplace-fnb/components/shared/FnBCategoryTabs',
+    FnBCartBar: '../../../plugins/marketplace-fnb/components/shared/FnBCartBar',
+    FnBItemDetailSheet: '../../../plugins/marketplace-fnb/components/shared/FnBItemDetailSheet',
+    MerchantHeader: '../../../plugins/marketplace-fnb/components/shared/MerchantHeader',
+  },
   payment: {
     TopUpScreen: '../../../plugins/payment/components/topup/TopUpScreen',
     VirtualAccountScreen: '../../../plugins/payment/components/virtual-account/VirtualAccountScreen',
@@ -27,8 +38,6 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     TopUpMemberPinScreen: '../../../plugins/payment/components/topup/TopUpMemberPinScreen',
     TopUpMemberSuccessScreen: '../../../plugins/payment/components/topup/TopUpMemberSuccessScreen',
     TapKartuSummaryScreen: '../../../plugins/payment/components/topup/TapKartuSummaryScreen',
-    QrScreen: '../../../plugins/payment/components/qr/QrScreen',
-    EditQuickAmountScreen: '../../../plugins/payment/components/qr/EditQuickAmountScreen',
     PinInput: '../../../plugins/payment/components/shared/PinInput',
     WithdrawConfirmModal: '../../../plugins/payment/components/withdraw/WithdrawConfirmModal',
     AutoWithdrawModal: '../../../plugins/payment/components/withdraw/AutoWithdrawModal',

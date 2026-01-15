@@ -130,13 +130,13 @@ export const QrScreen = () => {
         if (pagerRef.current && !isScrollingRef.current) {
             const index = activeTab === 'scan' ? 0 : 1;
             const targetX = index * width;
-            
+
             isScrollingRef.current = true;
             pagerRef.current.scrollTo({
                 x: targetX,
                 animated: true,
             });
-            
+
             // Reset scrolling flag after animation completes
             setTimeout(() => {
                 isScrollingRef.current = false;
@@ -188,8 +188,8 @@ export const QrScreen = () => {
             >
                 {/* Scan Tab */}
                 <View style={{ width }} pointerEvents={activeTab === 'scan' ? 'auto' : 'none'}>
-                    <QrScanScreen 
-                        isActive={activeTab === 'scan'} 
+                    <QrScanScreen
+                        isActive={activeTab === 'scan'}
                         onScanned={handleScanned}
                         onHeaderActionsReady={setScanHeaderActions}
                     />
@@ -228,7 +228,7 @@ export const QrScreen = () => {
                             </Animated.View>
                         </View>
                     </TouchableOpacity>
-                    
+
                     <View style={{ flex: 1, position: 'relative', alignItems: 'flex-start', justifyContent: 'center' }}>
                         {/* White title (for scan tab) */}
                         <Animated.Text
@@ -256,7 +256,7 @@ export const QrScreen = () => {
                             {t('qr.title')}
                         </Animated.Text>
                     </View>
-                    
+
                     {activeTab === 'scan' && scanHeaderActions && (
                         <View style={styles.rightComponent}>
                             {scanHeaderActions}
@@ -266,7 +266,7 @@ export const QrScreen = () => {
             </SafeAreaView>
 
             {/* Bottom Tab Switcher Overlay */}
-            <View 
+            <View
                 style={[styles.bottomTabOverlay, { backgroundColor: colors.background, paddingBottom: insets.bottom + 20 }]}
             >
                 {/* Balance Selection Section */}
@@ -427,7 +427,7 @@ export const QrScreen = () => {
                                         />
                                     </Animated.View>
                                 </View>
-                                
+
                                 {/* Text Container */}
                                 <View style={styles.textContainer} pointerEvents="none">
                                     <Animated.Text style={[
@@ -490,7 +490,7 @@ export const QrScreen = () => {
                                         />
                                     </Animated.View>
                                 </View>
-                                
+
                                 {/* Text Container */}
                                 <View style={styles.textContainer} pointerEvents="none">
                                     <Animated.Text style={[

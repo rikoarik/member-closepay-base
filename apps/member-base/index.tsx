@@ -23,8 +23,7 @@ import { HomeScreen } from './src/screens/HomeScreen';
 import { NotificationScreen } from './src/screens/NotificationScreen';
 import { NewsDetailScreen } from './src/screens/NewsDetailScreen';
 import { NewsScreen } from './src/screens/NewsScreen';
-import { SearchScreen } from './src/screens/SearchScreen';
-import { SearchResultsScreen } from './src/screens/SearchResultsScreen';
+import { SearchScreen, SearchResultsScreen } from '@plugins/marketplace';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/CustomToast';
 

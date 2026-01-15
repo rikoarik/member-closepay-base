@@ -194,14 +194,14 @@ export const QrScanScreen: React.FC<QrScanScreenProps> = ({ isActive, onScanned,
     const animateZoom = useCallback((target: number) => {
         const maxZoom = cameraDevice?.maxZoom || 4;
         const clampedTarget = Math.max(1, Math.min(target, maxZoom));
-        
+
         if (Math.abs(targetZoom.current - clampedTarget) < 0.1) {
             return;
         }
 
         targetZoom.current = clampedTarget;
         isZoomingRef.current = true;
-        
+
         Animated.timing(zoomAnim, {
             toValue: clampedTarget,
             duration: 400,
@@ -241,7 +241,7 @@ export const QrScanScreen: React.FC<QrScanScreenProps> = ({ isActive, onScanned,
             }
 
             const first = codes[0];
-            
+
             if (!first?.value || first.value.trim().length === 0) {
                 return;
             }
@@ -265,13 +265,13 @@ export const QrScanScreen: React.FC<QrScanScreenProps> = ({ isActive, onScanned,
 
             const now = Date.now();
             const maxZoom = cameraDevice?.maxZoom || 4;
-            
+
             if (ratio < 0.03 && ratio > 0.0005 && targetZoom.current < maxZoom && (now - lastZoomTime.current > 400)) {
                 const idealZoom = Math.min(1 + (0.03 - ratio) * 50, maxZoom);
                 const currentZoom = targetZoom.current;
                 const zoomStep = 0.15;
                 const desiredZoom = Math.min(currentZoom + zoomStep, idealZoom);
-                
+
                 animateZoom(desiredZoom);
                 lastZoomTime.current = now;
             }
@@ -285,7 +285,7 @@ export const QrScanScreen: React.FC<QrScanScreenProps> = ({ isActive, onScanned,
             setScannedValue(first.value);
             const detectedType = first.type === 'qr' ? 'qr' : 'barcode';
             setScanType(detectedType);
-            
+
             if (onScanned) {
                 onScanned(first.value, detectedType);
             }
@@ -439,6 +439,11 @@ export const QrScanHeaderActions: React.FC<{
 }> = ({ flashEnabled, onToggleFlash, onPickFromGallery }) => {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: scale(8) }}>
+            <TouchableOpacity onPress={onPickFromGallery}>
+                <Gallery size={scale(24)} color="white" />
+            </TouchableOpacity>
+
+            <View style={{ width: scale(8) }} />
             <TouchableOpacity onPress={onToggleFlash}>
                 <Flash
                     size={scale(24)}
@@ -446,10 +451,7 @@ export const QrScanHeaderActions: React.FC<{
                     variant={flashEnabled ? "Bold" : "Linear"}
                 />
             </TouchableOpacity>
-            <View style={{ width: scale(16) }} />
-            <TouchableOpacity onPress={onPickFromGallery}>
-                <Gallery size={scale(24)} color="white" />
-            </TouchableOpacity>
+             <View style={{ width: scale(16) }} />
         </View>
     );
 };

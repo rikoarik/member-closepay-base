@@ -1,0 +1,70 @@
+{
+  "id": "marketplace",
+  "name": "Marketplace",
+  "version": "1.0.0",
+  "description": "Complete marketplace with search and product browsing",
+  "type": "segment-plugin",
+  "author": "Closepay Team",
+  "dependencies": [
+    "payment"
+  ],
+  "exports": {
+    "components": [
+      "ProductCard",
+      "ProductCardSkeleton"
+    ],
+    "screens": {
+      "MarketplaceScreen": "MarketplaceScreen",
+      "SearchScreen": "SearchScreen",
+      "SearchResultsScreen": "SearchResultsScreen"
+    },
+    "hooks": {
+      "useMarketplaceData": "useMarketplaceData",
+      "useSearch": "useSearch",
+      "getCategories": "getCategories"
+    }
+  },
+  "routes": [
+    {
+      "name": "Marketplace",
+      "path": "/marketplace",
+      "component": "MarketplaceScreen",
+      "permissions": [
+        "marketplace:view"
+      ],
+      "meta": {
+        "title": "Marketplace",
+        "showInMenu": true
+      }
+    },
+    {
+      "name": "MarketplaceSearch",
+      "path": "/marketplace/search",
+      "component": "SearchScreen",
+      "permissions": [
+        "marketplace:search"
+      ],
+      "meta": {
+        "title": "Pencarian",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "MarketplaceSearchResults",
+      "path": "/marketplace/search/results",
+      "component": "SearchResultsScreen",
+      "permissions": [
+        "marketplace:search"
+      ],
+      "meta": {
+        "title": "Hasil Pencarian",
+        "showInMenu": false
+      }
+    }
+  ],
+  "permissions": [
+    "marketplace:view",
+    "marketplace:search",
+    "marketplace:order"
+  ]
+}

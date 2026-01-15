@@ -40,6 +40,7 @@ import {
   NewsTab,
   AktivitasTab,
   MarketplaceTab,
+  FnBTab,
 } from "../components/home";
 import { useNewsState } from "../components/home/TabContent/NewsTab";
 import { useNotifications } from "@core/notification";
@@ -189,12 +190,12 @@ export const HomeScreen = () => {
 
       if (tabId === "news" || tabId === "berita") {
         return (
-            <NewsTab
-              isActive={activeTab === tabId}
-              isVisible={activeTab === tabId}
-              searchState={newsState}
-              scrollEnabled={false}
-            />
+          <NewsTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            searchState={newsState}
+            scrollEnabled={false}
+          />
         );
       }
 
@@ -206,6 +207,16 @@ export const HomeScreen = () => {
       //     />
       //   );
       // }
+
+      if (tabId === "fnb") {
+        return (
+          <FnBTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={true}
+          />
+        );
+      }
 
       if (tabId === "marketplace") {
         return (
@@ -476,7 +487,7 @@ export const HomeScreen = () => {
             nestedScrollEnabled={true}
             decelerationRate="fast"
             snapToInterval={screenWidth}
-            removeClippedSubviews={true}
+            removeClippedSubviews={false} // Changed to false to prevent clipping nested scroll
             onScroll={Animated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
               { useNativeDriver: true }

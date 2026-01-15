@@ -3,8 +3,7 @@ import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text, RefreshC
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SearchNormal, CloseCircle } from 'iconsax-react-nativejs';
-import { ProductCard, Product } from '../products/ProductCard';
-import { ProductCardSkeleton } from '../products/ProductCardSkeleton';
+import { ProductCard, Product, ProductCardSkeleton } from '@plugins/marketplace';
 import { StoreCard, Store } from '../stores/StoreCard';
 import {
   scale,
@@ -17,7 +16,7 @@ import {
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { useMarketplaceData, getCategories } from '../hooks/useMarketplaceData';
+import { useMarketplaceData, getCategories } from '@plugins/marketplace';
 import { useStoreData } from '../hooks/useStoreData';
 import { ScrollView } from 'react-native';
 

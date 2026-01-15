@@ -60,5 +60,17 @@ declare module 'iconsax-react-nativejs' {
   export class ScanBarcode extends Component<IconProps> { }
   export class Star1 extends Component<IconProps> { }
   export class ShoppingCart extends Component<IconProps> { }
+  export class Add extends Component<IconProps> { }
+  export class Truck extends Component<IconProps> { }
+  export class Box extends Component<IconProps> { }
+  export class Location extends Component<IconProps> { }
+  export class Clock extends Component<IconProps> { }
+  export class Minus extends Component<IconProps> { }
+  export class Verify extends Component<IconProps> { }
+  export class Element3 extends Component<IconProps> { }
+  export class Notification extends Component<IconProps> { }
+  export class Heart extends Component<IconProps> { }
+  export class DiscountShape extends Component<IconProps> { }
+  export class TruckFast extends Component<IconProps> { }
 }
 

@@ -1,19 +1,97 @@
 {
-    "id": "marketplace-fnb",
-    "name": "Marketplace F&B",
-    "version": "1.0.0",
-    "description": "Food and beverage marketplace for ordering and delivery",
-    "type": "segment-plugin",
-    "author": "Closepay Team",
-    "dependencies": [
-        "payment"
+  "id": "marketplace-fnb",
+  "name": "Marketplace F&B",
+  "description": "Food & Beverage ordering plugin with dine-in, take away, and delivery options",
+  "version": "1.0.0",
+  "type": "segment-plugin",
+  "author": "Closepay Team",
+  "dependencies": ["balance", "payment"],
+  "exports": {
+    "components": [
+      "FnBItemCard",
+      "FnBCategoryTabs",
+      "FnBCartBar",
+      "FnBItemDetailSheet",
+      "MerchantHeader"
     ],
-    "exports": {
-        "screens": {}
+    "screens": {
+      "FnB": "FnBScreen",
+      "FnBMerchantDetail": "FnBMerchantDetailScreen",
+      "FnBCheckout": "FnBCheckoutScreen",
+      "FnBScan": "FnBScanScreen"
     },
-    "routes": [],
-    "permissions": [
-        "marketplace:fnb:view",
-        "marketplace:fnb:order"
+    "hooks": [
+      "useFnBData",
+      "useFnBCart"
+    ],
+    "models": [
+      "FnBItem",
+      "FnBVariant",
+      "FnBAddon",
+      "FnBCategory",
+      "FnBOrder",
+      "FnBOrderItem",
+      "OrderType",
+      "EntryPoint",
+      "OrderStatus",
+      "FnBStore",
+      "FnBQRData",
+      "OperatingHour",
+      "DeliverySettings"
     ]
+  },
+  "routes": [
+    {
+      "name": "FnB",
+      "path": "/fnb",
+      "component": "FnBScreen",
+      "permissions": [
+        "read:fnb"
+      ],
+      "meta": {
+        "title": "Pesan Makanan",
+        "showInMenu": true
+      }
+    },
+    {
+      "name": "FnBMerchantDetail",
+      "path": "/fnb/merchant-detail",
+      "component": "FnBMerchantDetailScreen",
+      "permissions": [
+        "read:fnb"
+      ],
+      "meta": {
+        "title": "Detail Merchant",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "FnBCheckout",
+      "path": "/fnb/checkout",
+      "component": "FnBCheckoutScreen",
+      "permissions": [
+        "write:fnb"
+      ],
+      "meta": {
+        "title": "Checkout",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "FnBScan",
+      "path": "/fnb/scan",
+      "component": "FnBScanScreen",
+      "permissions": [
+        "write:fnb"
+      ],
+      "meta": {
+        "title": "Scan QR",
+        "showInMenu": false
+      }
+    }
+  ],
+  "permissions": [
+    "read:fnb",
+    "write:fnb"
+  ]
 }

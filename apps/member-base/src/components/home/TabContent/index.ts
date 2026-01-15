@@ -8,6 +8,7 @@ export { NewsTab } from './NewsTab';
 export { BerandaTab } from './BerandaTab';
 export { AktivitasTab } from './AktivitasTab';
 export { MarketplaceTab } from './MarketplaceTab';
+export { FnBTab } from './FnBTab';
 export { BerandaNewsInfo, type BerandaNewsInfoProps } from './BerandaNewsInfo';
 export { RecentTransactions, type RecentTransactionsProps } from './RecentTransactions';
 

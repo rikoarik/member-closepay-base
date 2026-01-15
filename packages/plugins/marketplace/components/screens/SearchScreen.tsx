@@ -3,11 +3,11 @@
  * Halaman search untuk marketplace seperti Shopee
  * Menampilkan history search dan rekomendasi
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, ScrollView, Keyboard, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { ArrowLeft2, SearchNormal, CloseCircle, ShoppingCart, Calendar, Chart, Trash } from 'iconsax-react-nativejs';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { ArrowLeft2, SearchNormal, CloseCircle, Calendar, Chart, Trash } from 'iconsax-react-nativejs';
 import {
   scale,
   moderateVerticalScale,
@@ -17,73 +17,60 @@ import {
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { useDimensions } from '@core/config';
-
-// Mock data untuk history search dan rekomendasi
-const mockSearchHistory = [
-  'baju pria',
-  'sepatu running',
-  'handphone samsung',
-  'tas wanita',
-  'kamera canon',
-];
-
-const mockRecommendations = [
-  'baju muslim',
-  'sepatu sneakers',
-  'laptop gaming',
-  'jam tangan',
-  'kamera mirrorless',
-  'tas ransel',
-  'celana jeans',
-  'kaos polos',
-];
+import { useMarketplaceAnalytics } from '../../hooks/useMarketplaceAnalytics';
+import { getCategories } from '../../hooks/useMarketplaceData';
 
 export const SearchScreen: React.FC = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const route = useRoute();
   const insets = useSafeAreaInsets();
   const horizontalPadding = getHorizontalPadding();
-  const { width: screenWidth } = useDimensions();
   const searchInputRef = useRef<TextInput>(null);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchHistory, setSearchHistory] = useState(mockSearchHistory);
+  const { searchHistory, trackSearch, clearSearchHistory, getRecommendations } = useMarketplaceAnalytics();
+  const [searchQuery, setSearchQuery] = React.useState('');
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+  // Refresh focus on input when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }, [])
+  );
+
+  const recommendations = useMemo(() => {
+    const { topCategories } = getRecommendations();
+    const allCategories = getCategories().filter(c => c !== 'Semua');
+
+    // Combine top categories tracked by user + some random ones if not enough data
+    const combined = [...new Set([...topCategories, ...allCategories])].slice(0, 8);
+    return combined;
+  }, [getRecommendations]);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      // Add to history if not already exists
-      if (!searchHistory.includes(searchQuery.trim())) {
-        setSearchHistory(prev => [searchQuery.trim(), ...prev.slice(0, 4)]);
-      }
+      trackSearch(searchQuery.trim());
       // @ts-ignore
-      navigation.navigate('SearchResults' as never, { query: searchQuery.trim() } as never);
+      navigation.navigate('MarketplaceSearchResults' as never, { query: searchQuery.trim() } as never);
     }
   };
 
   const handleHistoryItemPress = (query: string) => {
     setSearchQuery(query);
+    trackSearch(query);
     // @ts-ignore
-    navigation.navigate('SearchResults' as never, { query } as never);
+    navigation.navigate('MarketplaceSearchResults' as never, { query } as never);
   };
 
-  const handleRecommendationPress = (query: string) => {
-    setSearchQuery(query);
-    // Add to history
-    if (!searchHistory.includes(query)) {
-      setSearchHistory(prev => [query, ...prev.slice(0, 4)]);
-    }
+  const handleRecommendationPress = (category: string) => {
+    // When clicking a category recommendation, we search for that category
+    setSearchQuery(category);
+    trackSearch(category);
     // @ts-ignore
-    navigation.navigate('SearchResults' as never, { query } as never);
+    navigation.navigate('MarketplaceSearchResults' as never, { query: category } as never);
   };
 
   const handleClearHistory = () => {
@@ -98,14 +85,10 @@ export const SearchScreen: React.FC = () => {
         {
           text: t('common.delete') || 'Hapus',
           style: 'destructive',
-          onPress: () => setSearchHistory([]),
+          onPress: () => clearSearchHistory(),
         },
       ]
     );
-  };
-
-  const handleRemoveHistoryItem = (query: string) => {
-    setSearchHistory(prev => prev.filter(item => item !== query));
   };
 
   return (
@@ -133,7 +116,7 @@ export const SearchScreen: React.FC = () => {
             <TextInput
               ref={searchInputRef}
               style={[styles.searchInput, { color: colors.text }]}
-              placeholder={t('marketplace.searchPlaceholder')}
+              placeholder={t('marketplace.searchPlaceholder') || 'Cari produk...'}
               placeholderTextColor={colors.textSecondary}
               value={searchQuery}
               multiline={false}
@@ -188,12 +171,6 @@ export const SearchScreen: React.FC = () => {
                 >
                   <Calendar size={scale(16)} color={colors.textSecondary} variant="Linear" />
                   <Text style={[styles.historyText, { color: colors.text }]}>{query}</Text>
-                  <TouchableOpacity
-                    onPress={() => handleRemoveHistoryItem(query)}
-                    style={styles.removeHistoryButton}
-                  >
-                    <CloseCircle size={scale(16)} color={colors.textSecondary} variant="Linear" />
-                  </TouchableOpacity>
                 </TouchableOpacity>
               ))}
             </View>
@@ -211,13 +188,13 @@ export const SearchScreen: React.FC = () => {
             </View>
           </View>
           <View style={styles.recommendationsContainer}>
-            {mockRecommendations.map((query, index) => (
+            {recommendations.map((category, index) => (
               <TouchableOpacity
                 key={index}
                 style={[styles.recommendationItem, { backgroundColor: colors.primaryLight || colors.surface }]}
-                onPress={() => handleRecommendationPress(query)}
+                onPress={() => handleRecommendationPress(category)}
               >
-                <Text style={[styles.recommendationText, { color: colors.primary }]}>{query}</Text>
+                <Text style={[styles.recommendationText, { color: colors.primary }]}>{category}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -266,19 +243,6 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: scale(4),
   },
-  cartButton: {
-    padding: scale(8),
-    marginRight: scale(4),
-  },
-  searchButton: {
-    paddingHorizontal: scale(16),
-    paddingVertical: moderateVerticalScale(10),
-    borderRadius: scale(8),
-  },
-  searchButtonText: {
-    fontSize: getResponsiveFontSize('medium'),
-    fontFamily: FontFamily.monasans.semiBold,
-  },
   contentContainer: {
     flex: 1,
     backgroundColor: 'transparent',
@@ -286,6 +250,7 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: getHorizontalPadding(),
     marginBottom: moderateVerticalScale(24),
+    marginTop: moderateVerticalScale(16),
   },
   sectionHeader: {
     flexDirection: 'row',

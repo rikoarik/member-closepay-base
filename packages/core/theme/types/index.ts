@@ -22,6 +22,8 @@ export type ColorScheme = 'light' | 'dark';
  * Theme colors untuk light dan dark mode
  */
 export interface ThemeColors {
+  errorContainer: ColorValue | undefined;
+  successContainer: ColorValue | undefined;
   // Background colors
   background: string;
   surface: string;

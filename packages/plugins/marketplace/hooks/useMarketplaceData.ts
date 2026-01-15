@@ -3,7 +3,7 @@
  * Hook untuk mendapatkan data produk marketplace dengan pagination
  */
 import { useMemo } from 'react';
-import { Product } from '../products/ProductCard';
+import { Product } from '../components/shared/ProductCard';
 
 const BATCH_SIZE = 20;
 
@@ -79,7 +79,7 @@ const generateProductBatch = (startIndex: number, count: number): Product[] => {
     const originalPrice = hasDiscount ? basePrice : undefined;
     const rating = Math.random() * 1.5 + 3.5;
     // Generate sold count dengan beberapa produk yang sangat laris (untuk best sellers)
-    const sold = i < 10 
+    const sold = i < 10
       ? Math.floor(Math.random() * 5000) + 1000  // Produk pertama lebih laris
       : Math.floor(Math.random() * 1000);
     const storeName = storeNames[i % storeNames.length];
@@ -116,18 +116,18 @@ export const useMarketplaceData = (
 ): Product[] => {
   return useMemo(() => {
     if (!isActive && !isVisible) return [];
-    
+
     const products: Product[] = [];
     const batchesToLoad = limit ? Math.ceil(limit / BATCH_SIZE) : 1;
-    
+
     for (let i = 0; i < batchesToLoad; i++) {
       const startIndex = i * BATCH_SIZE;
-      const count = limit && (i + 1) * BATCH_SIZE > limit 
-        ? limit - i * BATCH_SIZE 
+      const count = limit && (i + 1) * BATCH_SIZE > limit
+        ? limit - i * BATCH_SIZE
         : BATCH_SIZE;
       products.push(...generateProductBatch(startIndex, count));
     }
-    
+
     return limit ? products.slice(0, limit) : products;
   }, [limit, isActive, isVisible, refreshKey]);
 };

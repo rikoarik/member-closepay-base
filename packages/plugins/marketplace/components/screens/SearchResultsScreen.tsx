@@ -18,9 +18,10 @@ import {
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { ProductCard, Product } from '../components/home/products/ProductCard';
-import { ProductCardSkeleton } from '../components/home/products/ProductCardSkeleton';
-import { useMarketplaceData } from '../components/home/hooks/useMarketplaceData';
+import { ProductCard, Product } from '../shared/ProductCard';
+import { ProductCardSkeleton } from '../shared/ProductCardSkeleton';
+import { useMarketplaceData } from '../../hooks/useMarketplaceData';
+import { useMarketplaceAnalytics } from '../../hooks/useMarketplaceAnalytics';
 
 const PAGE_SIZE = UI_CONSTANTS.DEFAULT_PAGE_SIZE;
 
@@ -32,6 +33,7 @@ export const SearchResultsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const horizontalPadding = getHorizontalPadding();
   const { width: screenWidth } = useDimensions();
+  const { trackSearch, trackViewProduct } = useMarketplaceAnalytics();
 
   const searchQuery = (route.params as any)?.query || '';
   const [searchText, setSearchText] = useState(searchQuery);
@@ -89,6 +91,9 @@ export const SearchResultsScreen: React.FC = () => {
   }, []);
 
   const handleProductPress = (product: Product) => {
+    if (product.category) {
+      trackViewProduct(product.category);
+    }
     // @ts-ignore
     navigation.navigate('ProductDetail', { product });
   };
@@ -145,8 +150,9 @@ export const SearchResultsScreen: React.FC = () => {
               returnKeyType="search"
               onSubmitEditing={() => {
                 if (searchText.trim()) {
+                  trackSearch(searchText.trim());
                   // @ts-ignore
-                  navigation.navigate('SearchResults' as never, { query: searchText.trim() } as never);
+                  navigation.push('MarketplaceSearchResults' as never, { query: searchText.trim() } as never);
                 }
               }}
               autoCapitalize="none"
