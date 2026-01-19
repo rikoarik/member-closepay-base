@@ -20,7 +20,8 @@ import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { ProductCard, Product } from '../shared/ProductCard';
 import { ProductCardSkeleton } from '../shared/ProductCardSkeleton';
-import { useMarketplaceData } from '../../hooks/useMarketplaceData';
+import { StoreCard } from '../shared/StoreCard';
+import { useMarketplaceData, searchStores } from '../../hooks/useMarketplaceData';
 import { useMarketplaceAnalytics } from '../../hooks/useMarketplaceAnalytics';
 
 const PAGE_SIZE = UI_CONSTANTS.DEFAULT_PAGE_SIZE;
@@ -37,6 +38,7 @@ export const SearchResultsScreen: React.FC = () => {
 
   const searchQuery = (route.params as any)?.query || '';
   const [searchText, setSearchText] = useState(searchQuery);
+  const [activeTab, setActiveTab] = useState<'product' | 'store'>('product');
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,7 +49,7 @@ export const SearchResultsScreen: React.FC = () => {
     setSearchText(searchQuery);
   }, [searchQuery]);
 
-  const allProducts = useMarketplaceData(loadedBatches * 20, true, true);
+  const { products: allProducts } = useMarketplaceData(loadedBatches * 20, true, true);
 
   const filteredProducts = React.useMemo(() => {
     const query = searchText || searchQuery;
@@ -59,6 +61,11 @@ export const SearchResultsScreen: React.FC = () => {
         product.category?.toLowerCase().includes(lowerQuery)
     );
   }, [allProducts, searchText, searchQuery]);
+
+  const filteredStores = React.useMemo(() => {
+    const query = searchText || searchQuery;
+    return searchStores(query);
+  }, [searchText, searchQuery]);
 
   const paginatedProducts = React.useMemo(() => {
     const endIndex = currentPage * PAGE_SIZE;
@@ -181,31 +188,81 @@ export const SearchResultsScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* Search Tabs */}
+      <View style={[styles.tabsContainer, { borderBottomColor: colors.border }]}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'product' && { borderBottomColor: colors.primary }]}
+          onPress={() => setActiveTab('product')}
+        >
+          <Text style={[styles.tabText, { color: activeTab === 'product' ? colors.primary : colors.textSecondary }]}>
+            Produk
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'store' && { borderBottomColor: colors.primary }]}
+          onPress={() => setActiveTab('store')}
+        >
+          <Text style={[styles.tabText, { color: activeTab === 'store' ? colors.primary : colors.textSecondary }]}>
+            Toko
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Results Count */}
-      {filteredProducts.length > 0 && (
+      {(activeTab === 'product' ? filteredProducts.length : filteredStores.length) > 0 && (
         <View style={[styles.resultsCount, { paddingHorizontal: horizontalPadding }]}>
           <Text style={[styles.countText, { color: colors.textSecondary }]}>
-            {t('marketplace.found') || 'Ditemukan'} {filteredProducts.length} {t('marketplace.products') || 'produk'}
+            {t('marketplace.found') || 'Ditemukan'} {activeTab === 'product' ? filteredProducts.length : filteredStores.length} {activeTab === 'product' ? (t('marketplace.products') || 'produk') : 'toko'}
           </Text>
         </View>
       )}
 
       {/* Product List */}
-      {paginatedProducts.length === 0 && !refreshing && !isLoadingMore ? (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            {t('marketplace.noProductsFound') || 'Tidak ada produk ditemukan.'}
-          </Text>
-        </View>
+      {activeTab === 'product' ? (
+        paginatedProducts.length === 0 && !refreshing && !isLoadingMore ? (
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              {t('marketplace.noProductsFound') || 'Tidak ada produk ditemukan.'}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={paginatedProducts}
+            renderItem={renderProduct}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={{
+              gap: scale(12),
+            }}
+            contentContainerStyle={[
+              styles.listContent,
+              {
+                paddingHorizontal: horizontalPadding,
+                paddingTop: moderateVerticalScale(16),
+                paddingBottom: insets.bottom + moderateVerticalScale(16),
+              },
+            ]}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[colors.primary]}
+                tintColor={colors.primary}
+              />
+            }
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.6}
+            ListFooterComponent={renderFooter}
+            keyboardShouldPersistTaps="handled"
+          />
+        )
       ) : (
+        /* Store List */
         <FlatList
-          data={paginatedProducts}
-          renderItem={renderProduct}
+          data={filteredStores}
+          renderItem={({ item }) => <StoreCard store={item} onPress={() => { }} />}
           keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={{
-            gap: scale(12),
-          }}
           contentContainerStyle={[
             styles.listContent,
             {
@@ -215,18 +272,13 @@ export const SearchResultsScreen: React.FC = () => {
             },
           ]}
           showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={[colors.primary]}
-              tintColor={colors.primary}
-            />
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                Tidak ada toko ditemukan.
+              </Text>
+            </View>
           }
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.6}
-          ListFooterComponent={renderFooter}
-          keyboardShouldPersistTaps="handled"
         />
       )}
     </View>
@@ -309,5 +361,20 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize('medium'),
     fontFamily: FontFamily.monasans.regular,
     textAlign: 'center',
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: moderateVerticalScale(12),
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabText: {
+    fontSize: getResponsiveFontSize('medium'),
+    fontFamily: FontFamily.monasans.semiBold,
   },
 });

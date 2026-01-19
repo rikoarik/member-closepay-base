@@ -16,8 +16,8 @@ import {
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { useFnBData, useFnBCart } from '../../hooks';
-import { FnBItemCard, FnBCategoryTabs, FnBCartBar, FnBItemDetailSheet, FnBCartDetailSheet, MerchantHeader } from '../shared';
+import { useFnBData, useFnBCart, useFnBFavorites } from '../../hooks';
+import { FnBItemCard, FnBCategoryTabs, FnBCartBar, FnBItemDetailSheet, FnBCartDetailSheet, MerchantHeader, FnBItemCardSkeleton, FnBCategoryTabsSkeleton, MerchantHeaderSkeleton } from '../shared';
 import type { FnBItem, FnBVariant, FnBAddon, FnBOrderItem, EntryPoint } from '../../models';
 
 interface CartItem extends FnBOrderItem {
@@ -58,6 +58,8 @@ export const FnBMerchantDetailScreen: React.FC<FnBMerchantDetailScreenProps> = (
         incrementItem,
         decrementItem,
     } = useFnBCart(entryPoint);
+
+    const { isFavorite, toggleFavorite } = useFnBFavorites();
 
     // Local state
     const [refreshing, setRefreshing] = useState(false);
@@ -161,12 +163,14 @@ export const FnBMerchantDetailScreen: React.FC<FnBMerchantDetailScreenProps> = (
             <FnBItemCard
                 item={item}
                 quantity={getItemQuantity(item.id)}
+                isFavorite={isFavorite(item.id)}
                 onPress={handleItemPress}
                 onAdd={handleAddItem}
                 onRemove={handleRemoveItem}
+                onToggleFavorite={toggleFavorite}
             />
         ),
-        [handleItemPress, handleAddItem, handleRemoveItem, getItemQuantity]
+        [handleItemPress, handleAddItem, handleRemoveItem, getItemQuantity, isFavorite, toggleFavorite]
     );
 
     return (
@@ -256,16 +260,32 @@ export const FnBMerchantDetailScreen: React.FC<FnBMerchantDetailScreenProps> = (
                 }
                 ListHeaderComponent={
                     <View>
-                        {store && <MerchantHeader store={store} />}
-                        <FnBCategoryTabs
-                            categories={categories}
-                            selectedCategory={selectedCategory}
-                            onSelectCategory={setSelectedCategory}
-                        />
+                        {loading ? (
+                            <>
+                                <MerchantHeaderSkeleton />
+                                <FnBCategoryTabsSkeleton />
+                            </>
+                        ) : (
+                            <>
+                                {store && <MerchantHeader store={store} />}
+                                <FnBCategoryTabs
+                                    categories={categories}
+                                    selectedCategory={selectedCategory}
+                                    onSelectCategory={setSelectedCategory}
+                                />
+                            </>
+                        )}
                     </View>
                 }
                 ListEmptyComponent={
-                    !loading ? (
+                    loading ? (
+                        // Show skeleton loading when loading
+                        <View style={styles.loadingContainer}>
+                            {Array.from({ length: 6 }, (_, index) => (
+                                <FnBItemCardSkeleton key={`skeleton-${index}`} />
+                            ))}
+                        </View>
+                    ) : (
                         <View style={styles.emptyContainer}>
                             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                                 {searchQuery
@@ -274,7 +294,7 @@ export const FnBMerchantDetailScreen: React.FC<FnBMerchantDetailScreenProps> = (
                                 }
                             </Text>
                         </View>
-                    ) : null
+                    )
                 }
             />
 
@@ -295,8 +315,10 @@ export const FnBMerchantDetailScreen: React.FC<FnBMerchantDetailScreenProps> = (
                 initialVariant={editingCartItem?.variant}
                 initialAddons={editingCartItem?.addons}
                 initialNotes={editingCartItem?.notes}
+                isFavorite={selectedItem ? isFavorite(selectedItem.id) : false}
                 onClose={handleCloseItemDetail}
                 onAddToCart={handleAddToCart}
+                onToggleFavorite={toggleFavorite}
             />
 
             {/* Cart Detail Sheet */}
@@ -310,6 +332,8 @@ export const FnBMerchantDetailScreen: React.FC<FnBMerchantDetailScreenProps> = (
                 onEditItem={handleEditCartItem}
                 onCheckout={handleCartCheckout}
             />
+
+
         </View>
     );
 };
@@ -376,6 +400,9 @@ const styles = StyleSheet.create({
     listContent: {
         paddingTop: moderateVerticalScale(16),
         flexGrow: 1,
+    },
+    loadingContainer: {
+        paddingTop: moderateVerticalScale(8),
     },
     emptyContainer: {
         flex: 1,

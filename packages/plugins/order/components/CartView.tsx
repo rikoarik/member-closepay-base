@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Cart } from '../models/Cart';
+import { CartItemSkeleton } from './CartItemSkeleton';
 import {
   scale,
   moderateVerticalScale,
@@ -19,10 +20,11 @@ import { useTheme } from '@core/theme';
 
 export interface CartViewProps {
   cart: Cart;
+  loading?: boolean;
   onCheckout?: () => void;
 }
 
-export const CartView: React.FC<CartViewProps> = ({ cart, onCheckout }) => {
+export const CartView: React.FC<CartViewProps> = ({ cart, loading = false, onCheckout }) => {
   const { colors } = useTheme();
   const horizontalPadding = getHorizontalPadding();
   const verticalPadding = getVerticalPadding();
@@ -40,15 +42,33 @@ export const CartView: React.FC<CartViewProps> = ({ cart, onCheckout }) => {
     >
       <ScrollView>
         <Text style={[styles.title, { color: colors.text }]}>Keranjang</Text>
-        {cart.items.length === 0 ? (
+        {loading ? (
+          // Show loading skeletons
+          <>
+            {Array.from({ length: 3 }, (_, index) => (
+              <CartItemSkeleton key={`skeleton-${index}`} />
+            ))}
+            <View
+              style={[
+                styles.totalContainer,
+                {
+                  borderTopColor: colors.border,
+                },
+              ]}
+            >
+              <View style={[styles.totalSkeleton, { backgroundColor: colors.border }]} />
+              <View style={[styles.totalSkeleton, { backgroundColor: colors.border }]} />
+            </View>
+          </>
+        ) : cart.items.length === 0 ? (
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             Keranjang kosong
           </Text>
         ) : (
           <>
             {cart.items.map((item, index) => (
-              <View 
-                key={index} 
+              <View
+                key={index}
                 style={[
                   styles.item,
                   {
@@ -67,7 +87,7 @@ export const CartView: React.FC<CartViewProps> = ({ cart, onCheckout }) => {
                 </Text>
               </View>
             ))}
-            <View 
+            <View
               style={[
                 styles.totalContainer,
                 {
@@ -136,6 +156,11 @@ const styles = StyleSheet.create({
   totalAmount: {
     fontSize: getResponsiveFontSize('xlarge'),
     fontFamily: FontFamily.monasans.bold,
+  },
+  totalSkeleton: {
+    height: scale(16),
+    borderRadius: scale(4),
+    marginVertical: scale(4),
   },
 });
 

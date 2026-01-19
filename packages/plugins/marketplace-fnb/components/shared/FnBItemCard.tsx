@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Add, Minus } from 'iconsax-react-nativejs';
+import { Add, Minus, Heart } from 'iconsax-react-nativejs';
 import { scale, moderateVerticalScale, FontFamily } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
@@ -14,10 +14,12 @@ import type { FnBItem } from '../../models';
 interface FnBItemCardProps {
     item: FnBItem;
     quantity?: number;
+    isFavorite?: boolean;
     onPress: (item: FnBItem) => void;
     onAdd?: (item: FnBItem) => void;
     onRemove?: (item: FnBItem) => void;
     onQuickAdd?: (item: FnBItem) => void;
+    onToggleFavorite?: (item: FnBItem) => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -27,10 +29,12 @@ const formatPrice = (price: number): string => {
 export const FnBItemCard: React.FC<FnBItemCardProps> = ({
     item,
     quantity = 0,
+    isFavorite = false,
     onPress,
     onAdd,
     onRemove,
     onQuickAdd,
+    onToggleFavorite,
 }) => {
     const { colors } = useTheme();
     const { t } = useTranslation();
@@ -77,6 +81,24 @@ export const FnBItemCard: React.FC<FnBItemCardProps> = ({
                             {t('fnb.soldOut') || 'Habis'}
                         </Text>
                     </View>
+                )}
+
+                {/* Favorite button */}
+                {onToggleFavorite && (
+                    <TouchableOpacity
+                        style={[styles.favoriteButton, { backgroundColor: 'rgba(255,255,255,0.9)' }]}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            onToggleFavorite(item);
+                        }}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                        <Heart
+                            size={scale(18)}
+                            color={isFavorite ? '#E53935' : colors.textSecondary}
+                            variant={isFavorite ? 'Bold' : 'Linear'}
+                        />
+                    </TouchableOpacity>
                 )}
             </View>
 
@@ -196,6 +218,21 @@ const styles = StyleSheet.create({
     soldOutText: {
         fontSize: scale(10),
         fontFamily: FontFamily.monasans.semiBold,
+    },
+    favoriteButton: {
+        position: 'absolute',
+        top: scale(8),
+        right: scale(8),
+        width: scale(32),
+        height: scale(32),
+        borderRadius: scale(16),
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.15,
+        shadowRadius: 2,
+        elevation: 2,
     },
     infoContainer: {
         padding: scale(10),

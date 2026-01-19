@@ -22,7 +22,7 @@ export type {
 export { getAvailableOrderTypes, isStoreOpen, parseFnBQRCode } from './models';
 
 // Hooks
-export { useFnBData, useFnBCart } from './hooks';
+export { useFnBData, useFnBCart, useFnBFavorites } from './hooks';
 
 // Components
 export {
@@ -34,7 +34,7 @@ export {
 } from './components/shared';
 
 // Screens
-export { FnBScreen, FnBMerchantDetailScreen, FnBCheckoutScreen, FnBScanScreen } from './components/screens';
+export { FnBScreen, FnBMerchantDetailScreen, FnBCheckoutScreen, FnBScanScreen, FnBFavoritesScreen } from './components/screens';
 
 // Module definition
 export const FnBModule = {
@@ -45,5 +45,6 @@ export const FnBModule = {
         FnBMerchantDetail: 'FnBMerchantDetailScreen',
         FnBCheckout: 'FnBCheckoutScreen',
         FnBScan: 'FnBScanScreen',
+        FnBFavorites: 'FnBFavoritesScreen',
     },
 };

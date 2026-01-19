@@ -50,6 +50,7 @@ export const TopUpScreen = () => {
   const insets = useSafeAreaInsets();
   const [amount, setAmount] = useState('200000');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const formatCurrency = (value: string): string => {
     // Remove non-numeric characters
@@ -65,17 +66,29 @@ export const TopUpScreen = () => {
     setAmount(formatted.replace(/\./g, ''));
   };
 
-  const handleNext = () => {
-    if (!selectedMethod || !amount) return;
-    
+  const handleNext = async () => {
+    if (!selectedMethod || !amount || isProcessing) return;
+
     const numericAmount = parseInt(amount.replace(/\D/g, ''), 10);
     if (numericAmount <= 0) return;
 
-    // @ts-ignore - navigation type akan di-setup nanti
-    navigation.navigate('VirtualAccount', {
-      amount: numericAmount,
-      paymentMethod: selectedMethod,
-    });
+    setIsProcessing(true);
+
+    try {
+      // Simulate topup validation process
+      await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+
+      // @ts-ignore - navigation type akan di-setup nanti
+      navigation.navigate('VirtualAccount', {
+        amount: numericAmount,
+        paymentMethod: selectedMethod,
+      });
+    } catch (error) {
+      // Handle error - could show error message
+      console.error('Topup validation failed:', error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const numericAmount = parseInt(amount.replace(/\D/g, ''), 10) || 0;
@@ -208,13 +221,13 @@ export const TopUpScreen = () => {
             style={[
               styles.nextButton,
               {
-                backgroundColor: numericAmount > 0 && selectedMethod ? colors.primary : colors.border,
+                backgroundColor: numericAmount > 0 && selectedMethod && !isProcessing ? colors.primary : colors.border,
               }
             ]}
             onPress={handleNext}
-            disabled={!numericAmount || !selectedMethod}>
+            disabled={!numericAmount || !selectedMethod || isProcessing}>
             <Text style={[styles.nextButtonText, { color: '#FFFFFF' }]}>
-              {t('common.next')}
+              {isProcessing ? 'Memproses...' : t('common.next')}
             </Text>
           </TouchableOpacity>
         </View>

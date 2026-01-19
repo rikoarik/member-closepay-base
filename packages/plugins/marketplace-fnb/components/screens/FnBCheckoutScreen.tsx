@@ -64,6 +64,7 @@ export const FnBCheckoutScreen: React.FC = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [deliveryAddress, setDeliveryAddress] = useState('');
     const [pickupTime, setPickupTime] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Order type options
     const orderTypeOptions: OrderTypeOption[] = useMemo(() => {
@@ -107,26 +108,37 @@ export const FnBCheckoutScreen: React.FC = () => {
     }, [customerName, tableNumber, phoneNumber, deliveryAddress, selectedOrderType]);
 
     // Handle order
-    const handleOrder = useCallback(() => {
+    const handleOrder = useCallback(async () => {
         if (!isFormValid) {
             Alert.alert('Error', 'Mohon lengkapi semua data yang diperlukan');
             return;
         }
 
-        // Here you would normally send order to API
-        Alert.alert(
-            'Pesanan Berhasil',
-            `Pesanan Anda sedang diproses.\n\nTotal: ${formatPrice(total)}`,
-            [
-                {
-                    text: 'OK',
-                    onPress: () => {
-                        clearCart();
-                        navigation.goBack();
+        setIsSubmitting(true);
+
+        try {
+            // Simulate API call to submit order
+            await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+
+            // Here you would normally send order to API
+            Alert.alert(
+                'Pesanan Berhasil',
+                `Pesanan Anda sedang diproses.\n\nTotal: ${formatPrice(total)}`,
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => {
+                            clearCart();
+                            navigation.goBack();
+                        },
                     },
-                },
-            ]
-        );
+                ]
+            );
+        } catch (error) {
+            Alert.alert('Error', 'Gagal memproses pesanan. Silakan coba lagi.');
+        } finally {
+            setIsSubmitting(false);
+        }
     }, [isFormValid, total, clearCart, navigation]);
 
     return (
@@ -364,14 +376,17 @@ export const FnBCheckoutScreen: React.FC = () => {
                     style={[
                         styles.orderButton,
                         {
-                            backgroundColor: isFormValid ? colors.primary : colors.border,
+                            backgroundColor: isFormValid && !isSubmitting ? colors.primary : colors.border,
                         },
                     ]}
                     onPress={handleOrder}
-                    disabled={!isFormValid}
+                    disabled={!isFormValid || isSubmitting}
                 >
-                    <Text style={[styles.orderButtonText, { color: isFormValid ? colors.surface : colors.textSecondary }]}>
-                        {t('fnb.payNow') || 'Bayar Sekarang'} - {formatPrice(total)}
+                    <Text style={[styles.orderButtonText, { color: isFormValid && !isSubmitting ? colors.surface : colors.textSecondary }]}>
+                        {isSubmitting
+                            ? 'Memproses...'
+                            : `${t('fnb.payNow') || 'Bayar Sekarang'} - ${formatPrice(total)}`
+                        }
                     </Text>
                 </TouchableOpacity>
             </View>

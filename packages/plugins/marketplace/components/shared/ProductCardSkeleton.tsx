@@ -1,6 +1,6 @@
 /**
  * ProductCardSkeleton Component
- * Shimmer loading untuk ProductCard
+ * Shimmer loading untuk ProductCard - matches ProductCard layout exactly
  */
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
@@ -25,54 +25,53 @@ export const ProductCardSkeleton: React.FC = () => {
     Animated.loop(
       Animated.timing(shimmerAnim, {
         toValue: 1,
-        duration: 2000,
+        duration: 1500,
         useNativeDriver: true,
       })
     ).start();
   }, [shimmerAnim]);
 
-  const translateX = shimmerAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-200, 200],
-  });
-
   const opacity = shimmerAnim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.3, 0.6, 0.3],
+    outputRange: [0.3, 0.7, 0.3],
   });
 
   const ShimmerBox = ({ style }: { style: any }) => (
-    <View style={[style, { backgroundColor: colors.surfaceSecondary || colors.border, overflow: 'hidden', borderRadius: style.borderRadius || scale(4) }]}>
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            backgroundColor: colors.surface,
-            opacity,
-            transform: [{ translateX }],
-            width: '50%',
-          },
-        ]}
-      />
-    </View>
+    <Animated.View
+      style={[
+        style,
+        {
+          backgroundColor: colors.surfaceSecondary || colors.border,
+          opacity,
+          borderRadius: style.borderRadius ?? scale(4),
+        },
+      ]}
+    />
   );
 
   return (
-    <View style={[styles.container, { width: cardWidth, backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {/* Image Skeleton */}
+    <View
+      style={[
+        styles.container,
+        {
+          width: cardWidth,
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+        },
+      ]}
+    >
+      {/* Image Skeleton - matches ProductCard aspectRatio: 2 */}
       <ShimmerBox style={styles.imageSkeleton} />
 
       {/* Content Skeleton */}
       <View style={styles.content}>
-        {/* Name Skeleton - Line 1 */}
-        <ShimmerBox style={styles.nameSkeleton1} />
-        {/* Name Skeleton - Line 2 */}
-        <ShimmerBox style={styles.nameSkeleton2} />
+        {/* Name Skeleton - single line like ProductCard */}
+        <ShimmerBox style={styles.nameSkeleton} />
 
         {/* Price Skeleton */}
         <ShimmerBox style={styles.priceSkeleton} />
 
-        {/* Footer Skeleton */}
+        {/* Footer Skeleton - rating and sold */}
         <View style={styles.footer}>
           <ShimmerBox style={styles.ratingSkeleton} />
           <ShimmerBox style={styles.soldSkeleton} />
@@ -84,50 +83,47 @@ export const ProductCardSkeleton: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: scale(12),
+    borderRadius: scale(10), // Match ProductCard
     borderWidth: 1,
     marginBottom: moderateVerticalScale(12),
     overflow: 'hidden',
+    minHeight: moderateVerticalScale(190), // Match ProductCard
+    elevation: 2, // Match ProductCard
   },
   imageSkeleton: {
     width: '100%',
-    aspectRatio: 1,
+    aspectRatio: 2, // Match ProductCard image aspectRatio
     borderRadius: 0,
   },
   content: {
-    padding: scale(12),
+    flex: 1,
+    padding: scale(10), // Match ProductCard content padding
+    justifyContent: 'space-between', // Match ProductCard
   },
-  nameSkeleton1: {
-    width: '90%',
+  nameSkeleton: {
+    width: '85%',
     height: getResponsiveFontSize('small') * 1.2,
     borderRadius: scale(4),
-    marginBottom: moderateVerticalScale(4),
-  },
-  nameSkeleton2: {
-    width: '70%',
-    height: getResponsiveFontSize('small') * 1.2,
-    borderRadius: scale(4),
-    marginBottom: moderateVerticalScale(8),
   },
   priceSkeleton: {
-    width: '60%',
+    width: '55%',
     height: getResponsiveFontSize('medium') * 1.2,
     borderRadius: scale(4),
-    marginBottom: moderateVerticalScale(4),
   },
   footer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: moderateVerticalScale(4),
+    alignItems: 'flex-end', // Match ProductCard
+    justifyContent: 'space-between', // Match ProductCard
+    flexWrap: 'wrap',
   },
   ratingSkeleton: {
-    width: scale(40),
-    height: getResponsiveFontSize('small') * 1.2,
+    width: scale(45),
+    height: getResponsiveFontSize('xxxsmall') * 1.2,
     borderRadius: scale(4),
   },
   soldSkeleton: {
-    width: scale(50),
-    height: getResponsiveFontSize('small') * 1.2,
+    width: scale(55),
+    height: getResponsiveFontSize('xxxsmall') * 1.2,
     borderRadius: scale(4),
   },
 });

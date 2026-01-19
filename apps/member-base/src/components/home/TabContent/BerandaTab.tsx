@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
   menuItem: {
     marginTop: moderateVerticalScale(16),
     marginBottom: moderateVerticalScale(16),
-    paddingHorizontal: getHorizontalPadding(),
     paddingVertical: moderateVerticalScale(16),
   },
 });

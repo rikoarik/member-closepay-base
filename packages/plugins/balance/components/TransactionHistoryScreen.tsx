@@ -19,7 +19,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { useBalance, TransactionType, BalanceMutation } from '../index';
+import { useBalance, TransactionType, BalanceMutation, TransactionItemSkeleton } from '../index';
 import {
   ArrowLeft2,
 } from 'iconsax-react-nativejs';
@@ -105,7 +105,7 @@ export const TransactionHistoryScreen = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { mutations, loadMutations, refresh } = useBalance();
+  const { mutations, loadMutations, refresh, isLoading } = useBalance();
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [refreshing, setRefreshing] = useState(false);
@@ -251,7 +251,13 @@ export const TransactionHistoryScreen = () => {
       </View>
 
       {/* Transaction List */}
-      {filteredMutations.length === 0 ? (
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          {Array.from({ length: 5 }, (_, index) => (
+            <TransactionItemSkeleton key={`skeleton-${index}`} />
+          ))}
+        </View>
+      ) : filteredMutations.length === 0 ? (
         <View style={[styles.emptyState, { paddingTop: moderateVerticalScale(40) }]}>
           <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
             {t('balance.noTransactions')}
@@ -314,6 +320,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalPadding,
     paddingTop: moderateVerticalScale(16),
     paddingBottom: moderateVerticalScale(24),
+  },
+  loadingContainer: {
+    paddingHorizontal: horizontalPadding,
+    paddingTop: moderateVerticalScale(16),
   },
   monthFilterContainer: {
     paddingVertical: moderateVerticalScale(12),

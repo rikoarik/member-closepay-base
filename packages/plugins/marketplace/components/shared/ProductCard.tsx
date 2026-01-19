@@ -22,6 +22,8 @@ export interface Product {
   category?: string;
   discount?: number;
   storeName?: string;
+  description?: string;
+  stock?: number;
 }
 
 interface ProductCardProps {
@@ -52,8 +54,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product, onPress }) 
   const discountPercentage =
     product.originalPrice && product.originalPrice > product.price
       ? Math.round(
-          ((product.originalPrice - product.price) / product.originalPrice) * 100
-        )
+        ((product.originalPrice - product.price) / product.originalPrice) * 100
+      )
       : null;
 
   return (
@@ -101,7 +103,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product, onPress }) 
 
         {product.originalPrice && product.originalPrice > product.price && (
           <Text style={[styles.promoText, { color: colors.error }]}>
-            Hemat {discountPercentage}% · {formatCurrency(product.originalPrice)}
+            {t('marketplace.save')} {discountPercentage}% · {formatCurrency(product.originalPrice)}
           </Text>
         )}
 

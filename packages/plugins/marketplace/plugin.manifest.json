@@ -11,17 +11,22 @@
   "exports": {
     "components": [
       "ProductCard",
-      "ProductCardSkeleton"
+      "ProductCardSkeleton",
+      "CartBar"
     ],
     "screens": {
       "MarketplaceScreen": "MarketplaceScreen",
       "SearchScreen": "SearchScreen",
-      "SearchResultsScreen": "SearchResultsScreen"
+      "SearchResultsScreen": "SearchResultsScreen",
+      "CartScreen": "CartScreen",
+      "ProductDetailScreen": "ProductDetailScreen",
+      "CheckoutScreen": "CheckoutScreen"
     },
     "hooks": {
       "useMarketplaceData": "useMarketplaceData",
       "useSearch": "useSearch",
-      "getCategories": "getCategories"
+      "getCategories": "getCategories",
+      "useMarketplaceCart": "useMarketplaceCart"
     }
   },
   "routes": [
@@ -58,6 +63,42 @@
       ],
       "meta": {
         "title": "Hasil Pencarian",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "Cart",
+      "path": "/marketplace/cart",
+      "component": "CartScreen",
+      "permissions": [
+        "marketplace:view"
+      ],
+      "meta": {
+        "title": "Keranjang",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "ProductDetail",
+      "path": "/marketplace/product/:id",
+      "component": "ProductDetailScreen",
+      "permissions": [
+        "marketplace:view"
+      ],
+      "meta": {
+        "title": "Detail Produk",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "Checkout",
+      "path": "/marketplace/checkout",
+      "component": "CheckoutScreen",
+      "permissions": [
+        "marketplace:order"
+      ],
+      "meta": {
+        "title": "Checkout",
         "showInMenu": false
       }
     }

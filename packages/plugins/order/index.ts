@@ -13,4 +13,5 @@ export * from './services/cartService';
 export * from './services/invoiceService';
 export * from './components/CartView';
 export * from './components/OrderList';
+export * from './components/CartItemSkeleton';
 

@@ -2,7 +2,7 @@
  * Shared Marketplace Data Hook
  * Hook untuk mendapatkan data produk marketplace dengan pagination
  */
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Product } from '../components/shared/ProductCard';
 
 const BATCH_SIZE = 20;
@@ -101,6 +101,13 @@ const generateProductBatch = (startIndex: number, count: number): Product[] => {
   return products;
 };
 
+export interface UseMarketplaceDataReturn {
+  products: Product[];
+  loading: boolean;
+  error: string | null;
+  refresh: () => void;
+}
+
 /**
  * Hook untuk mendapatkan data produk marketplace
  * @param limit - Jumlah produk yang diambil
@@ -113,8 +120,12 @@ export const useMarketplaceData = (
   isActive: boolean = true,
   isVisible: boolean = true,
   refreshKey?: number
-): Product[] => {
-  return useMemo(() => {
+): UseMarketplaceDataReturn => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadProducts = useMemo(() => {
     if (!isActive && !isVisible) return [];
 
     const products: Product[] = [];
@@ -130,7 +141,54 @@ export const useMarketplaceData = (
 
     return limit ? products.slice(0, limit) : products;
   }, [limit, isActive, isVisible, refreshKey]);
+
+  const refresh = () => {
+    setLoading(true);
+    setError(null);
+    // Trigger re-calculation by updating refresh key
+    setTimeout(() => setLoading(false), 800);
+  };
+
+  useEffect(() => {
+    if (!isActive && !isVisible) {
+      setProducts([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    // Simulate API loading
+    const timer = setTimeout(() => {
+      try {
+        setProducts(loadProducts);
+      } catch (err) {
+        setError('Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [loadProducts, isActive, isVisible]);
+
+  return {
+    products,
+    loading,
+    error,
+    refresh,
+  };
 };
+
+export interface Store {
+  id: string;
+  name: string;
+  imageUrl: string;
+  rating: number;
+  location: string;
+  followers: number;
+}
 
 /**
  * Get all available categories
@@ -138,3 +196,23 @@ export const useMarketplaceData = (
 export const getCategories = (): string[] => {
   return categories;
 };
+
+/**
+ * Search stores by query
+ */
+export const searchStores = (query: string): Store[] => {
+  const lowerQuery = query.toLowerCase();
+
+  return storeNames
+    .filter(name => !query || name.toLowerCase().includes(lowerQuery))
+    .map((name, index) => ({
+      id: `store-${index}`,
+      name,
+      imageUrl: `https://picsum.photos/id/${200 + index}/200/200`,
+      rating: 4.5 + (Math.random() * 0.5),
+      location: 'Jakarta',
+      followers: Math.floor(Math.random() * 10000) + 100,
+    }));
+};
+
+export const getAllStores = (): Store[] => searchStores('');

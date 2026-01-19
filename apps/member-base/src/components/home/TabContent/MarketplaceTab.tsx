@@ -61,8 +61,8 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
 
   const categories = useMemo(() => getCategories(), []);
 
-  const allProductsData = useMarketplaceData(loadedBatches * 20, isActive, isVisible);
-  
+  const { products: allProductsData } = useMarketplaceData(loadedBatches * 20, isActive, isVisible);
+
   const bestSellerProducts = useMemo(() => {
     const products = [...allProductsData];
     return products
@@ -261,8 +261,8 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
           >
             {bestSellerProducts.map((product) => (
               <View key={product.id} style={[styles.horizontalCard, { width: cardWidth }]}>
-                <ProductCard 
-                  product={product} 
+                <ProductCard
+                  product={product}
                   onPress={renderItem({ item: product }).props.onPress}
                 />
               </View>
@@ -407,7 +407,11 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
           ) : (
             <>
               <View style={styles.grid}>
-                {paginatedProducts.map((item) => renderItem({ item }))}
+                {paginatedProducts.map((item) => (
+                  <React.Fragment key={item.id}>
+                    {renderItem({ item })}
+                  </React.Fragment>
+                ))}
               </View>
               {isLoadingMore && hasMore && (
                 <View style={styles.footerShimmer}>

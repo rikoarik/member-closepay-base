@@ -44,6 +44,17 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     WithdrawConfirmModal: () => import('../../../plugins/payment/components/withdraw/WithdrawConfirmModal'),
     AutoWithdrawModal: () => import('../../../plugins/payment/components/withdraw/AutoWithdrawModal'),
   },
+  'marketplace': {
+    MarketplaceScreen: () => import('../../../plugins/marketplace/components/screens/MarketplaceScreen'),
+    SearchScreen: () => import('../../../plugins/marketplace/components/screens/SearchScreen'),
+    SearchResultsScreen: () => import('../../../plugins/marketplace/components/screens/SearchResultsScreen'),
+    CartScreen: () => import('../../../plugins/marketplace/components/screens/CartScreen'),
+    ProductDetailScreen: () => import('../../../plugins/marketplace/components/screens/ProductDetailScreen'),
+    CheckoutScreen: () => import('../../../plugins/marketplace/components/screens/CheckoutScreen'),
+    ProductCard: () => import('../../../plugins/marketplace/components/shared/ProductCard'),
+    ProductCardSkeleton: () => import('../../../plugins/marketplace/components/shared/ProductCardSkeleton'),
+    CartBar: () => import('../../../plugins/marketplace/components/shared/CartBar'),
+  },
   'marketplace-fnb': {
     FnBMerchantDetailScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBMerchantDetailScreen'),
     FnBScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScreen'),
@@ -54,6 +65,7 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     FnBCartBar: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCartBar'),
     FnBItemDetailSheet: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemDetailSheet'),
     MerchantHeader: () => import('../../../plugins/marketplace-fnb/components/shared/MerchantHeader'),
+    FnBFavoritesScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBFavoritesScreen'),
   },
 };
 

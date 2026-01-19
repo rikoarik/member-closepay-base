@@ -7,11 +7,16 @@
 export { MarketplaceScreen } from './components/screens/MarketplaceScreen';
 export { SearchScreen } from './components/screens/SearchScreen';
 export { SearchResultsScreen } from './components/screens/SearchResultsScreen';
+export { CartScreen } from './components/screens/CartScreen';
+export { ProductDetailScreen } from './components/screens/ProductDetailScreen';
+export { CheckoutScreen } from './components/screens/CheckoutScreen';
 export { ProductCard } from './components/shared/ProductCard';
 export type { Product } from './components/shared/ProductCard';
 export { ProductCardSkeleton } from './components/shared/ProductCardSkeleton';
+export { CartBar } from './components/shared/CartBar';
 export { useMarketplaceData, getCategories } from './hooks/useMarketplaceData';
 export { useSearch } from './hooks/useSearch';
+export { useMarketplaceCart } from './hooks/useMarketplaceCart';
 
 // Module definition
 export const MarketplaceModule = {
@@ -21,5 +26,8 @@ export const MarketplaceModule = {
     Marketplace: 'MarketplaceScreen',
     Search: 'SearchScreen',
     SearchResults: 'SearchResultsScreen',
+    Cart: 'CartScreen',
+    ProductDetail: 'ProductDetailScreen',
+    Checkout: 'CheckoutScreen',
   },
 };

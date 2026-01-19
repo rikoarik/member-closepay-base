@@ -12,13 +12,15 @@
       "FnBCategoryTabs",
       "FnBCartBar",
       "FnBItemDetailSheet",
-      "MerchantHeader"
+      "MerchantHeader",
+      "FnBFavorites"
     ],
     "screens": {
       "FnB": "FnBScreen",
       "FnBMerchantDetail": "FnBMerchantDetailScreen",
       "FnBCheckout": "FnBCheckoutScreen",
-      "FnBScan": "FnBScanScreen"
+      "FnBScan": "FnBScanScreen",
+      "FnBFavorites": "FnBFavoritesScreen"
     },
     "hooks": [
       "useFnBData",
@@ -86,6 +88,18 @@
       ],
       "meta": {
         "title": "Scan QR",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "FnBFavorites",
+      "path": "/fnb/favorites",
+      "component": "FnBFavoritesScreen",
+      "permissions": [
+        "read:fnb"
+      ],
+      "meta": {
+        "title": "Favorites",
         "showInMenu": false
       }
     }

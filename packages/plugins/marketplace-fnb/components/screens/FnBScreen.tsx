@@ -3,8 +3,8 @@
  * Premium Marketplace Landing Page (Superapp Style)
  */
 
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, ScrollView, Image, FlatList, TextInput, StatusBar, Dimensions } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, ScrollView, Image, FlatList, TextInput, StatusBar, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -15,7 +15,8 @@ import {
     Star1,
     Clock,
     DiscountShape,
-    TruckFast
+    TruckFast,
+    ScanBarcode
 } from 'iconsax-react-nativejs';
 import {
     scale,
@@ -111,6 +112,19 @@ export const FnBScreen: React.FC<FnBScreenProps> = ({ entryPoint = 'browse' }) =
         // @ts-ignore
         navigation.navigate('FnBMerchantDetail', { entryPoint });
     };
+
+
+    const handleScanPress = useCallback(() => {
+        // Navigate to dedicated FnB scan screen
+        // @ts-ignore
+        navigation.navigate('FnBScan');
+    }, [navigation]);
+
+    const handleFavoritesPress = useCallback(() => {
+        // Navigate to favorites screen
+        // @ts-ignore
+        navigation.navigate('FnBFavorites');
+    }, [navigation]);
 
     // --- Render Items ---
 
@@ -232,7 +246,7 @@ export const FnBScreen: React.FC<FnBScreenProps> = ({ entryPoint = 'browse' }) =
                         </View>
                     </TouchableOpacity>
                     <View style={styles.headerActions}>
-                        <TouchableOpacity style={styles.iconButton}>
+                        <TouchableOpacity style={styles.iconButton} onPress={handleFavoritesPress}>
                             <Heart size={scale(24)} color={colors.text} variant="Linear" />
                         </TouchableOpacity>
                     </View>
@@ -317,6 +331,12 @@ export const FnBScreen: React.FC<FnBScreenProps> = ({ entryPoint = 'browse' }) =
                 </View>
 
             </ScrollView>
+            <TouchableOpacity
+                style={[styles.scanButton, { backgroundColor: colors.primary }]}
+                onPress={handleScanPress}
+            >
+                <ScanBarcode size={scale(34)} color={colors.surface} variant="Outline" />
+            </TouchableOpacity>
         </View>
     );
 };
@@ -580,6 +600,27 @@ const styles = StyleSheet.create({
         fontSize: scale(10),
         fontFamily: FontFamily.monasans.semiBold,
         marginLeft: scale(4),
+    },
+    scanButton: {
+        position: 'absolute',
+        bottom: moderateVerticalScale(54),
+        alignSelf: 'center',
+        width: scale(80),
+        height: scale(55),
+        borderRadius: scale(2000),
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+            },
+            android: {
+                elevation: 8,
+            },
+        }),
     },
 });
 
