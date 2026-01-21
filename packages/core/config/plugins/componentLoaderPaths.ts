@@ -12,14 +12,20 @@
 
 export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
   balance: {
-    TransactionHistoryScreen: '../../../plugins/balance/components/TransactionHistoryScreen',
-    WithdrawIcon: '../../../plugins/balance/components/WithdrawIcon',
-    TopUpIcon: '../../../plugins/balance/components/TopUpIcon',
-    BalanceCard: '../../../plugins/balance/components/BalanceCard',
+    BalanceDetailScreen: '../../../plugins/balance/components/screens/BalanceDetailScreen',
+    TransactionHistoryScreen: '../../../plugins/balance/components/screens/TransactionHistoryScreen',
   },
   marketplace: {
     ProductCard: '../../../plugins/marketplace/components/shared/ProductCard',
     ProductCardSkeleton: '../../../plugins/marketplace/components/shared/ProductCardSkeleton',
+    CartBar: '../../../plugins/marketplace/components/shared/CartBar',
+    MarketplaceScreen: '../../../plugins/marketplace/components/screens/MarketplaceScreen',
+    SearchScreen: '../../../plugins/marketplace/components/screens/SearchScreen',
+    SearchResultsScreen: '../../../plugins/marketplace/components/screens/SearchResultsScreen',
+    CartScreen: '../../../plugins/marketplace/components/screens/CartScreen',
+    ProductDetailScreen: '../../../plugins/marketplace/components/screens/ProductDetailScreen',
+    StoreDetailScreen: '../../../plugins/marketplace/components/screens/StoreDetailScreen',
+    CheckoutScreen: '../../../plugins/marketplace/components/screens/CheckoutScreen',
   },
   marketplace-fnb: {
     FnBItemCard: '../../../plugins/marketplace-fnb/components/shared/FnBItemCard',
@@ -27,6 +33,11 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     FnBCartBar: '../../../plugins/marketplace-fnb/components/shared/FnBCartBar',
     FnBItemDetailSheet: '../../../plugins/marketplace-fnb/components/shared/FnBItemDetailSheet',
     MerchantHeader: '../../../plugins/marketplace-fnb/components/shared/MerchantHeader',
+    FnBScreen: '../../../plugins/marketplace-fnb/components/screens/FnBScreen',
+    FnBMerchantDetailScreen: '../../../plugins/marketplace-fnb/components/screens/FnBMerchantDetailScreen',
+    FnBCheckoutScreen: '../../../plugins/marketplace-fnb/components/screens/FnBCheckoutScreen',
+    FnBScanScreen: '../../../plugins/marketplace-fnb/components/screens/FnBScanScreen',
+    FnBFavoritesScreen: '../../../plugins/marketplace-fnb/components/screens/FnBFavoritesScreen',
   },
   payment: {
     TopUpScreen: '../../../plugins/payment/components/topup/TopUpScreen',

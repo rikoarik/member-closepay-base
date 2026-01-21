@@ -14,7 +14,6 @@
 import { PluginRegistry } from './PluginRegistry';
 import type { PluginManifest } from './types';
 import React from 'react';
-import { COMPONENT_LOADER_PATHS } from './componentLoaderPaths';
 
 /**
  * Static component loader map for Metro bundler compatibility
@@ -23,10 +22,11 @@ import { COMPONENT_LOADER_PATHS } from './componentLoaderPaths';
  */
 const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>>> = {
   balance: {
-    TransactionHistoryScreen: () => import('../../../plugins/balance/components/TransactionHistoryScreen'),
-    WithdrawIcon: () => import('../../../plugins/balance/components/WithdrawIcon'),
-    TopUpIcon: () => import('../../../plugins/balance/components/TopUpIcon'),
-    BalanceCard: () => import('../../../plugins/balance/components/BalanceCard'),
+    TransactionHistoryScreen: () => import('../../../plugins/balance/components/screens/TransactionHistoryScreen'),
+    WithdrawIcon: () => import('../../../plugins/balance/components/ui/WithdrawIcon'),
+    TopUpIcon: () => import('../../../plugins/balance/components/ui/TopUpIcon'),
+    BalanceCard: () => import('../../../plugins/balance/components/ui/BalanceCard'),
+    BalanceDetailScreen: () => import('../../../plugins/balance/components/screens/BalanceDetailScreen'),
   },
   payment: {
     TopUpScreen: () => import('../../../plugins/payment/components/topup/TopUpScreen'),
@@ -53,6 +53,7 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     CheckoutScreen: () => import('../../../plugins/marketplace/components/screens/CheckoutScreen'),
     ProductCard: () => import('../../../plugins/marketplace/components/shared/ProductCard'),
     ProductCardSkeleton: () => import('../../../plugins/marketplace/components/shared/ProductCardSkeleton'),
+    StoreDetailScreen: () => import('../../../plugins/marketplace/components/screens/StoreDetailScreen'),
     CartBar: () => import('../../../plugins/marketplace/components/shared/CartBar'),
   },
   'marketplace-fnb': {

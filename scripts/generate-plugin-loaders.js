@@ -61,7 +61,7 @@ const PATH_PATTERNS = [
   // Pattern 2: components/{folder}/{ComponentName} (for nested structures)
   // We'll try common folders: topup, withdraw, shared, virtual-account, etc.
   (componentName, pluginId) => {
-    const commonFolders = ['topup', 'withdraw', 'shared', 'virtual-account', 'topup-member'];
+    const commonFolders = ['topup', 'withdraw', 'shared', 'virtual-account', 'topup-member', 'screens'];
     for (const folder of commonFolders) {
       const testPath = `components/${folder}/${componentName}`;
       const fullPath = path.join(PLUGINS_DIR, pluginId, testPath);
@@ -186,7 +186,18 @@ function generateLoaders() {
       const manifestContent = fs.readFileSync(manifestPath, 'utf8');
       const manifest = JSON.parse(manifestContent);
       
-      const components = manifest.exports?.components || [];
+      let components = manifest.exports?.components || [];
+      
+      // Also include screens if they exist
+      if (manifest.exports?.screens) {
+        // screens is an object { "ExportName": "ComponentName" }
+        // We want the ComponentName values
+        const screenComponents = Object.values(manifest.exports.screens);
+        components = [...components, ...screenComponents];
+      }
+      
+      // Remove duplicates
+      components = [...new Set(components)];
       
       if (components.length === 0) {
         logWarning(`No components exported by plugin: ${pluginId}`);
