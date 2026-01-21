@@ -3,10 +3,10 @@
  * Export semua types, models, services, hooks, dan components
  */
 
-import { balanceOperationsRegistry, BalanceOperations } from '@core/config/plugins/contracts/balance';
+import { balanceOperationsRegistry, BalanceOperations, BalanceMutation } from '@core/config/plugins/contracts/balance';
 import { balanceService } from './services/balanceService';
 import { mutationService } from './services/mutationService';
-import { BalanceAccount, BalanceMutation } from './models/BalanceAccount';
+import { BalanceAccount } from './models/BalanceAccount';
 import { TransactionType } from './models/TransactionType';
 
 // Register balance operations with core registry
@@ -16,13 +16,24 @@ const balanceOps: BalanceOperations = {
   },
   async createMutation(mutation: Omit<BalanceMutation, 'id' | 'createdAt'>): Promise<BalanceMutation> {
     // Map to mutation service format
-    return await mutationService.createMutation(
+    const result = await mutationService.createMutation(
       mutation.accountId,
       mutation.type === 'credit' ? TransactionType.CREDIT : TransactionType.DEBIT,
       mutation.amount,
       mutation.description || '',
       mutation.metadata?.referenceId
     );
+    
+    // Map plugin's BalanceMutation to contract's BalanceMutation format
+    return {
+      id: result.id,
+      accountId: result.accountId,
+      type: result.type === TransactionType.CREDIT ? 'credit' : 'debit',
+      amount: result.amount,
+      description: result.description,
+      metadata: result.metadata,
+      createdAt: result.createdAt,
+    };
   },
 };
 
@@ -35,11 +46,12 @@ export * from './models/BalanceMutation';
 export * from './services/balanceService';
 export * from './services/mutationService';
 export * from './hooks/useBalance';
-export * from './components/TransactionHistoryScreen';
-export * from './components/WithdrawIcon';
-export * from './components/TopUpIcon';
-export * from './components/BalanceCard';
-export * from './components/TransactionItem';
-export * from './components/TransactionList';
-export * from './components/TransactionItemSkeleton';
+export * from './components/screens/BalanceDetailScreen';
+export * from './components/screens/TransactionHistoryScreen';
+export * from './components/ui/WithdrawIcon';
+export * from './components/ui/TopUpIcon';
+export * from './components/ui/BalanceCard';
+export * from './components/ui/TransactionItem';
+export * from './components/ui/TransactionList';
+export * from './components/ui/TransactionItemSkeleton';
 

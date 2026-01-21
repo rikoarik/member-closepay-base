@@ -8,6 +8,7 @@
     "dependencies": [],
     "exports": {
         "components": [
+            "BalanceDetailScreen",
             "TransactionHistoryScreen",
             "WithdrawIcon",
             "TopUpIcon",
@@ -26,6 +27,7 @@
             "BalanceMutation"
         ],
         "screens": {
+            "BalanceDetail": "BalanceDetailScreen",
             "TransactionHistory": "TransactionHistoryScreen"
         }
     },
@@ -33,6 +35,18 @@
         {
             "name": "BalanceDetail",
             "path": "/balance/detail",
+            "component": "BalanceDetailScreen",
+            "permissions": [
+                "read:balance"
+            ],
+            "meta": {
+                "title": "Balance Detail",
+                "showInMenu": false
+            }
+        },
+        {
+            "name": "TransactionHistory",
+            "path": "/balance/history",
             "component": "TransactionHistoryScreen",
             "permissions": [
                 "read:balance"

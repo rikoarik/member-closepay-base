@@ -13,6 +13,7 @@ export interface BalanceMutation {
   balance: number; // Balance setelah transaksi
   description: string;
   referenceId?: string; // Reference ke transaction/payment
+  metadata?: any;
   createdAt: Date;
 }
 

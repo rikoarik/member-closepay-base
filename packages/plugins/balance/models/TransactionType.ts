@@ -10,5 +10,7 @@ export enum TransactionType {
   PAYMENT = 'payment',
   REFUND = 'refund',
   FEE = 'fee',
+  CREDIT = "CREDIT",
+  DEBIT = "DEBIT",
 }
 
