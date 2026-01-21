@@ -75,5 +75,13 @@ declare module 'iconsax-react-nativejs' {
   export class ArrowRight2 extends Component<IconProps> { }
   export class Bag2 extends Component<IconProps> { }
   export class Wallet3 extends Component<IconProps> { }
+  export class ArrowSwap extends Component<IconProps> { }
+  export class Buildings extends Component<IconProps> { }
+  export class Send2 extends Component<IconProps> { }
+  export class ReceiptItem extends Component<IconProps> { }
+  export class ArrowDown2 extends Component<IconProps> { }
+  export class MoneyRecive extends Component<IconProps> { }
+  export class MoneySend extends Component<IconProps> { }
+  export class Wallet extends Component<IconProps> { }
 }
 

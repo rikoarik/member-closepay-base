@@ -35,6 +35,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Kamera dibutuhkan untuk scan QR pembayaran dan unggah dokumen verifikasi supaya proses cepat dan tanpa ribet</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Akses galeri dibutuhkan untuk memilih foto profil atau mengunggah bukti pembayaran</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Lokasi membantu kami mencocokkan wilayah operasional toko dan meningkatkan keamanan akun merchant</string>
 	<key>NSUserNotificationsUsageDescription</key>
