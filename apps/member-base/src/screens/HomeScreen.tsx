@@ -19,6 +19,7 @@ import {
   BackHandler,
   Platform,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -430,6 +431,14 @@ export const HomeScreen = () => {
         directionalLockEnabled={true}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
         {...(Platform.OS === 'ios' && {
           contentInsetAdjustmentBehavior: 'automatic',
           automaticallyAdjustContentInsets: false,

@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft2, Profile, GalleryEdit, Camera, Gallery } from 'iconsax-react-nativejs';
+import { Profile, GalleryEdit, Camera, Gallery } from 'iconsax-react-nativejs';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useAuth } from '@core/auth';
@@ -38,6 +38,7 @@ import {
   permissionService,
   ScreenHeader,
 } from '@core/config';
+import { MediaType } from 'react-native-image-picker/lib/typescript/types';
 
 export const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -160,10 +161,11 @@ export const EditProfileScreen: React.FC = () => {
     setShowPhotoPicker(true);
   };
 
-  const handleSelectFromGallery = async () => {
+  const handleSelectFromGallery = () => {
     setShowPhotoPicker(false);
 
-    try {
+    if (Platform.OS === 'android') {
+      // Use native ImagePickerModule for Android (with crop)
       const { NativeModules } = require('react-native');
       const { ImagePickerModule } = NativeModules;
 
@@ -176,32 +178,63 @@ export const EditProfileScreen: React.FC = () => {
         return;
       }
 
-      const result = await ImagePickerModule.pickImage({
+      ImagePickerModule.pickImage({
         maxWidth: 1024,
         maxHeight: 1024,
         quality: 0.8,
+      }).then((result: any) => {
+        if (result && result.uri) {
+          const imageUri = result.uri.startsWith('file://')
+            ? result.uri
+            : `file://${result.uri}`;
+          setProfileImage(imageUri);
+        }
+      }).catch((error: any) => {
+        console.error('Error selecting image from gallery:', error);
+
+        if (error.code === 'CANCELLED') {
+          return;
+        }
+
+        Alert.alert(
+          t('common.error') || 'Error',
+          error.message || t('profile.imagePickerError') || 'Terjadi kesalahan saat memilih foto.',
+          [{ text: t('common.ok') || 'OK' }]
+        );
       });
+    } else {
+      // iOS: Use basic image picker without crop for now
+      const { launchImageLibrary } = require('react-native-image-picker');
 
-      if (result && result.uri) {
-        // Convert file:// URI to proper format
-        const imageUri = result.uri.startsWith('file://')
-          ? result.uri
-          : `file://${result.uri}`;
-        setProfileImage(imageUri);
-      }
-    } catch (error: any) {
-      console.error('Error selecting image from gallery:', error);
+      const options = {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxHeight: 1024,
+        maxWidth: 1024,
+        quality: 0.8,
+      };
 
-      if (error.code === 'CANCELLED') {
-        // User cancelled, no need to show error
-        return;
-      }
+      launchImageLibrary(options, (response: any) => {
+        if (response.didCancel) {
+          return;
+        }
 
-      Alert.alert(
-        t('common.error') || 'Error',
-        error.message || t('profile.imagePickerError') || 'Terjadi kesalahan saat memilih foto.',
-        [{ text: t('common.ok') || 'OK' }]
-      );
+        if (response.errorMessage) {
+          Alert.alert(
+            t('common.error') || 'Error',
+            response.errorMessage || t('profile.imagePickerError') || 'Terjadi kesalahan saat memilih foto.',
+            [{ text: t('common.ok') || 'OK' }]
+          );
+          return;
+        }
+
+        if (response.assets && response.assets[0]) {
+          const asset = response.assets[0];
+          if (asset.uri) {
+            setProfileImage(asset.uri);
+          }
+        }
+      });
     }
   };
 
@@ -233,30 +266,65 @@ export const EditProfileScreen: React.FC = () => {
         return;
       }
 
-      const { NativeModules } = require('react-native');
-      const { ImagePickerModule } = NativeModules;
+      if (Platform.OS === 'android') {
+        // Use native ImagePickerModule for Android (with crop)
+        const { NativeModules } = require('react-native');
+        const { ImagePickerModule } = NativeModules;
 
-      if (!ImagePickerModule || !ImagePickerModule.takePicture) {
-        Alert.alert(
-          t('common.error') || 'Error',
-          t('profile.imagePickerNotAvailable') || 'Image picker module tidak tersedia.',
-          [{ text: t('common.ok') || 'OK' }]
-        );
-        return;
-      }
+        if (!ImagePickerModule || !ImagePickerModule.takePicture) {
+          Alert.alert(
+            t('common.error') || 'Error',
+            t('profile.imagePickerNotAvailable') || 'Image picker module tidak tersedia.',
+            [{ text: t('common.ok') || 'OK' }]
+          );
+          return;
+        }
 
-      const result = await ImagePickerModule.takePicture({
-        maxWidth: 1024,
-        maxHeight: 1024,
-        quality: 0.8,
-      });
+        const result = await ImagePickerModule.takePicture({
+          maxWidth: 1024,
+          maxHeight: 1024,
+          quality: 0.8,
+        });
 
-      if (result && result.uri) {
-        // Convert file:// URI to proper format
-        const imageUri = result.uri.startsWith('file://')
-          ? result.uri
-          : `file://${result.uri}`;
-        setProfileImage(imageUri);
+        if (result && result.uri) {
+          const imageUri = result.uri.startsWith('file://')
+            ? result.uri
+            : `file://${result.uri}`;
+          setProfileImage(imageUri);
+        }
+      } else {
+        // iOS: Use basic camera without crop for now
+        const { launchCamera } = require('react-native-image-picker');
+
+        const options = {
+          mediaType: 'photo',
+          includeBase64: false,
+          maxHeight: 1024,
+          maxWidth: 1024,
+          quality: 0.8,
+        };
+
+        launchCamera(options, (response: any) => {
+          if (response.didCancel) {
+            return;
+          }
+
+          if (response.errorMessage) {
+            Alert.alert(
+              t('common.error') || 'Error',
+              response.errorMessage || t('profile.cameraError') || 'Terjadi kesalahan saat mengambil foto.',
+              [{ text: t('common.ok') || 'OK' }]
+            );
+            return;
+          }
+
+          if (response.assets && response.assets[0]) {
+            const asset = response.assets[0];
+            if (asset.uri) {
+              setProfileImage(asset.uri);
+            }
+          }
+        });
       }
     } catch (error: any) {
       console.error('Error taking photo:', error);

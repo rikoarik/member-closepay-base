@@ -15,7 +15,7 @@ import {
   QrScanIcon,
 } from '@core/config';
 import { QuickAccessButtons } from '../quick-actions/QuickAccessButtons';
-import { BalanceCard } from '@plugins/balance/components/BalanceCard';
+import { BalanceCard } from '@plugins/balance/components/ui/BalanceCard';
 import { TransactionHistoryScreen } from '@plugins/balance';
 import { useTranslation } from '@core/i18n';
 import { BerandaNewsInfo, type BerandaNewsInfoProps } from './BerandaNewsInfo';
@@ -107,14 +107,14 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
         * Toggle show/hide saldo (balance)
         */}
       <BalanceCard
-        title="Balance"
+        title="Saldo Utama"
         balance={10000000000}
         showBalance={showBalance}
         onToggleBalance={() => setShowBalance(v => !v)}
       />
       {/* Quick Access Buttons */}
       <View style={styles.menuItem}>
-        <Text style={styles.menuItemTitle}>{t('home.quickAccess')}</Text>
+        <Text style={[styles.menuItemTitle, { color: colors.text }]}>{t('home.quickAccess')}</Text>
         <QuickAccessButtons />
       </View>
 
