@@ -170,11 +170,19 @@ export const MarketplaceScreen: React.FC = () => {
       {selectedCategory === 'Semua' && bestSellerProducts.length > 0 && (
         <View style={styles.section}>
           <View style={[styles.sectionHeader, { paddingHorizontal: horizontalPadding }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Produk Terlaris</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('marketplace.bestSellers')}</Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: horizontalPadding, gap: scale(12) }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingLeft: horizontalPadding,
+              paddingRight: horizontalPadding, // ga pengaruh
+              gap: scale(12)
+            }}
+          >
             {bestSellerProducts.map(product => (
-              <View key={product.id} style={{ width: scale(160) }}>
+              <View key={product.id} style={{ width: scale(160), marginRight: scale(12) }}>
                 <ProductCard product={product} onPress={handleProductPress} />
               </View>
             ))}
@@ -186,11 +194,18 @@ export const MarketplaceScreen: React.FC = () => {
       {selectedCategory === 'Semua' && stores.length > 0 && (
         <View style={styles.section}>
           <View style={[styles.sectionHeader, { paddingHorizontal: horizontalPadding }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Toko Terdekat</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('marketplace.nearbyStores')}</Text>
           </View>
-          <View style={{ paddingHorizontal: horizontalPadding }}>
+            <View style={{ paddingHorizontal: horizontalPadding }}>
             {stores.map(store => (
-              <StoreCard key={store.id} store={store} onPress={() => { }} />
+              <StoreCard 
+                key={store.id} 
+                store={store} 
+                onPress={(store) => {
+                  // @ts-ignore
+                  navigation.navigate('StoreDetail', { store });
+                }} 
+              />
             ))}
           </View>
         </View>
@@ -199,7 +214,7 @@ export const MarketplaceScreen: React.FC = () => {
       {/* All Products Title */}
       <View style={[styles.sectionHeader, { paddingHorizontal: horizontalPadding, marginTop: moderateVerticalScale(16) }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {selectedCategory === 'Semua' ? 'Rekomendasi Untukmu' : `Produk ${selectedCategory}`}
+          {selectedCategory === 'Semua' ? t('marketplace.recommendations') : t('marketplace.productsForCategory', { category: selectedCategory })}
         </Text>
       </View>
     </View>
@@ -223,7 +238,7 @@ export const MarketplaceScreen: React.FC = () => {
         </TouchableOpacity>
 
         <View style={[styles.searchBar, { backgroundColor: colors.primaryLight || colors.surface }]}>
-          <SearchNormal size={scale(20)} color={colors.primary} variant="Bold" />
+          <SearchNormal size={scale(20)} color={colors.primary} variant="Linear" />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
             placeholder={t('marketplace.searchPlaceholder') || 'Cari produk...'}

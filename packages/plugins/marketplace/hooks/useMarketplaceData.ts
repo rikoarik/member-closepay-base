@@ -188,6 +188,8 @@ export interface Store {
   rating: number;
   location: string;
   followers: number;
+  phoneNumber?: string;
+  openingHours?: string;
 }
 
 /**
@@ -212,6 +214,8 @@ export const searchStores = (query: string): Store[] => {
       rating: 4.5 + (Math.random() * 0.5),
       location: 'Jakarta',
       followers: Math.floor(Math.random() * 10000) + 100,
+      phoneNumber: `62812345678${index}`,
+      openingHours: '08:00 - 21:00',
     }));
 };
 

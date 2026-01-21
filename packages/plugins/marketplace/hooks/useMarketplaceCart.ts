@@ -15,6 +15,7 @@ export interface CartItem {
     product: Product;
     quantity: number;
     subtotal: number;
+    selected?: boolean;
 }
 
 interface UseMarketplaceCartReturn {
@@ -29,6 +30,13 @@ interface UseMarketplaceCartReturn {
     getItemQuantity: (productId: string) => number;
     incrementItem: (product: Product) => void;
     decrementItem: (productId: string) => void;
+    // Selection helpers
+    toggleSelection: (cartId: string) => void;
+    toggleStoreSelection: (storeName: string) => void;
+    selectAll: (selected: boolean) => void;
+    removeSelected: () => void;
+    selectedCount: number;
+    isAllSelected: boolean;
 }
 
 // Global state
@@ -129,6 +137,7 @@ export const useMarketplaceCart = (): UseMarketplaceCartReturn => {
                     product,
                     quantity,
                     subtotal,
+                    selected: true, // Auto-select new items
                 };
                 const newItems = [...currentItems, newItem];
                 saveCartToStorage(newItems);
@@ -144,6 +153,11 @@ export const useMarketplaceCart = (): UseMarketplaceCartReturn => {
         },
         []
     );
+
+    const removeSelected = useCallback(() => {
+        const newItems = memoryCart.filter((item) => !item.selected);
+        saveCartToStorage(newItems);
+    }, []);
 
     const updateQuantity = useCallback(
         (cartId: string, quantity: number) => {
@@ -164,6 +178,35 @@ export const useMarketplaceCart = (): UseMarketplaceCartReturn => {
         [calculateSubtotal, removeItem]
     );
 
+    const toggleSelection = useCallback((cartId: string) => {
+        const newItems = memoryCart.map((item) => {
+            if (item.cartId === cartId) {
+                return { ...item, selected: !item.selected };
+            }
+            return item;
+        });
+        saveCartToStorage(newItems);
+    }, []);
+
+    const toggleStoreSelection = useCallback((storeName: string) => {
+        // Check if all items in store are currently selected
+        const storeItems = memoryCart.filter((item) => (item.product.storeName || 'Other') === storeName);
+        const allSelected = storeItems.every((item) => item.selected);
+        
+        const newItems = memoryCart.map((item) => {
+            if ((item.product.storeName || 'Other') === storeName) {
+                return { ...item, selected: !allSelected };
+            }
+            return item;
+        });
+        saveCartToStorage(newItems);
+    }, []);
+
+    const selectAll = useCallback((selected: boolean) => {
+        const newItems = memoryCart.map((item) => ({ ...item, selected }));
+        saveCartToStorage(newItems);
+    }, []);
+
     const clearCart = useCallback(() => {
         saveCartToStorage([]);
     }, []);
@@ -173,7 +216,7 @@ export const useMarketplaceCart = (): UseMarketplaceCartReturn => {
             const item = memoryCart.find((item) => item.product.id === productId);
             return item ? item.quantity : 0;
         },
-        [cartItems] // Depend on cartItems to force re-render when state changes
+        [cartItems]
     );
 
     const incrementItem = useCallback(
@@ -204,8 +247,18 @@ export const useMarketplaceCart = (): UseMarketplaceCartReturn => {
         return cartItems.reduce((sum, item) => sum + item.quantity, 0);
     }, [cartItems]);
 
+    const selectedCount = useMemo(() => {
+        return cartItems.filter(i => i.selected).reduce((sum, item) => sum + item.quantity, 0);
+    }, [cartItems]);
+
     const subtotal = useMemo(() => {
-        return cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+        return cartItems
+            .filter(item => item.selected)
+            .reduce((sum, item) => sum + item.subtotal, 0);
+    }, [cartItems]);
+
+    const isAllSelected = useMemo(() => {
+        return cartItems.length > 0 && cartItems.every(item => item.selected);
     }, [cartItems]);
 
     const getTotal = useCallback(
@@ -227,6 +280,12 @@ export const useMarketplaceCart = (): UseMarketplaceCartReturn => {
         getItemQuantity,
         incrementItem,
         decrementItem,
+        toggleSelection,
+        toggleStoreSelection,
+        selectAll,
+        removeSelected,
+        selectedCount,
+        isAllSelected,
     };
 };
 

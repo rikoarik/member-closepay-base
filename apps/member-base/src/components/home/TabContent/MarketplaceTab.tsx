@@ -1,5 +1,14 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text, RefreshControl, Platform } from 'react-native';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  RefreshControl,
+  Platform,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SearchNormal, CloseCircle } from 'iconsax-react-nativejs';
@@ -65,9 +74,7 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
 
   const bestSellerProducts = useMemo(() => {
     const products = [...allProductsData];
-    return products
-      .sort((a, b) => (b.sold || 0) - (a.sold || 0))
-      .slice(0, 10);
+    return products.sort((a, b) => (b.sold || 0) - (a.sold || 0)).slice(0, 10);
   }, [allProductsData]);
 
   const nearbyStores = useStoreData(5);
@@ -78,7 +85,7 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
     let result = [...allProductsData];
 
     if (selectedCategory && selectedCategory !== 'Semua') {
-      result = result.filter(item => item.category === selectedCategory);
+      result = result.filter((item) => item.category === selectedCategory);
     }
 
     return result;
@@ -117,20 +124,36 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   }, [isInitialLoad]);
 
   const loadMore = useCallback(() => {
-    if (!isLoadingMore && hasMore && !refreshing && isActive && !isInitialLoad && paginatedProducts.length > 0) {
+    if (
+      !isLoadingMore &&
+      hasMore &&
+      !refreshing &&
+      isActive &&
+      !isInitialLoad &&
+      paginatedProducts.length > 0
+    ) {
       setIsLoadingMore(true);
 
-      const neededBatches = Math.ceil((currentPage + 1) * PAGE_SIZE / BATCH_SIZE);
+      const neededBatches = Math.ceil(((currentPage + 1) * PAGE_SIZE) / BATCH_SIZE);
       if (neededBatches > loadedBatches) {
         setLoadedBatches(neededBatches);
       }
 
       setTimeout(() => {
-        setCurrentPage(prev => prev + 1);
+        setCurrentPage((prev) => prev + 1);
         setIsLoadingMore(false);
       }, 500);
     }
-  }, [isLoadingMore, hasMore, refreshing, isActive, isInitialLoad, paginatedProducts.length, currentPage, loadedBatches]);
+  }, [
+    isLoadingMore,
+    hasMore,
+    refreshing,
+    isActive,
+    isInitialLoad,
+    paginatedProducts.length,
+    currentPage,
+    loadedBatches,
+  ]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -147,15 +170,18 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
     }
   }, [onRefreshRequested, onRefresh]);
 
-  const renderItem = useCallback(({ item }: { item: Product }) => (
-    <ProductCard
-      product={item}
-      onPress={(product) => {
-        // @ts-ignore
-        navigation.navigate('ProductDetail', { product });
-      }}
-    />
-  ), [navigation]);
+  const renderItem = useCallback(
+    ({ item }: { item: Product }) => (
+      <ProductCard
+        product={item}
+        onPress={(product) => {
+          // @ts-ignore
+          navigation.navigate('ProductDetail', { product });
+        }}
+      />
+    ),
+    [navigation]
+  );
 
   const renderFooter = () => {
     if (isLoadingMore && hasMore) {
@@ -189,7 +215,10 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
       <View style={[styles.searchContainer, { paddingHorizontal: horizontalPadding }]}>
         <TouchableOpacity
           activeOpacity={0.8}
-          style={[styles.searchInputContainer, { backgroundColor: colors.primaryLight || colors.surface }]}
+          style={[
+            styles.searchInputContainer,
+            { backgroundColor: colors.primaryLight || colors.surface },
+          ]}
           onPress={() => {
             // @ts-ignore
             navigation.navigate('Search' as never);
@@ -204,7 +233,11 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
 
       {/* Category Filter */}
       <View style={[styles.categoryContainer, { paddingHorizontal: horizontalPadding }]}>
-        <View style={styles.categoryScrollContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryScrollContainer}
+        >
           {categories.map((item) => {
             const isSelected = selectedCategory === item;
             return (
@@ -224,16 +257,18 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
                     styles.categoryText,
                     {
                       color: isSelected ? colors.surface : colors.text,
-                      fontFamily: isSelected ? FontFamily.monasans.semiBold : FontFamily.monasans.regular,
+                      fontFamily: isSelected
+                        ? FontFamily.monasans.semiBold
+                        : FontFamily.monasans.regular,
                     },
                   ]}
                 >
-                  {item === 'Semua' ? (t('marketplace.allCategories') || 'Semua') : item}
+                  {item === 'Semua' ? t('marketplace.allCategories') || 'Semua' : item}
                 </Text>
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
       </View>
 
       {/* Best Seller Products */}
@@ -373,7 +408,10 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
                   ))}
                 </View>
               </View>
-            ) : paginatedProducts.length === 0 && !refreshing && !isLoadingMore && !isInitialLoad ? (
+            ) : paginatedProducts.length === 0 &&
+              !refreshing &&
+              !isLoadingMore &&
+              !isInitialLoad ? (
               <View style={styles.emptyContainer}>
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                   {t('marketplace.noProductsFound') || 'Tidak ada produk ditemukan.'}
@@ -408,9 +446,7 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
             <>
               <View style={styles.grid}>
                 {paginatedProducts.map((item) => (
-                  <React.Fragment key={item.id}>
-                    {renderItem({ item })}
-                  </React.Fragment>
+                  <React.Fragment key={item.id}>{renderItem({ item })}</React.Fragment>
                 ))}
               </View>
               {isLoadingMore && hasMore && (

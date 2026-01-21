@@ -20,6 +20,7 @@
       "SearchResultsScreen": "SearchResultsScreen",
       "CartScreen": "CartScreen",
       "ProductDetailScreen": "ProductDetailScreen",
+      "StoreDetailScreen": "StoreDetailScreen",
       "CheckoutScreen": "CheckoutScreen"
     },
     "hooks": {
@@ -99,6 +100,18 @@
       ],
       "meta": {
         "title": "Checkout",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "StoreDetail",
+      "path": "/marketplace/store/:id",
+      "component": "StoreDetailScreen",
+      "permissions": [
+        "marketplace:view"
+      ],
+      "meta": {
+        "title": "Detail Toko",
         "showInMenu": false
       }
     }

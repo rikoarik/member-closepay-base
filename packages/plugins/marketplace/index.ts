@@ -9,6 +9,7 @@ export { SearchScreen } from './components/screens/SearchScreen';
 export { SearchResultsScreen } from './components/screens/SearchResultsScreen';
 export { CartScreen } from './components/screens/CartScreen';
 export { ProductDetailScreen } from './components/screens/ProductDetailScreen';
+export { StoreDetailScreen } from './components/screens/StoreDetailScreen';
 export { CheckoutScreen } from './components/screens/CheckoutScreen';
 export { ProductCard } from './components/shared/ProductCard';
 export type { Product } from './components/shared/ProductCard';
@@ -28,6 +29,7 @@ export const MarketplaceModule = {
     SearchResults: 'SearchResultsScreen',
     Cart: 'CartScreen',
     ProductDetail: 'ProductDetailScreen',
+    StoreDetail: 'StoreDetailScreen',
     Checkout: 'CheckoutScreen',
   },
 };
