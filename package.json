@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "ios": "xcodebuild -workspace ios/MemberBaseApp.xcworkspace -scheme memberBaseApp -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17' && xcrun simctl install booted ~/Library/Developer/Xcode/DerivedData/memberBaseApp-*/Build/Products/Debug-iphonesimulator/MemberBaseApp.app && xcrun simctl launch booted com.closepay.member.base",
+    "ios": "node scripts/ios-launcher.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
@@ -16,7 +16,7 @@
     "test:html:open": "jest && start test-results/test-report.html",
     "test:e2e": "detox test",
     "test:e2e:android": "detox test --configuration android.emu.debug",
-    "test:e2e:ios": "detox test --configuration ios.sim.debug",
+    "test:e2e:ios": "detox test --configuratzion ios.sim.debug",
     "build:e2e:android": "detox build --configuration android.emu.debug",
     "build:e2e:ios": "detox build --configuration ios.sim.debug",
     "build:android:debug": "cd android && gradlew.bat assembleDebug && cd ..",
@@ -29,7 +29,8 @@
     "copy:assets": "node scripts/copy-company-assets.js",
     "generate:loaders": "node scripts/generate-plugin-loaders.js",
     "split:company": "node scripts/split-company-repo.js",
-    "split:all": "node scripts/split-company-repo.js --all"
+    "split:all": "node scripts/split-company-repo.js --all",
+    "mock": "cd mock-api && npm start"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -40,7 +41,6 @@
     "@react-navigation/drawer": "^7.7.5",
     "@react-navigation/native": "^7.1.20",
     "@react-navigation/native-stack": "^7.6.3",
-    "@tinymomentum/liquid-glass-react": "^1.0.6",
     "axios": "^1.13.2",
     "base-64": "^1.0.0",
     "freerasp-react-native": "^4.2.4",
@@ -63,7 +63,8 @@
     "react-native-vision-camera": "^4.4.2",
     "react-native-worklets": "^0.7.2",
     "tailwindcss": "^3.4.18",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "react-native-glass-blur": "file:packages/glass-blur"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

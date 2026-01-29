@@ -1,0 +1,192 @@
+{
+  "news": [
+    {
+      "id": "1",
+      "title": "Pembukaan Gedung Baru Kampus",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "date": "2024-01-20T10:00:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1018/200/200"
+    },
+    {
+      "id": "2",
+      "title": "Workshop Teknologi Terkini",
+      "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "date": "2024-01-21T09:30:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1019/200/200"
+    },
+    {
+      "id": "3",
+      "title": "Seminar Kewirausahaan",
+      "description": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+      "date": "2024-01-22T14:00:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1020/200/200"
+    },
+    {
+      "id": "4",
+      "title": "Festival Budaya Lokal",
+      "description": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "date": "2024-01-23T16:00:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1021/200/200"
+    },
+    {
+      "id": "5",
+      "title": "Kompetisi Olahraga Antar Fakultas",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "date": "2024-01-24T08:00:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1022/200/200"
+    },
+    {
+      "id": "6",
+      "title": "Peluncuran Program Beasiswa",
+      "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      "date": "2024-01-25T11:00:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1023/200/200"
+    },
+    {
+      "id": "7",
+      "title": "Konser Musik Akhir Tahun",
+      "description": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+      "date": "2024-01-26T19:00:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1024/200/200"
+    },
+    {
+      "id": "8",
+      "title": "Pameran Seni Rupa",
+      "description": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "date": "2024-01-27T10:00:00.000Z",
+      "imageUrl": "https://picsum.photos/id/1025/200/200"
+    }
+  ],
+  "stores": [
+    {
+      "id": "store-001",
+      "name": "Warung Makan Sederhana",
+      "description": "Makanan rumahan autentik",
+      "rating": 4.8,
+      "distance": "0.5 km",
+      "isOpen": true,
+      "openTime": "08:00",
+      "closeTime": "22:00",
+      "category": "Makanan",
+      "imageUrl": "https://picsum.photos/id/200/200/200"
+    },
+    {
+      "id": "store-002",
+      "name": "Kedai Kopi Nusantara",
+      "description": "Kopi lokal berkualitas",
+      "rating": 4.6,
+      "distance": "0.8 km",
+      "isOpen": true,
+      "openTime": "07:00",
+      "closeTime": "23:00",
+      "category": "Minuman",
+      "imageUrl": "https://picsum.photos/id/201/200/200"
+    },
+    {
+      "id": "store-003",
+      "name": "Bakso Pak Kumis",
+      "description": "Bakso dan mie ayam legendaris",
+      "rating": 4.9,
+      "distance": "1.2 km",
+      "isOpen": false,
+      "openTime": "10:00",
+      "closeTime": "21:00",
+      "category": "Makanan",
+      "imageUrl": "https://picsum.photos/id/202/200/200"
+    },
+    {
+      "id": "store-004",
+      "name": "Sate Klathak Bu Muri",
+      "description": "Sate kambing asli Jogja",
+      "rating": 4.7,
+      "distance": "1.5 km",
+      "isOpen": true,
+      "openTime": "16:00",
+      "closeTime": "22:00",
+      "category": "Makanan",
+      "imageUrl": "https://picsum.photos/id/203/200/200"
+    },
+    {
+      "id": "store-005",
+      "name": "Es Teler 77",
+      "description": "Minuman segar khas Indonesia",
+      "rating": 4.5,
+      "distance": "2.0 km",
+      "isOpen": true,
+      "openTime": "10:00",
+      "closeTime": "21:00",
+      "category": "Minuman",
+      "imageUrl": "https://picsum.photos/id/204/200/200"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-001",
+      "type": "info",
+      "title": "Selamat Datang!",
+      "message": "Selamat datang di aplikasi Member Closepay. Nikmati kemudahan bertransaksi.",
+      "isRead": false,
+      "createdAt": "2024-01-28T08:00:00.000Z",
+      "data": {}
+    },
+    {
+      "id": "notif-002",
+      "type": "alert",
+      "title": "Tagihan Jatuh Tempo",
+      "message": "Tagihan SPP Anda akan jatuh tempo dalam 3 hari. Segera lakukan pembayaran.",
+      "isRead": true,
+      "createdAt": "2024-01-27T14:30:00.000Z",
+      "data": { "billId": "12345", "amount": "500000" }
+    },
+    {
+      "id": "notif-003",
+      "type": "promo",
+      "title": "Promo Spesial Hari Ini",
+      "message": "Dapatkan cashback 50% untuk pembelian di kantin. Syarat dan ketentuan berlaku.",
+      "isRead": false,
+      "createdAt": "2024-01-28T10:15:00.000Z",
+      "data": { "promoCode": "KANTIN50" }
+    }
+  ],
+  "transactions": [
+    {
+      "id": "tx-001",
+      "description": "Top Up Saldo",
+      "amount": 500000,
+      "type": "topup",
+      "createdAt": "2024-01-28T10:00:00.000Z"
+    },
+    {
+      "id": "tx-002",
+      "description": "Pembayaran Kantin",
+      "amount": -25000,
+      "type": "payment",
+      "createdAt": "2024-01-28T12:30:00.000Z"
+    },
+    {
+      "id": "tx-003",
+      "description": "Transfer ke Teman",
+      "amount": -50000,
+      "type": "transfer",
+      "createdAt": "2024-01-27T15:45:00.000Z"
+    },
+    {
+      "id": "tx-004",
+      "description": "Pembayaran SPP",
+      "amount": -300000,
+      "type": "payment",
+      "createdAt": "2024-01-25T09:00:00.000Z"
+    },
+    {
+      "id": "tx-005",
+      "description": "Cashback Promo",
+      "amount": 12500,
+      "type": "cashback",
+      "createdAt": "2024-01-28T12:35:00.000Z"
+    }
+  ],
+  "balance": {
+    "total": 10000000000,
+    "currency": "IDR"
+  }
+}

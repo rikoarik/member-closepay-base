@@ -3,13 +3,7 @@
  * Dashboard screen sesuai design
  * Responsive untuk semua device termasuk EDC
  */
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -20,11 +14,11 @@ import {
   Platform,
   TouchableOpacity,
   RefreshControl,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { useTheme } from "@core/theme";
-import { useTranslation } from "@core/i18n";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '@core/theme';
+import { useTranslation } from '@core/i18n';
 import {
   moderateVerticalScale,
   getHorizontalPadding,
@@ -33,7 +27,7 @@ import {
   type Tab,
   useConfig,
   useRefreshWithConfig,
-} from "@core/config";
+} from '@core/config';
 import {
   TopBar,
   AnalyticsTab,
@@ -42,12 +36,13 @@ import {
   AktivitasTab,
   MarketplaceTab,
   FnBTab,
-} from "../components/home";
-import { useNewsState } from "../components/home/TabContent/NewsTab";
-import { useNotifications } from "@core/notification";
+} from '../components/home';
+import { useNewsState } from '../components/home/TabContent/NewsTab';
+import { useNotifications } from '@core/notification';
 import Toast from 'react-native-toast-message';
-import { QrScanIcon } from "@core/config/components/icons";
-import { scale, moderateScale } from "@core/config";
+import { QrScanIcon } from '@core/config/components/icons';
+import { scale, moderateScale } from '@core/config';
+import { ProgressiveBlurView } from '../components/ProgressiveBlurView';
 
 export const HomeScreen = () => {
   const navigation = useNavigation();
@@ -75,23 +70,20 @@ export const HomeScreen = () => {
       .map((tab) => {
         const i18nKey = `home.${tab.id}`;
         const translatedLabel = t(i18nKey);
-        const label =
-          translatedLabel && translatedLabel !== i18nKey
-            ? translatedLabel
-            : tab.label;
+        const label = translatedLabel && translatedLabel !== i18nKey ? translatedLabel : tab.label;
         return { id: tab.id, label };
       });
   }, [homeTabs, t]);
 
-  const [activeTab, setActiveTab] = useState<string>("home");
+  const [activeTab, setActiveTab] = useState<string>('home');
   const tabRefreshFunctionsRef = useRef<{ [key: string]: () => void }>({});
   const hasSetOrder2TabRef = useRef(false);
   const backPressTimeRef = useRef<number>(0);
   const DOUBLE_BACK_PRESS_DELAY = 2000;
 
   // Animate FAB show/hide based on activeTab
-  const shouldShowFab = config?.showQrButton !== false &&
-    (activeTab === "beranda" || activeTab === "home");
+  const shouldShowFab =
+    config?.showQrButton !== false && (activeTab === 'beranda' || activeTab === 'home');
 
   useEffect(() => {
     if (shouldShowFab) {
@@ -126,8 +118,6 @@ export const HomeScreen = () => {
     }
   }, [shouldShowFab, fabOpacity, fabScale]);
 
-
-
   // Set activeTab ke tab dengan order 2 (di tengah) saat tabs pertama kali ter-load
   useEffect(() => {
     // Reset flag jika tabs berubah (misalnya config reload)
@@ -143,43 +133,38 @@ export const HomeScreen = () => {
     }
   }, [tabs, activeTab]);
 
+  const registerTabRefresh = useCallback((tabId: string, refreshFn: () => void) => {
+    tabRefreshFunctionsRef.current[tabId] = refreshFn;
+  }, []);
 
-  const registerTabRefresh = useCallback(
-    (tabId: string, refreshFn: () => void) => {
-      tabRefreshFunctionsRef.current[tabId] = refreshFn;
+  const { refresh: handleRefresh, isRefreshing: refreshing } = useRefreshWithConfig({
+    onRefresh: async () => {
+      // Call refresh function of active tab
+      const refreshFn = tabRefreshFunctionsRef.current[activeTab];
+      if (refreshFn) {
+        refreshFn();
+      }
     },
-    []
-  );
-
-  const { refresh: handleRefresh, isRefreshing: refreshing } =
-    useRefreshWithConfig({
-      onRefresh: async () => {
-        // Call refresh function of active tab
-        const refreshFn = tabRefreshFunctionsRef.current[activeTab];
-        if (refreshFn) {
-          refreshFn();
-        }
-      },
-      enableConfigRefresh: true,
-    });
+    enableConfigRefresh: true,
+  });
 
   const renderTabContent = useCallback(
     (tabId: string, index: number) => {
       const tabConfig = homeTabs.find((tab) => tab.id === tabId);
 
-      if (tabId === "beranda" || tabId === "home") {
+      if (tabId === 'beranda' || tabId === 'home') {
         return (
           <BerandaTab
             isActive={activeTab === tabId}
             onNavigateToNews={() => {
-              navigation.navigate("News" as never);
+              navigation.navigate('News' as never);
             }}
             scrollEnabled={false}
           />
         );
       }
 
-      if (tabId === "activity" || tabId === "aktivitas") {
+      if (tabId === 'activity' || tabId === 'aktivitas') {
         return (
           <AktivitasTab
             isActive={activeTab === tabId}
@@ -189,7 +174,7 @@ export const HomeScreen = () => {
         );
       }
 
-      if (tabId === "news" || tabId === "berita") {
+      if (tabId === 'news' || tabId === 'berita') {
         return (
           <NewsTab
             isActive={activeTab === tabId}
@@ -209,7 +194,7 @@ export const HomeScreen = () => {
       //   );
       // }
 
-      if (tabId === "fnb") {
+      if (tabId === 'fnb') {
         return (
           <FnBTab
             isActive={activeTab === tabId}
@@ -219,7 +204,7 @@ export const HomeScreen = () => {
         );
       }
 
-      if (tabId === "marketplace") {
+      if (tabId === 'marketplace') {
         return (
           <MarketplaceTab
             isActive={activeTab === tabId}
@@ -231,9 +216,7 @@ export const HomeScreen = () => {
 
       if (tabConfig?.component) {
         return (
-          <View
-            style={{ width: screenWidth, padding: getHorizontalPadding() }}
-          >
+          <View style={{ width: screenWidth, padding: getHorizontalPadding() }}>
             <Text style={{ color: colors.text }}>{tabConfig.label}</Text>
           </View>
         );
@@ -244,37 +227,27 @@ export const HomeScreen = () => {
           style={{
             width: screenWidth,
             padding: getHorizontalPadding(),
-            justifyContent: "center",
-            alignItems: "center",
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          <Text style={{ color: colors.text, fontSize: 16 }}>
-            {tabConfig?.label || tabId}
-          </Text>
+          <Text style={{ color: colors.text, fontSize: 16 }}>{tabConfig?.label || tabId}</Text>
         </View>
       );
     },
-    [
-      homeTabs,
-      screenWidth,
-      activeTab,
-      colors,
-      registerTabRefresh,
-      newsState,
-      navigation,
-    ]
+    [homeTabs, screenWidth, activeTab, colors, registerTabRefresh, newsState, navigation]
   );
 
   const handleMenuPress = () => {
-    navigation.navigate("Profile" as never);
+    navigation.navigate('Profile' as never);
   };
 
   const handleNotificationPress = () => {
-    navigation.navigate("Notifications" as never);
+    navigation.navigate('Notifications' as never);
   };
 
   const handleQrPress = () => {
-    navigation.navigate("Qr" as never);
+    navigation.navigate('Qr' as never);
   };
 
   const activeTabIndex = useMemo(
@@ -308,9 +281,7 @@ export const HomeScreen = () => {
     [screenWidth, tabs, activeTab]
   );
 
-  const tabChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
+  const tabChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleTabChange = useCallback(
     (tabId: string) => {
       if (tabChangeTimeoutRef.current) {
@@ -343,7 +314,12 @@ export const HomeScreen = () => {
 
   const hasInitializedRef = useRef(false);
   useEffect(() => {
-    if (pagerRef.current && tabs.length >= 2 && hasSetOrder2TabRef.current && !hasInitializedRef.current) {
+    if (
+      pagerRef.current &&
+      tabs.length >= 2 &&
+      hasSetOrder2TabRef.current &&
+      !hasInitializedRef.current
+    ) {
       const middleTabIndex = 1;
       setTimeout(() => {
         if (pagerRef.current) {
@@ -357,8 +333,6 @@ export const HomeScreen = () => {
     }
   }, [screenWidth, tabs, activeTab]);
 
-
-
   const { unreadCount, refresh: refreshNotifications } = useNotifications();
 
   useFocusEffect(
@@ -370,12 +344,12 @@ export const HomeScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        const homeTabId = tabs.find(tab => tab.id === 'home' || tab.id === 'beranda')?.id;
+        const homeTabId = tabs.find((tab) => tab.id === 'home' || tab.id === 'beranda')?.id;
         const isHomeTab = homeTabId && activeTab === homeTabId;
 
         if (!isHomeTab && homeTabId) {
           setActiveTab(homeTabId);
-          const homeIndex = tabs.findIndex(tab => tab.id === homeTabId);
+          const homeIndex = tabs.findIndex((tab) => tab.id === homeTabId);
           if (homeIndex >= 0 && pagerRef.current) {
             pagerRef.current.scrollTo({
               x: homeIndex * screenWidth,
@@ -386,7 +360,7 @@ export const HomeScreen = () => {
         }
 
         const now = Date.now();
-        if (backPressTimeRef.current && (now - backPressTimeRef.current) < DOUBLE_BACK_PRESS_DELAY) {
+        if (backPressTimeRef.current && now - backPressTimeRef.current < DOUBLE_BACK_PRESS_DELAY) {
           if (Platform.OS === 'android') {
             BackHandler.exitApp();
           }
@@ -497,10 +471,9 @@ export const HomeScreen = () => {
             decelerationRate="fast"
             snapToInterval={screenWidth}
             removeClippedSubviews={false} // Changed to false to prevent clipping nested scroll
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: true }
-            )}
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+              useNativeDriver: true,
+            })}
             onMomentumScrollEnd={handlePagerMomentumEnd}
             style={{ flex: 1 }}
             contentContainerStyle={{ flexGrow: 1 }}
@@ -509,11 +482,7 @@ export const HomeScreen = () => {
               // Lazy loading: hanya render tab aktif dan tab adjacent
               if (!shouldRenderTab(tab.id, index)) {
                 return (
-                  <View
-                    key={tab.id}
-                    style={{ width: screenWidth, flex: 1 }}
-                    pointerEvents="none"
-                  />
+                  <View key={tab.id} style={{ width: screenWidth, flex: 1 }} pointerEvents="none" />
                 );
               }
 
@@ -521,7 +490,7 @@ export const HomeScreen = () => {
                 <View
                   key={tab.id}
                   style={{ width: screenWidth, flex: 1 }}
-                  pointerEvents={activeTab === tab.id ? "auto" : "none"}
+                  pointerEvents={activeTab === tab.id ? 'auto' : 'none'}
                 >
                   {renderTabContent(tab.id, index)}
                 </View>
@@ -539,24 +508,29 @@ export const HomeScreen = () => {
             {
               backgroundColor: colors.primary,
               opacity: fabOpacity,
+              zIndex: 2,
               transform: [{ scale: fabScale }],
             },
           ]}
           pointerEvents={shouldShowFab ? 'auto' : 'none'}
         >
-          <TouchableOpacity
-            onPress={handleQrPress}
-            activeOpacity={0.8}
-            style={styles.fabTouchable}
-          >
-            <QrScanIcon
-              width={scale(26)}
-              height={scale(26)}
-              fill={colors.surface}
-            />
+          <TouchableOpacity onPress={handleQrPress} activeOpacity={0.8} style={styles.fabTouchable}>
+            <QrScanIcon width={scale(26)} height={scale(26)} fill={colors.surface} />
           </TouchableOpacity>
         </Animated.View>
       )}
+      <ProgressiveBlurView
+        style={{
+          position: 'absolute',
+          height: 200,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1,
+        }}
+        startBlur={0}
+        endBlur={20}
+      />
     </SafeAreaView>
   );
 };
@@ -572,11 +546,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   headerContent: {
-    width: "100%",
+    width: '100%',
   },
   refreshIndicatorContainer: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: moderateVerticalScale(8),
   },
   topBarContainer: {

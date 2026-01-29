@@ -17,11 +17,8 @@ import {
 } from 'react-native';
 import { BlurView } from '@react-native-community/blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../../theme';  
-import {
-  scale,
-  moderateVerticalScale,
-} from '../../utils/responsive';
+import { useTheme } from '../../../theme';
+import { scale, moderateVerticalScale } from '../../utils/responsive';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -46,20 +43,18 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 }) => {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  
+
   // Convert snap points dari percentage ke pixel
   // 0% = full screen (translateY = 0), 100% = hidden (translateY = SCREEN_HEIGHT)
   // point = percentage dari screen height yang ditampilkan (75 = 75% dari screen height)
-  const snapPointsInPixels = snapPoints.map(
-    (point) => {
-      // Clamp point antara 0-100
-      const clampedPoint = Math.max(0, Math.min(100, point));
-      // Jika point = 75, berarti kita ingin menampilkan 75% dari screen height
-      // translateY = SCREEN_HEIGHT * (100 - point) / 100
-      // Contoh: point = 75, translateY = SCREEN_HEIGHT * 0.25 (menampilkan 75% dari bawah)
-      return SCREEN_HEIGHT * (100 - clampedPoint) / 100;
-    }
-  );
+  const snapPointsInPixels = snapPoints.map((point) => {
+    // Clamp point antara 0-100
+    const clampedPoint = Math.max(0, Math.min(100, point));
+    // Jika point = 75, berarti kita ingin menampilkan 75% dari screen height
+    // translateY = SCREEN_HEIGHT * (100 - point) / 100
+    // Contoh: point = 75, translateY = SCREEN_HEIGHT * 0.25 (menampilkan 75% dari bawah)
+    return (SCREEN_HEIGHT * (100 - clampedPoint)) / 100;
+  });
   const initialPosition = snapPointsInPixels[initialSnapPoint] || snapPointsInPixels[0];
 
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -184,12 +179,13 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   }
 
   return (
-      <Modal
-        visible={visible}
-        transparent
-        animationType="fade"
-        onRequestClose={disableClose ? undefined : onClose}
-        statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={disableClose ? undefined : onClose}
+      statusBarTranslucent
+    >
       <View style={styles.container}>
         {/* Backdrop with Blur */}
         <TouchableWithoutFeedback onPress={disableClose ? undefined : onClose}>
@@ -224,7 +220,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             animatedSheetStyle,
           ]}
           pointerEvents={disableClose ? 'box-none' : 'auto'}
-          {...panResponder.panHandlers}>
+          {...panResponder.panHandlers}
+        >
           {/* Drag Handle */}
           {enablePanDownToClose && !disableClose && (
             <View style={styles.dragHandleContainer}>
@@ -277,4 +274,3 @@ const styles = StyleSheet.create({
     borderRadius: scale(2),
   },
 });
-

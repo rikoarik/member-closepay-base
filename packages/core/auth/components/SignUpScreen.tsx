@@ -40,6 +40,7 @@ import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { Eye, EyeSlash, ArrowLeft2 } from 'iconsax-react-nativejs';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface SignUpScreenProps {
   onSignUpSuccess?: () => void;
@@ -59,6 +60,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { company } = useAuth();
   const config = configService.getConfig();
   const companyId = company?.id || config?.companyId || '';
@@ -72,7 +74,9 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customDate, setCustomDate] = useState<Record<string, Date>>({});
   const [selectedData, setSelectedData] = useState<Record<string, any>>({});
-  const [extraDatas, setExtraDatas] = useState<Record<string, Array<{ label: string; value: string }>>>({});
+  const [extraDatas, setExtraDatas] = useState<
+    Record<string, Array<{ label: string; value: string }>>
+  >({});
   const [showDatePickers, setShowDatePickers] = useState<Record<string, boolean>>({});
   const [showDropdowns, setShowDropdowns] = useState<Record<string, boolean>>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -207,7 +211,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
           initialData[key] = '';
         }
 
-        if (key === 'dateOfBirth' || meta.data.typeData === 'Date' || meta.data.typeData === 'Datetime') {
+        if (
+          key === 'dateOfBirth' ||
+          meta.data.typeData === 'Date' ||
+          meta.data.typeData === 'Datetime'
+        ) {
           initialDates[key] = new Date();
           if (meta.data.typeData === 'Datetime') {
             initialData[key] = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -224,7 +232,10 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
           if (meta.data.typeData === 'Date' || meta.data.typeData === 'Datetime') {
             initialDates[key] = new Date();
             if (meta.data.typeData === 'Datetime') {
-              initialData.additionalData![key] = new Date().toISOString().slice(0, 19).replace('T', ' ');
+              initialData.additionalData![key] = new Date()
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ');
             } else {
               initialData.additionalData![key] = new Date().toISOString().slice(0, 10);
             }
@@ -315,7 +326,20 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
       return months[month] || '';
     } catch {
       // Fallback to English month names
-      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
       return months[month] || '';
     }
   };
@@ -361,7 +385,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
       return false;
     }
 
-    const regexPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*~()-_+\-=[\]{};':"|,.<>/?]).{6,}$/;
+    const regexPass =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*~()-_+\-=[\]{};':"|,.<>/?]).{6,}$/;
     const regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
     const regexPhone = /^\d{8,13}$/;
 
@@ -442,9 +467,9 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
         tags: selectedTags,
         oAuth: googleAuthData
           ? {
-            type: 'google',
-            googleAuthId: googleAuthData.id,
-          }
+              type: 'google',
+              googleAuthId: googleAuthData.id,
+            }
           : null,
       };
 
@@ -544,8 +569,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 borderColor: colors.border,
               },
             ]}
-            onPress={() => setShowDatePickers({ ...showDatePickers, [key]: true })}>
-            <Text style={[styles.datePickerText, { color: value ? colors.text : colors.textTertiary }]}>
+            onPress={() => setShowDatePickers({ ...showDatePickers, [key]: true })}
+          >
+            <Text
+              style={[styles.datePickerText, { color: value ? colors.text : colors.textTertiary }]}
+            >
               {customDate[key] ? formatDate(customDate[key]) : t('auth.selectDate')}
             </Text>
           </TouchableOpacity>
@@ -587,8 +615,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 borderColor: colors.border,
               },
             ]}
-            onPress={() => setShowDatePickers({ ...showDatePickers, [key]: true })}>
-            <Text style={[styles.datePickerText, { color: value ? colors.text : colors.textTertiary }]}>
+            onPress={() => setShowDatePickers({ ...showDatePickers, [key]: true })}
+          >
+            <Text
+              style={[styles.datePickerText, { color: value ? colors.text : colors.textTertiary }]}
+            >
               {customDate[key] ? formatDateTime(customDate[key]) : t('auth.selectDateTime')}
             </Text>
           </TouchableOpacity>
@@ -635,11 +666,16 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
             <TouchableOpacity
               style={styles.eyeButton}
               onPress={() => setShowPassword(!showPassword)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               {showPassword ? (
                 <Eye size={getIconSize('medium')} color={colors.textSecondary} variant="Outline" />
               ) : (
-                <EyeSlash size={getIconSize('medium')} color={colors.textSecondary} variant="Outline" />
+                <EyeSlash
+                  size={getIconSize('medium')}
+                  color={colors.textSecondary}
+                  variant="Outline"
+                />
               )}
             </TouchableOpacity>
           </View>
@@ -723,14 +759,24 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 borderColor: colors.border,
               },
             ]}
-            onPress={() => setShowDropdown(!showDropdown)}>
-            <Text style={[styles.dropdownText, { color: value ? colors.text : colors.textTertiary }]}>
-              {value ? options.find((opt) => opt.value === value)?.label || value : t('auth.selectOption')}
+            onPress={() => setShowDropdown(!showDropdown)}
+          >
+            <Text
+              style={[styles.dropdownText, { color: value ? colors.text : colors.textTertiary }]}
+            >
+              {value
+                ? options.find((opt) => opt.value === value)?.label || value
+                : t('auth.selectOption')}
             </Text>
             <Text style={[styles.dropdownArrow, { color: colors.textSecondary }]}>▼</Text>
           </TouchableOpacity>
           {showDropdown && (
-            <View style={[styles.dropdownList, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View
+              style={[
+                styles.dropdownList,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
               {options.map((option, optIndex) => (
                 <TouchableOpacity
                   key={optIndex}
@@ -744,8 +790,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                     changeValue(option.value, key, tag, typeData);
                     setSelectedData({ ...selectedData, [key]: option });
                     setShowDropdown(false);
-                  }}>
-                  <Text style={[styles.dropdownItemText, { color: colors.text }]}>{option.label}</Text>
+                  }}
+                >
+                  <Text style={[styles.dropdownItemText, { color: colors.text }]}>
+                    {option.label}
+                  </Text>
                   {value === option.value && (
                     <Text style={[styles.dropdownCheckmark, { color: colors.primary }]}>✓</Text>
                   )}
@@ -780,7 +829,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                       borderColor: isSelected ? colors.primary : colors.border,
                     },
                   ]}
-                  onPress={() => changeValue(flag, key, tag, typeData)}>
+                  onPress={() => changeValue(flag, key, tag, typeData)}
+                >
                   <View
                     style={[
                       styles.flagCheckbox,
@@ -788,8 +838,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                         backgroundColor: isSelected ? colors.primary : 'transparent',
                         borderColor: isSelected ? colors.primary : colors.border,
                       },
-                    ]}>
-                    {isSelected && <Text style={[styles.flagCheckmark, { color: colors.surface }]}>✓</Text>}
+                    ]}
+                  >
+                    {isSelected && (
+                      <Text style={[styles.flagCheckmark, { color: colors.surface }]}>✓</Text>
+                    )}
                   </View>
                   <Text style={[styles.flagLabel, { color: colors.text }]}>{flag}</Text>
                 </TouchableOpacity>
@@ -812,14 +865,21 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
             {selectedTags.map((tag, tagIndex) => (
               <View
                 key={tagIndex}
-                style={[styles.tagChip, { backgroundColor: colors.primaryLight }]}>
+                style={[styles.tagChip, { backgroundColor: colors.primaryLight }]}
+              >
                 <Text style={[styles.tagChipText, { color: colors.primary }]}>{tag}</Text>
                 <TouchableOpacity
                   onPress={() => {
                     setSelectedTags(selectedTags.filter((t) => t !== tag));
-                    changeValue(selectedTags.filter((t) => t !== tag), key, tag, typeData);
+                    changeValue(
+                      selectedTags.filter((t) => t !== tag),
+                      key,
+                      tag,
+                      typeData
+                    );
                   }}
-                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}>
+                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+                >
                   <Text style={[styles.tagChipRemove, { color: colors.primary }]}>×</Text>
                 </TouchableOpacity>
               </View>
@@ -843,7 +903,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                   setSelectedTags(newTags);
                   changeValue(newTags, key, tag, typeData);
                 }
-              }}>
+              }}
+            >
               <Text style={[styles.addTagButtonText, { color: colors.primary }]}>
                 + {t('auth.addTag')}
               </Text>
@@ -888,20 +949,38 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
     );
   }
 
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container]}>
       {/* Absolute positioned background */}
+      <View style={[styles.absoluteBackground, { backgroundColor: colors.background }]} />
+
+      {/* Header with Back Button - Fixed at top */}
       <View
-        style={[
-          styles.absoluteBackground,
-          { backgroundColor: colors.background }
-        ]}
-      />
+        style={[styles.topBarContainer, { zIndex: 0, marginTop: insets.top - 16, backgroundColor: colors.background }]}
+      >
+        <ScreenHeader
+          title={t('auth.signUp')}
+          onBackPress={() => {
+            if (onBackToLogin) {
+              onBackToLogin();
+            } else {
+              // @ts-ignore - navigation type will be inferred
+              navigation.goBack();
+            }
+          }}
+          style={{
+            backgroundColor: colors.background,
+            borderRadius: scale(12),
+            paddingVertical: verticalScale(14),
+          }}
+        />
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1, backgroundColor: 'transparent' }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
         <ScrollView
           ref={scrollViewRef}
           style={{ flex: 1, backgroundColor: 'transparent' }}
@@ -915,33 +994,12 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           bounces={false}
-          contentInsetAdjustmentBehavior="automatic">
-
-          <View style={[styles.content, { backgroundColor: 'transparent' }]}>
-            {/* Header with Back Button - Separated */}
-            <View style={[styles.topBarContainer]}>
-              <ScreenHeader
-                title={t('auth.signUp')}
-                onBackPress={() => {
-                  if (onBackToLogin) {
-                    onBackToLogin();
-                  } else {
-                    // @ts-ignore - navigation type will be inferred
-                    navigation.goBack();
-                  }
-                }}
-                style={{
-                  backgroundColor: colors.surface,
-                  borderRadius: scale(12),
-                  paddingVertical: verticalScale(14), // Match standard vertical padding but can be customized if needed
-                }}
-              />
-            </View>
-
+          contentInsetAdjustmentBehavior="automatic"
+        >
+          <View style={[styles.content, { backgroundColor: 'transparent', paddingTop: 0 }]}>
             {/* Sign Up Form - At bottom */}
             <View style={[styles.formContainer, { backgroundColor: 'transparent' }]}>
               <View style={[styles.formSection, { backgroundColor: 'transparent' }]}>
-
                 <View style={styles.formFieldsContainer}>
                   {metadata.map((meta, index) => renderField(meta, index))}
 
@@ -950,7 +1008,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                     <TouchableOpacity
                       style={styles.checkbox}
                       onPress={() => setAgreeToTerms(!agreeToTerms)}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
                       <View
                         style={[
                           styles.checkboxBox,
@@ -958,8 +1017,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                             backgroundColor: agreeToTerms ? colors.primary : 'transparent',
                             borderColor: agreeToTerms ? colors.primary : colors.border,
                           },
-                        ]}>
-                        {agreeToTerms && <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>}
+                        ]}
+                      >
+                        {agreeToTerms && (
+                          <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>
+                        )}
                       </View>
                     </TouchableOpacity>
                     <Text style={[styles.termsText, { color: colors.text }]}>
@@ -971,7 +1033,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                             setError(t('auth.cannotOpenTerms'));
                             setShowErrorModal(true);
                           });
-                        }}>
+                        }}
+                      >
                         {t('auth.termsAndConditions')}
                       </Text>
                     </Text>
@@ -982,7 +1045,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                     <TouchableOpacity
                       style={styles.checkbox}
                       onPress={() => setAgreeToPrivacy(!agreeToPrivacy)}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
                       <View
                         style={[
                           styles.checkboxBox,
@@ -990,8 +1054,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                             backgroundColor: agreeToPrivacy ? colors.primary : 'transparent',
                             borderColor: agreeToPrivacy ? colors.primary : colors.border,
                           },
-                        ]}>
-                        {agreeToPrivacy && <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>}
+                        ]}
+                      >
+                        {agreeToPrivacy && (
+                          <Text style={[styles.checkmark, { color: colors.surface }]}>✓</Text>
+                        )}
                       </View>
                     </TouchableOpacity>
                     <Text style={[styles.termsText, { color: colors.text }]}>
@@ -1003,7 +1070,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                             setError(t('auth.cannotOpenPrivacy'));
                             setShowErrorModal(true);
                           });
-                        }}>
+                        }}
+                      >
                         {t('auth.privacyPolicy')}
                       </Text>
                     </Text>
@@ -1020,7 +1088,8 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                     ]}
                     onPress={handleRegister}
                     disabled={loading || !isFormValid()}
-                    activeOpacity={0.8}>
+                    activeOpacity={0.8}
+                  >
                     {loading ? (
                       <ActivityIndicator color={colors.surface} size="small" />
                     ) : (
@@ -1075,13 +1144,19 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                 onPress={() => {
                   setShowOtpModal(false);
                   setOtp('');
-                }}>
-                <Text style={[styles.otpModalButtonText, { color: colors.text }]}>{t('common.cancel')}</Text>
+                }}
+              >
+                <Text style={[styles.otpModalButtonText, { color: colors.text }]}>
+                  {t('common.cancel')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.otpModalButton, { backgroundColor: colors.primary }]}
-                onPress={handleSubmitOtp}>
-                <Text style={[styles.otpModalButtonText, { color: colors.surface }]}>{t('common.confirm')}</Text>
+                onPress={handleSubmitOtp}
+              >
+                <Text style={[styles.otpModalButtonText, { color: colors.surface }]}>
+                  {t('common.confirm')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1146,7 +1221,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: getHorizontalPadding(),
   },
   formContainer: {
-
     justifyContent: 'flex-end',
     flex: 1,
     paddingBottom: verticalScale(24),
@@ -1450,4 +1524,3 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.monasans.medium,
   },
 });
-
