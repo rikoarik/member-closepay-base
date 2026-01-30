@@ -210,7 +210,7 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {paddingTop: scale(10)}]}>
       {/* Search Header - Clickable untuk navigate ke SearchScreen */}
       <View style={[styles.searchContainer, { paddingHorizontal: horizontalPadding }]}>
         <TouchableOpacity

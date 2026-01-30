@@ -411,6 +411,7 @@ export const FnBTab: React.FC<FnBTabProps> = ({ isActive, isVisible, scrollEnabl
                 style={[
                     styles.fixedHeader,
                     {
+                        paddingTop: scale(10),
                         paddingHorizontal: horizontalPadding,
                     },
                 ]}
@@ -521,7 +522,7 @@ export const FnBTab: React.FC<FnBTabProps> = ({ isActive, isVisible, scrollEnabl
                     ]}
                     showsVerticalScrollIndicator={false}
                     scrollEnabled={scrollEnabled}
-                    nestedScrollEnabled={true}
+                    nestedScrollEnabled={false}
                     scrollEventThrottle={16}
                     bounces={true}
                     alwaysBounceVertical={true}

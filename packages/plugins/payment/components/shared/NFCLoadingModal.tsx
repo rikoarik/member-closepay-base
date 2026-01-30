@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import { BlurView } from '@sbaiahmed1/react-native-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@core/theme';
 import {
@@ -55,9 +56,17 @@ export const NFCLoadingModal: React.FC<NFCLoadingModalProps> = ({
           {
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent black background
+            backgroundColor: 'transparent',
           },
         ]}>
+        {Platform.OS === 'ios' && (
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="systemThinMaterial"
+            blurAmount={20}
+            overlayColor="rgba(255, 255, 255, 0.5)"
+          />
+        )}
         <View style={styles.contentContainer}>
           {/* Activity Indicator */}
           <ActivityIndicator

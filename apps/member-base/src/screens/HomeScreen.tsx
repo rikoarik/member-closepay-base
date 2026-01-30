@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
@@ -43,13 +43,14 @@ import Toast from 'react-native-toast-message';
 import { QrScanIcon } from '@core/config/components/icons';
 import { scale, moderateScale } from '@core/config';
 import { ProgressiveBlurView } from '../components/ProgressiveBlurView';
+import BlurView from '@sbaiahmed1/react-native-blur';
 
 export const HomeScreen = () => {
   const navigation = useNavigation();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { t } = useTranslation();
   const { width: screenWidth, height: screenHeight } = useDimensions();
-
+  const insets = useSafeAreaInsets();
   // State for News Tab (Lifted Up)
   const newsState = useNewsState();
 
@@ -199,7 +200,7 @@ export const HomeScreen = () => {
           <FnBTab
             isActive={activeTab === tabId}
             isVisible={activeTab === tabId}
-            scrollEnabled={true}
+            scrollEnabled={false}
           />
         );
       }
@@ -395,9 +396,23 @@ export const HomeScreen = () => {
         },
       ]}
     >
+      {/* Status Bar Blur */}
+      <BlurView
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: insets.top,
+          zIndex: 999,
+        }}
+        blurType={isDark ? 'dark' : 'light'}
+        blurAmount={50}
+      />
+
       {/* Main ScrollView dengan sticky header di TabSwitcher */}
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView]}
         contentContainerStyle={styles.scrollContent}
         stickyHeaderIndices={[1]}
         showsVerticalScrollIndicator={false}
@@ -438,23 +453,38 @@ export const HomeScreen = () => {
 
         {/* Tab Switcher - Sticky Header */}
         <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: colors.background,
-              paddingHorizontal: getHorizontalPadding(),
-            },
-          ]}
+          style={{
+            zIndex: 1,
+            // paddingTop: insets.top, // Moved to inner view
+          }}
         >
+          <BlurView
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: scale(70), // Height adjusted by user ("bawah nya lebihin")
+            }}
+            blurType={isDark ? 'dark' : 'light'}
+            blurAmount={50}
+          />
           {tabs.length > 0 && (
-            <TabSwitcher
-              variant="segmented"
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-              scrollX={scrollX}
-              pagerWidth={screenWidth}
-            />
+            <View
+              style={{
+                paddingHorizontal: getHorizontalPadding(),
+                paddingVertical: moderateVerticalScale(12),
+              }}
+            >
+              <TabSwitcher
+                variant="segmented"
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                scrollX={scrollX}
+                pagerWidth={screenWidth}
+              />
+            </View>
           )}
         </View>
 
@@ -500,6 +530,28 @@ export const HomeScreen = () => {
         </View>
       </ScrollView>
 
+      {/* QR Blur Background */}
+      {config?.showQrButton !== false && (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: scale(100), // Height adjusted by user
+            opacity: fabOpacity,
+            zIndex: 1,
+          }}
+          pointerEvents="none"
+        >
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType={isDark ? 'dark' : 'light'}
+            blurAmount={10}
+          />
+        </Animated.View>
+      )}
+
       {/* FAB QR Button */}
       {config?.showQrButton !== false && (
         <Animated.View
@@ -519,18 +571,6 @@ export const HomeScreen = () => {
           </TouchableOpacity>
         </Animated.View>
       )}
-      <ProgressiveBlurView
-        style={{
-          position: 'absolute',
-          height: 200,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 1,
-        }}
-        startBlur={0}
-        endBlur={20}
-      />
     </SafeAreaView>
   );
 };

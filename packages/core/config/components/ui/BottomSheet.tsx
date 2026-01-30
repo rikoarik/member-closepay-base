@@ -15,7 +15,7 @@ import {
   KeyboardAvoidingView,
   Keyboard,
 } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
+import { BlurView } from '@sbaiahmed1/react-native-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../../theme';
 import { scale, moderateVerticalScale } from '../../utils/responsive';
@@ -41,7 +41,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   enablePanDownToClose = true,
   disableClose = false,
 }) => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   // Convert snap points dari percentage ke pixel
@@ -58,7 +58,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const initialPosition = snapPointsInPixels[initialSnapPoint] || snapPointsInPixels[0];
 
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-  const backdropOpacity = useRef(new Animated.Value(10)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
@@ -90,7 +90,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         }),
       ]).start();
     }
-  }, [visible, initialPosition, translateY, backdropOpacity]);
+  }, [visible, initialPosition, translateY]);
 
   const startY = useRef(0);
   const currentY = useRef(initialPosition);
@@ -191,7 +191,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         <TouchableWithoutFeedback onPress={disableClose ? undefined : onClose}>
           <Animated.View
             style={[
-              styles.backdrop,
+              StyleSheet.absoluteFill,
               {
                 opacity: backdropOpacity,
               },
@@ -200,16 +200,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             {Platform.OS === 'ios' ? (
               <BlurView
                 style={StyleSheet.absoluteFill}
-                blurType="dark"
-                blurAmount={40}
-                reducedTransparencyFallbackColor="rgba(0, 0, 0, 0.5)"
+                blurType={isDark ? 'dark' : 'light'}
+                blurAmount={20}
               />
             ) : (
               <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
             )}
           </Animated.View>
         </TouchableWithoutFeedback>
-
         <Animated.View
           style={[
             styles.sheet,
@@ -239,9 +237,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     position: 'absolute',

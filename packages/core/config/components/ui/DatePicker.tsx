@@ -5,7 +5,8 @@
  * Optimized with FlatList for performance
  */
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList, Platform } from 'react-native';
+import { BlurView } from '@sbaiahmed1/react-native-blur';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import {
@@ -87,8 +88,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const generateMonths = () => {
     const monthNames = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
     ];
     return monthNames.map((name, index) => ({ name, value: index + 1 }));
   };
@@ -151,7 +162,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   // Initial scroll indices
   const initialScrollPositions = useMemo(() => {
     if (!visible) return null;
-    const yearIndex = Math.max(0, filteredYears.findIndex((y) => y === dateState.year));
+    const yearIndex = Math.max(
+      0,
+      filteredYears.findIndex((y) => y === dateState.year)
+    );
     const monthIndex = Math.max(0, dateState.month - 1);
     const dayIndex = Math.max(0, dateState.day - 1);
     return { yearIndex, monthIndex, dayIndex };
@@ -197,35 +211,43 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   // Optimized getItemLayout for fixed height items
-  const getItemLayout = useCallback((_data: any, index: number) => ({
-    length: PICKER_ITEM_HEIGHT,
-    offset: PICKER_ITEM_HEIGHT * index,
-    index,
-  }), []);
+  const getItemLayout = useCallback(
+    (_data: any, index: number) => ({
+      length: PICKER_ITEM_HEIGHT,
+      offset: PICKER_ITEM_HEIGHT * index,
+      index,
+    }),
+    []
+  );
 
-  const renderItem = useCallback(({ item, index, isSelected, onPress, label, fontFamily }: any) => (
-    <TouchableOpacity
-      style={[
-        styles.pickerItem,
-        {
-          backgroundColor: isSelected ? colors.primaryLight || colors.surface : 'transparent',
-        },
-      ]}
-      onPress={onPress}
-    >
-      <Text
+  const renderItem = useCallback(
+    ({ item, index, isSelected, onPress, label, fontFamily }: any) => (
+      <TouchableOpacity
         style={[
-          styles.pickerItemText,
+          styles.pickerItem,
           {
-            color: isSelected ? colors.primary : colors.text,
-            fontFamily: fontFamily || (isSelected ? FontFamily.monasans.semiBold : FontFamily.monasans.regular),
+            backgroundColor: isSelected ? colors.primaryLight || colors.surface : 'transparent',
           },
         ]}
+        onPress={onPress}
       >
-        {label(item)}
-      </Text>
-    </TouchableOpacity>
-  ), [colors]);
+        <Text
+          style={[
+            styles.pickerItemText,
+            {
+              color: isSelected ? colors.primary : colors.text,
+              fontFamily:
+                fontFamily ||
+                (isSelected ? FontFamily.monasans.semiBold : FontFamily.monasans.regular),
+            },
+          ]}
+        >
+          {label(item)}
+        </Text>
+      </TouchableOpacity>
+    ),
+    [colors]
+  );
 
   if (!visible) return null;
 
@@ -238,93 +260,118 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       hardwareAccelerated
     >
       <View style={styles.modal}>
-        <View style={[styles.container, { backgroundColor: colors.surface }]}>
-          <View style={[styles.header, { borderBottomColor: colors.border }]}>
-            <TouchableOpacity onPress={onClose}>
-              <Text style={[styles.button, { color: colors.textSecondary }]}>
-                {t('common.cancel')}
+        {Platform.OS === 'ios' && (
+          <BlurView
+            style={StyleSheet.absoluteFill}
+            blurType="systemThinMaterial"
+            blurAmount={10}
+            overlayColor="rgba(255, 255, 255, 0.5)"
+          />
+        )}
+        <View
+          style={[
+            styles.container,
+            {
+              backgroundColor: colors.surface,
+            },
+          ]}
+        >
+          <View>
+            <View style={[styles.header, { borderBottomColor: colors.border }]}>
+              <TouchableOpacity onPress={onClose}>
+                <Text style={[styles.button, { color: colors.textSecondary }]}>
+                  {t('common.cancel')}
+                </Text>
+              </TouchableOpacity>
+              <Text style={[styles.title, { color: colors.text }]}>
+                {title || t('common.selectDate') || 'Pilih Tanggal'}
               </Text>
-            </TouchableOpacity>
-            <Text style={[styles.title, { color: colors.text }]}>
-              {title || t('common.selectDate') || 'Pilih Tanggal'}
-            </Text>
-            <TouchableOpacity onPress={handleConfirm} disabled={!isDateValid()}>
-              <Text
-                style={[
-                  styles.button,
-                  {
-                    color: isDateValid() ? colors.primary : colors.textTertiary || colors.textSecondary,
-                  },
-                ]}
-              >
-                {t('common.ok')}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity onPress={handleConfirm} disabled={!isDateValid()}>
+                <Text
+                  style={[
+                    styles.button,
+                    {
+                      color: isDateValid()
+                        ? colors.primary
+                        : colors.textTertiary || colors.textSecondary,
+                    },
+                  ]}
+                >
+                  {t('common.ok')}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.pickerContainer}>
-            <View style={styles.pickerRow}>
-              {/* Year Picker */}
-              <View style={styles.pickerColumn}>
-                <FlatList
-                  ref={yearListRef}
-                  data={filteredYears}
-                  keyExtractor={(item) => item.toString()}
-                  showsVerticalScrollIndicator={false}
-                  snapToInterval={PICKER_ITEM_HEIGHT}
-                  decelerationRate="fast"
-                  getItemLayout={getItemLayout}
-                  initialScrollIndex={initialScrollPositions?.yearIndex}
-                  contentContainerStyle={styles.pickerContent}
-                  renderItem={({ item }) => renderItem({
-                    item,
-                    isSelected: dateState.year === item,
-                    onPress: () => handleYearChange(item),
-                    label: (i: number) => i.toString()
-                  })}
-                />
-              </View>
+            <View style={styles.pickerContainer}>
+              <View style={styles.pickerRow}>
+                {/* Year Picker */}
+                <View style={styles.pickerColumn}>
+                  <FlatList
+                    ref={yearListRef}
+                    data={filteredYears}
+                    keyExtractor={(item) => item.toString()}
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={PICKER_ITEM_HEIGHT}
+                    decelerationRate="fast"
+                    getItemLayout={getItemLayout}
+                    initialScrollIndex={initialScrollPositions?.yearIndex}
+                    contentContainerStyle={styles.pickerContent}
+                    renderItem={({ item }) =>
+                      renderItem({
+                        item,
+                        isSelected: dateState.year === item,
+                        onPress: () => handleYearChange(item),
+                        label: (i: number) => i.toString(),
+                      })
+                    }
+                  />
+                </View>
 
-              {/* Month Picker */}
-              <View style={styles.pickerColumn}>
-                <FlatList
-                  ref={monthListRef}
-                  data={months}
-                  keyExtractor={(item) => item.value.toString()}
-                  showsVerticalScrollIndicator={false}
-                  snapToInterval={PICKER_ITEM_HEIGHT}
-                  decelerationRate="fast"
-                  getItemLayout={getItemLayout}
-                  initialScrollIndex={initialScrollPositions?.monthIndex}
-                  contentContainerStyle={styles.pickerContent}
-                  renderItem={({ item }) => renderItem({
-                    item,
-                    isSelected: dateState.month === item.value,
-                    onPress: () => handleMonthChange(item.value),
-                    label: (i: any) => i.name
-                  })}
-                />
-              </View>
+                {/* Month Picker */}
+                <View style={styles.pickerColumn}>
+                  <FlatList
+                    ref={monthListRef}
+                    data={months}
+                    keyExtractor={(item) => item.value.toString()}
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={PICKER_ITEM_HEIGHT}
+                    decelerationRate="fast"
+                    getItemLayout={getItemLayout}
+                    initialScrollIndex={initialScrollPositions?.monthIndex}
+                    contentContainerStyle={styles.pickerContent}
+                    renderItem={({ item }) =>
+                      renderItem({
+                        item,
+                        isSelected: dateState.month === item.value,
+                        onPress: () => handleMonthChange(item.value),
+                        label: (i: any) => i.name,
+                      })
+                    }
+                  />
+                </View>
 
-              {/* Day Picker */}
-              <View style={styles.pickerColumn}>
-                <FlatList
-                  ref={dayListRef}
-                  data={days}
-                  keyExtractor={(item) => item.toString()}
-                  showsVerticalScrollIndicator={false}
-                  snapToInterval={PICKER_ITEM_HEIGHT}
-                  decelerationRate="fast"
-                  getItemLayout={getItemLayout}
-                  initialScrollIndex={initialScrollPositions?.dayIndex}
-                  contentContainerStyle={styles.pickerContent}
-                  renderItem={({ item }) => renderItem({
-                    item,
-                    isSelected: dateState.day === item,
-                    onPress: () => handleDayChange(item),
-                    label: (i: number) => i.toString()
-                  })}
-                />
+                {/* Day Picker */}
+                <View style={styles.pickerColumn}>
+                  <FlatList
+                    ref={dayListRef}
+                    data={days}
+                    keyExtractor={(item) => item.toString()}
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={PICKER_ITEM_HEIGHT}
+                    decelerationRate="fast"
+                    getItemLayout={getItemLayout}
+                    initialScrollIndex={initialScrollPositions?.dayIndex}
+                    contentContainerStyle={styles.pickerContent}
+                    renderItem={({ item }) =>
+                      renderItem({
+                        item,
+                        isSelected: dateState.day === item,
+                        onPress: () => handleDayChange(item),
+                        label: (i: number) => i.toString(),
+                      })
+                    }
+                  />
+                </View>
               </View>
             </View>
           </View>
@@ -338,7 +385,7 @@ const styles = StyleSheet.create({
   modal: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'transparent',
   },
   container: {
     borderTopLeftRadius: scale(20),
@@ -386,4 +433,3 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize('medium'),
   },
 });
-

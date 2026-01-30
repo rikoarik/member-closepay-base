@@ -13,6 +13,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
 } from 'react-native';
+import { BlurView } from '@sbaiahmed1/react-native-blur';
 import {
   scale,
   verticalScale,
@@ -76,7 +77,7 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation();
   const horizontalPadding = getHorizontalPadding();
-  
+
   // Use translation if title/buttonText not provided
   const modalTitle = title || t('error.title');
   const modalButtonText = buttonText || t('common.ok');
@@ -88,21 +89,27 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={handleBackdropPress}>
-        <View style={[styles.backdrop, { backgroundColor: colors.backdrop }]}>
+        <View style={styles.backdrop}>
+          {Platform.OS === 'ios' && (
+            <BlurView
+              style={StyleSheet.absoluteFill}
+              blurType="systemThinMaterial"
+              blurAmount={20}
+              overlayColor="rgba(255, 255, 255, 0.5)"
+            />
+          )}
           <TouchableWithoutFeedback onPress={() => {}}>
-            <View style={[
-              styles.modalContainer,
-              { 
-                paddingHorizontal: horizontalPadding,
-                backgroundColor: colors.surface,
-              }
-            ]}>
+            <View
+              style={[
+                styles.modalContainer,
+                {
+                  paddingHorizontal: horizontalPadding,
+                  backgroundColor: colors.surface,
+                },
+              ]}
+            >
               {/* Icon Section */}
               <View style={styles.iconContainer}>
                 <View style={[styles.iconCircle, { backgroundColor: colors.errorLight }]}>
@@ -120,7 +127,8 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
               <TouchableOpacity
                 style={[styles.button, { backgroundColor: colors.error }]}
                 onPress={onClose}
-                activeOpacity={0.8}>
+                activeOpacity={0.8}
+              >
                 <Text style={[styles.buttonText, { color: colors.surface }]}>
                   {modalButtonText}
                 </Text>
@@ -209,4 +217,3 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 });
-
