@@ -111,7 +111,7 @@ export const SearchScreen: React.FC = () => {
           >
             <ArrowLeft2 size={scale(24)} color={colors.text} variant="Linear" />
           </TouchableOpacity>
-          <View style={[styles.searchInputContainer, { backgroundColor: colors.primaryLight || colors.surface }]}>
+          <View style={[styles.searchInputContainer, { backgroundColor: colors.background || colors.surface }]}>
             <SearchNormal size={scale(20)} color={colors.primary} variant="Linear" />
             <TextInput
               ref={searchInputRef}

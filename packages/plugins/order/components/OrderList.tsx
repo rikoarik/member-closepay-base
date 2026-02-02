@@ -16,6 +16,7 @@ import {
   FontFamily,
 } from '@core/config';
 import { useTheme } from '@core/theme';
+import { useTranslation } from '@core/i18n';
 
 export interface OrderListProps {
   orders: Order[];
@@ -24,11 +25,12 @@ export interface OrderListProps {
 
 export const OrderList: React.FC<OrderListProps> = ({ orders, onOrderPress }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const horizontalPadding = getHorizontalPadding();
   const verticalPadding = getVerticalPadding();
 
   return (
-    <ScrollView 
+    <ScrollView
       style={[
         styles.container,
         {
@@ -40,10 +42,10 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onOrderPress }) =>
     >
       {orders.length === 0 ? (
         <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-          Tidak ada pesanan
+          {t('order.noOrders') || 'Tidak ada pesanan'}
         </Text>
       ) : (
-        orders.map(order => (
+        orders.map((order) => (
           <View
             key={order.id}
             style={[
@@ -54,15 +56,11 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onOrderPress }) =>
             ]}
             onTouchEnd={() => onOrderPress?.(order)}
           >
-            <Text style={[styles.orderId, { color: colors.textSecondary }]}>
-              #{order.id}
-            </Text>
+            <Text style={[styles.orderId, { color: colors.textSecondary }]}>#{order.id}</Text>
             <Text style={[styles.orderTotal, { color: colors.text }]}>
               Rp {order.total.toLocaleString('id-ID')}
             </Text>
-            <Text style={[styles.orderStatus, getStatusColor(order.status)]}>
-              {order.status}
-            </Text>
+            <Text style={[styles.orderStatus, getStatusColor(order.status)]}>{order.status}</Text>
           </View>
         ))
       )}
@@ -111,4 +109,3 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 });
-

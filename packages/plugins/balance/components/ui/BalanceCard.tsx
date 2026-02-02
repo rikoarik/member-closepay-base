@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: scale(16),
     borderBottomRightRadius: scale(16),
     paddingTop: moderateVerticalScale(16),
-    paddingBottom: moderateVerticalScale(12),
+    paddingBottom: moderateVerticalScale(8),
     paddingHorizontal: scale(12),
     marginTop: moderateVerticalScale(12),
   },

@@ -190,6 +190,7 @@ export interface Store {
   followers: number;
   phoneNumber?: string;
   openingHours?: string;
+  isOpen: boolean;
 }
 
 /**
@@ -200,6 +201,24 @@ export const getCategories = (): string[] => {
 };
 
 /**
+ * Check if store is currently open based on opening hours string
+ * @param openingHours - Format: "HH:MM - HH:MM"
+ */
+const isStoreOpenByHours = (openingHours: string): boolean => {
+  try {
+    const [openTime, closeTime] = openingHours.split(' - ');
+    if (!openTime || !closeTime) return true; // Default to open if format invalid
+    
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    return currentTime >= openTime && currentTime <= closeTime;
+  } catch {
+    return true; // Default to open if parsing fails
+  }
+};
+
+/**
  * Search stores by query
  */
 export const searchStores = (query: string): Store[] => {
@@ -207,16 +226,20 @@ export const searchStores = (query: string): Store[] => {
 
   return storeNames
     .filter(name => !query || name.toLowerCase().includes(lowerQuery))
-    .map((name, index) => ({
-      id: `store-${index}`,
-      name,
-      imageUrl: `https://picsum.photos/id/${200 + index}/200/200`,
-      rating: 4.5 + (Math.random() * 0.5),
-      location: 'Jakarta',
-      followers: Math.floor(Math.random() * 10000) + 100,
-      phoneNumber: `62812345678${index}`,
-      openingHours: '08:00 - 21:00',
-    }));
+    .map((name, index) => {
+      const openingHours = '08:00 - 21:00';
+      return {
+        id: `store-${index}`,
+        name,
+        imageUrl: `https://picsum.photos/id/${200 + index}/200/200`,
+        rating: 4.5 + (Math.random() * 0.5),
+        location: 'Jakarta',
+        followers: Math.floor(Math.random() * 10000) + 100,
+        phoneNumber: `62812345678${index}`,
+        openingHours,
+        isOpen: isStoreOpenByHours(openingHours),
+      };
+    });
 };
 
 export const getAllStores = (): Store[] => searchStores('');

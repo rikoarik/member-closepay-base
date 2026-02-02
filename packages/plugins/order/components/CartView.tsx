@@ -17,6 +17,7 @@ import {
   FontFamily,
 } from '@core/config';
 import { useTheme } from '@core/theme';
+import { useTranslation } from '@core/i18n';
 
 export interface CartViewProps {
   cart: Cart;
@@ -26,11 +27,12 @@ export interface CartViewProps {
 
 export const CartView: React.FC<CartViewProps> = ({ cart, loading = false, onCheckout }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const horizontalPadding = getHorizontalPadding();
   const verticalPadding = getVerticalPadding();
 
   return (
-    <View 
+    <View
       style={[
         styles.container,
         {
@@ -41,7 +43,7 @@ export const CartView: React.FC<CartViewProps> = ({ cart, loading = false, onChe
       ]}
     >
       <ScrollView>
-        <Text style={[styles.title, { color: colors.text }]}>Keranjang</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('order.cart') || 'Keranjang'}</Text>
         {loading ? (
           // Show loading skeletons
           <>
@@ -62,7 +64,7 @@ export const CartView: React.FC<CartViewProps> = ({ cart, loading = false, onChe
           </>
         ) : cart.items.length === 0 ? (
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            Keranjang kosong
+            {t('order.emptyCart') || 'Keranjang kosong'}
           </Text>
         ) : (
           <>
@@ -76,9 +78,7 @@ export const CartView: React.FC<CartViewProps> = ({ cart, loading = false, onChe
                   },
                 ]}
               >
-                <Text style={[styles.itemName, { color: colors.text }]}>
-                  {item.productName}
-                </Text>
+                <Text style={[styles.itemName, { color: colors.text }]}>{item.productName}</Text>
                 <Text style={[styles.itemQuantity, { color: colors.textSecondary }]}>
                   x{item.quantity}
                 </Text>
@@ -163,4 +163,3 @@ const styles = StyleSheet.create({
     marginVertical: scale(4),
   },
 });
-

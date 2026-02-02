@@ -53,7 +53,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<BluetoothDevice | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [scanTimeout, setScanTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [scanTimeout, setScanTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   // Start scanning when modal opens
   useEffect(() => {
@@ -165,12 +165,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}
         <View
@@ -186,7 +181,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
             <ArrowLeft2 size={getIconSize('medium')} color={colors.text} variant="Outline" />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Pilih Perangkat NFC Bluetooth
+            {t('bluetooth.selectDevice') || 'Pilih Perangkat NFC Bluetooth'}
           </Text>
           <TouchableOpacity
             style={styles.refreshButton}
@@ -220,7 +215,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
           {!isScanning && devices.length === 0 && !error && (
             <View style={styles.emptyContainer}>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                Tidak ada perangkat ditemukan
+                {t('bluetooth.noDevicesFound') || 'Tidak ada perangkat ditemukan'}
               </Text>
               <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
                 Pastikan perangkat NFC Bluetooth sudah dinyalakan dan dalam jangkauan
@@ -237,7 +232,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
                 onPress={handleRefresh}
                 disabled={isScanning || isConnecting}
               >
-                <Text style={styles.retryButtonText}>Coba Lagi</Text>
+                <Text style={styles.retryButtonText}>{t('common.retry') || 'Coba Lagi'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -285,12 +280,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
                               },
                             ]}
                           />
-                          <Text
-                            style={[
-                              styles.signalText,
-                              { color: getSignalColor(device.rssi) },
-                            ]}
-                          >
+                          <Text style={[styles.signalText, { color: getSignalColor(device.rssi) }]}>
                             {getSignalStrength(device.rssi)}
                           </Text>
                         </View>
@@ -307,9 +297,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
 
           {/* Instructions */}
           <View style={styles.instructionsContainer}>
-            <Text style={[styles.instructionsTitle, { color: colors.text }]}>
-              Petunjuk
-            </Text>
+            <Text style={[styles.instructionsTitle, { color: colors.text }]}>Petunjuk</Text>
             <View style={styles.instructionItem}>
               <Text style={[styles.instructionNumber, { color: colors.primary }]}>1.</Text>
               <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
@@ -325,7 +313,7 @@ export const BluetoothDeviceSelector: React.FC<BluetoothDeviceSelectorProps> = (
             <View style={styles.instructionItem}>
               <Text style={[styles.instructionNumber, { color: colors.primary }]}>3.</Text>
               <Text style={[styles.instructionText, { color: colors.textSecondary }]}>
-                Pilih perangkat dari daftar untuk terhubung
+                {t('bluetooth.selectFromList') || 'Pilih perangkat dari daftar untuk terhubung'}
               </Text>
             </View>
           </View>
@@ -509,4 +497,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-

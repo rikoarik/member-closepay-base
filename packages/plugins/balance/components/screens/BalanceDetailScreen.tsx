@@ -591,7 +591,9 @@ export const BalanceDetailScreen = () => {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ArrowLeft2 size={scale(20)} color={colors.text} variant="Outline" />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Saldo</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            {t('balance.balance') || 'Saldo'}
+          </Text>
           <View style={styles.headerRight} />
         </View>
 
@@ -599,15 +601,7 @@ export const BalanceDetailScreen = () => {
         <ScrollView
           style={styles.content}
           showsVerticalScrollIndicator={false}
-          scrollEnabled={true}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.primary}
-              colors={[colors.primary]}
-            />
-          }
+          scrollEnabled={false}
         >
           <FlatList
             ref={flatListRef}
@@ -663,7 +657,9 @@ export const BalanceDetailScreen = () => {
 
         {/* Sheet Header */}
         <View style={styles.sheetHeader}>
-          <Text style={[styles.sheetTitle, { color: colors.text }]}>Riwayat Transaksi</Text>
+          <Text style={[styles.sheetTitle, { color: colors.text }]}>
+            {t('balance.transactionHistory') || 'Riwayat Transaksi'}
+          </Text>
           {isSheetExpanded && (
             <TouchableOpacity onPress={collapseSheet} style={styles.closeButton}>
               <CloseCircle size={scale(24)} color={colors.textSecondary} variant="Outline" />
@@ -704,6 +700,14 @@ export const BalanceDetailScreen = () => {
         <ScrollView
           style={styles.transactionScroll}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
           scrollEnabled={true}
         >
           {/* Date Header */}
@@ -760,7 +764,7 @@ export const BalanceDetailScreen = () => {
           ) : (
             <View style={styles.emptyState}>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                Tidak ada transaksi
+                {t('balance.noTransactions') || 'Tidak ada transaksi'}
               </Text>
             </View>
           )}

@@ -210,14 +210,14 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   }
 
   return (
-    <View style={[styles.container, {paddingTop: scale(10)}]}>
+    <View style={[styles.container, { paddingTop: scale(10) }]}>
       {/* Search Header - Clickable untuk navigate ke SearchScreen */}
       <View style={[styles.searchContainer, { paddingHorizontal: horizontalPadding }]}>
         <TouchableOpacity
           activeOpacity={0.8}
           style={[
             styles.searchInputContainer,
-            { backgroundColor: colors.primaryLight || colors.surface },
+            { backgroundColor: colors.surface || colors.surface },
           ]}
           onPress={() => {
             // @ts-ignore
@@ -352,6 +352,7 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
         </View>
       ) : scrollEnabled ? (
         <FlatList
+          key={`marketplace-grid-${numColumns}`}
           ref={flatListRef}
           data={showShimmer && (refreshing || isInitialLoad) ? [] : paginatedProducts}
           renderItem={renderItem}

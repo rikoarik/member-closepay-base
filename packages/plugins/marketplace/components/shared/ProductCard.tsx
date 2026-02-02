@@ -196,7 +196,6 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
     justifyContent: 'space-between',
     flexWrap: 'wrap',
   },

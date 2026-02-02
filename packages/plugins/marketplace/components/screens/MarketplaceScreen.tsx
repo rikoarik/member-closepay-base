@@ -3,16 +3,20 @@
  * Halaman utama marketplace dengan grid produk
  */
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SearchNormal, ShoppingCart, ArrowLeft2 } from 'iconsax-react-nativejs';
-import {
-  scale,
-  moderateVerticalScale,
-  getHorizontalPadding,
-  FontFamily,
-} from '@core/config';
+import { scale, moderateVerticalScale, getHorizontalPadding, FontFamily } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { ProductCard, Product } from '../shared/ProductCard';
@@ -43,11 +47,13 @@ export const MarketplaceScreen: React.FC = () => {
 
   const { itemCount, subtotal, addItem, getItemQuantity } = useMarketplaceCart();
 
-  const { products: allProducts, loading: isInitialLoading } = useMarketplaceData(loadedBatches * 20, true, true);
+  const { products: allProducts, loading: isInitialLoading } = useMarketplaceData(
+    loadedBatches * 20,
+    true,
+    true
+  );
   const stores = React.useMemo(() => getAllStores().slice(0, 3), []); // Get top 3 stores
   const categories = React.useMemo(() => getCategories(), []);
-
-  const [searchText, setSearchText] = useState('');
 
   const bestSellerProducts = React.useMemo(() => {
     return [...allProducts].sort((a, b) => (b.sold || 0) - (a.sold || 0)).slice(0, 6);
@@ -56,30 +62,27 @@ export const MarketplaceScreen: React.FC = () => {
   const filteredProducts = React.useMemo(() => {
     let products = allProducts;
     if (selectedCategory !== 'Semua') {
-      products = products.filter(p => p.category === selectedCategory);
+      products = products.filter((p) => p.category === selectedCategory);
     }
     const endIndex = currentPage * PAGE_SIZE;
     return products.slice(0, endIndex);
   }, [allProducts, selectedCategory, currentPage]);
 
-  const hasMore = filteredProducts.length < (selectedCategory === 'Semua' ? allProducts.length : allProducts.filter(p => p.category === selectedCategory).length);
+  const hasMore =
+    filteredProducts.length <
+    (selectedCategory === 'Semua'
+      ? allProducts.length
+      : allProducts.filter((p) => p.category === selectedCategory).length);
 
   const handleCategorySelect = useCallback((category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
   }, []);
 
-  const handleSearchSubmit = () => {
-    if (searchText.trim()) {
-      //@ts-ignore
-      navigation.navigate('MarketplaceSearchResults', { query: searchText.trim() });
-    }
-  };
-
   const loadMore = useCallback(() => {
     if (!isLoadingMore && hasMore && !refreshing) {
       setIsLoadingMore(true);
-      const neededBatches = Math.ceil((currentPage + 1) * PAGE_SIZE / 20);
+      const neededBatches = Math.ceil(((currentPage + 1) * PAGE_SIZE) / 20);
       if (neededBatches > loadedBatches) {
         setLoadedBatches(neededBatches);
       }
@@ -113,12 +116,7 @@ export const MarketplaceScreen: React.FC = () => {
   };
 
   const renderProduct = useCallback(
-    ({ item }: { item: Product }) => (
-      <ProductCard
-        product={item}
-        onPress={handleProductPress}
-      />
-    ),
+    ({ item }: { item: Product }) => <ProductCard product={item} onPress={handleProductPress} />,
     [handleProductPress]
   );
 
@@ -170,7 +168,9 @@ export const MarketplaceScreen: React.FC = () => {
       {selectedCategory === 'Semua' && bestSellerProducts.length > 0 && (
         <View style={styles.section}>
           <View style={[styles.sectionHeader, { paddingHorizontal: horizontalPadding }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('marketplace.bestSellers')}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('marketplace.bestSellers')}
+            </Text>
           </View>
           <ScrollView
             horizontal
@@ -178,10 +178,10 @@ export const MarketplaceScreen: React.FC = () => {
             contentContainerStyle={{
               paddingLeft: horizontalPadding,
               paddingRight: horizontalPadding, // ga pengaruh
-              gap: scale(12)
+              gap: scale(12),
             }}
           >
-            {bestSellerProducts.map(product => (
+            {bestSellerProducts.map((product) => (
               <View key={product.id} style={{ width: scale(160), marginRight: scale(12) }}>
                 <ProductCard product={product} onPress={handleProductPress} />
               </View>
@@ -194,17 +194,19 @@ export const MarketplaceScreen: React.FC = () => {
       {selectedCategory === 'Semua' && stores.length > 0 && (
         <View style={styles.section}>
           <View style={[styles.sectionHeader, { paddingHorizontal: horizontalPadding }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('marketplace.nearbyStores')}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('marketplace.nearbyStores')}
+            </Text>
           </View>
-            <View style={{ paddingHorizontal: horizontalPadding }}>
-            {stores.map(store => (
-              <StoreCard 
-                key={store.id} 
-                store={store} 
+          <View style={{ paddingHorizontal: horizontalPadding }}>
+            {stores.map((store) => (
+              <StoreCard
+                key={store.id}
+                store={store}
                 onPress={(store) => {
                   // @ts-ignore
                   navigation.navigate('StoreDetail', { store });
-                }} 
+                }}
               />
             ))}
           </View>
@@ -212,9 +214,16 @@ export const MarketplaceScreen: React.FC = () => {
       )}
 
       {/* All Products Title */}
-      <View style={[styles.sectionHeader, { paddingHorizontal: horizontalPadding, marginTop: moderateVerticalScale(16) }]}>
+      <View
+        style={[
+          styles.sectionHeader,
+          { paddingHorizontal: horizontalPadding, marginTop: moderateVerticalScale(16) },
+        ]}
+      >
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {selectedCategory === 'Semua' ? t('marketplace.recommendations') : t('marketplace.productsForCategory', { category: selectedCategory })}
+          {selectedCategory === 'Semua'
+            ? t('marketplace.recommendations')
+            : t('marketplace.productsForCategory', { category: selectedCategory })}
         </Text>
       </View>
     </View>
@@ -237,29 +246,36 @@ export const MarketplaceScreen: React.FC = () => {
           <ArrowLeft2 size={scale(24)} color={colors.text} variant="Linear" />
         </TouchableOpacity>
 
-        <View style={[styles.searchBar, { backgroundColor: colors.primaryLight || colors.surface }]}>
+        <TouchableOpacity
+          style={[styles.searchBar, { backgroundColor: colors.background || colors.surface }]}
+          activeOpacity={0.7}
+          onPress={() => {
+            // @ts-ignore
+            navigation.navigate('MarketplaceSearch');
+          }}
+        >
           <SearchNormal size={scale(20)} color={colors.primary} variant="Linear" />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder={t('marketplace.searchPlaceholder') || 'Cari produk...'}
-            placeholderTextColor={colors.textSecondary}
-            value={searchText}
-            onChangeText={setSearchText}
-            onSubmitEditing={handleSearchSubmit}
-            returnKeyType="search"
-          />
-        </View>
+          <Text numberOfLines={1} style={[styles.searchInput, { color: colors.textSecondary }]}>
+            {t('marketplace.searchPlaceholder') || 'Cari produk...'}
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.cartButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          style={[
+            styles.cartButton,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
           onPress={handleCartPress}
         >
           <ShoppingCart size={scale(20)} color={colors.text} variant="Linear" />
           {itemCount > 0 && (
-            <View style={[styles.badgeContainer, { backgroundColor: colors.error, borderColor: colors.surface }]}>
-              <Text style={styles.badgeText}>
-                {itemCount > 99 ? '99+' : itemCount}
-              </Text>
+            <View
+              style={[
+                styles.badgeContainer,
+                { backgroundColor: colors.error, borderColor: colors.surface },
+              ]}
+            >
+              <Text style={styles.badgeText}>{itemCount > 99 ? '99+' : itemCount}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -267,6 +283,7 @@ export const MarketplaceScreen: React.FC = () => {
 
       {/* Main Content */}
       <FlatList
+        key="marketplace-grid-2"
         data={filteredProducts}
         ListHeaderComponent={renderHeader}
         renderItem={renderProduct}

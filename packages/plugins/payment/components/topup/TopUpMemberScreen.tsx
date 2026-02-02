@@ -45,10 +45,7 @@ import {
   TopUpMemberSummaryBottomSheet,
   type TopUpMemberSummaryData,
 } from './TopUpMemberSummaryBottomSheet';
-import {
-  TopUpMemberPinBottomSheet,
-  type TopUpMemberPinData,
-} from './TopUpMemberPinBottomSheet';
+import { TopUpMemberPinBottomSheet, type TopUpMemberPinData } from './TopUpMemberPinBottomSheet';
 
 type TabType = 'id-member' | 'excel' | 'top-kartu';
 
@@ -80,43 +77,47 @@ export const TopUpMemberScreen = () => {
   const [isNFCListening, setIsNFCListening] = useState(false);
   const [nfcError, setNfcError] = useState<string | null>(null);
   const [isBluetoothScanning, setIsBluetoothScanning] = useState(false);
-  
+
   // NFC Health & Bluetooth states
-  const [nfcHealthStatus, setNfcHealthStatus] = useState<'available' | 'unavailable' | 'broken' | 'checking'>('checking');
+  const [nfcHealthStatus, setNfcHealthStatus] = useState<
+    'available' | 'unavailable' | 'broken' | 'checking'
+  >('checking');
   const [showBluetoothOption, setShowBluetoothOption] = useState(false);
   const [showBluetoothSelector, setShowBluetoothSelector] = useState(false);
-  const [selectedBluetoothDevice, setSelectedBluetoothDevice] = useState<BluetoothDevice | null>(null);
+  const [selectedBluetoothDevice, setSelectedBluetoothDevice] = useState<BluetoothDevice | null>(
+    null
+  );
   const [isConnectingBluetooth, setIsConnectingBluetooth] = useState(false);
   const [isBluetoothConnected, setIsBluetoothConnected] = useState(false);
   const [isReadingViaBluetooth, setIsReadingViaBluetooth] = useState(false);
-  
+
   // Summary Bottom Sheet
   const [showSummaryBottomSheet, setShowSummaryBottomSheet] = useState(false);
   const [summaryData, setSummaryData] = useState<TopUpMemberSummaryData | null>(null);
-  
+
   // PIN Bottom Sheet
   const [showPinBottomSheet, setShowPinBottomSheet] = useState(false);
   const [pinData, setPinData] = useState<TopUpMemberPinData | null>(null);
-  
+
   // Animated scroll for horizontal pager
   const pagerRef = useRef<any>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
-  
+
   // Dropdown animation
   const dropdownAnimation = useRef(new Animated.Value(0)).current;
   const dropdownOpacity = useRef(new Animated.Value(0)).current;
-  
+
   // ScrollView refs for keyboard handling
   const idMemberScrollRef = useRef<ScrollView>(null);
   const excelScrollRef = useRef<ScrollView>(null);
-  
+
   // Tabs configuration
   const tabs: Tab[] = [
     { id: 'id-member', label: 'ID Member' },
     { id: 'excel', label: 'Excel' },
     { id: 'top-kartu', label: 'Tap Kartu' },
   ];
-  
+
   // Get tab index for pager
   const getTabIndex = (tab: TabType): number => {
     switch (tab) {
@@ -130,18 +131,18 @@ export const TopUpMemberScreen = () => {
         return 0;
     }
   };
-  
+
   // Handle pager scroll end
   const handlePagerMomentumEnd = (event: any) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / screenWidth);
-    
+
     const tabs: TabType[] = ['id-member', 'excel', 'top-kartu'];
     if (tabs[index]) {
       setActiveTab(tabs[index]);
     }
   };
-  
+
   // Handle tab change and sync pager
   const handleTabChange = (tabId: string) => {
     const typed = tabId as TabType;
@@ -154,7 +155,7 @@ export const TopUpMemberScreen = () => {
       });
     }
   };
-  
+
   // Set initial pager position
   useEffect(() => {
     if (pagerRef.current) {
@@ -248,7 +249,12 @@ export const TopUpMemberScreen = () => {
    * Start NFC listener when NFC is available and tab is active
    */
   useEffect(() => {
-    if (activeTab === 'top-kartu' && !cardData && nfcHealthStatus === 'available' && !isBluetoothConnected) {
+    if (
+      activeTab === 'top-kartu' &&
+      !cardData &&
+      nfcHealthStatus === 'available' &&
+      !isBluetoothConnected
+    ) {
       // Start listener when NFC is available
       startNFCListener();
     } else {
@@ -270,10 +276,10 @@ export const TopUpMemberScreen = () => {
     try {
       setNfcHealthStatus('checking');
       setShowBluetoothOption(false);
-      
+
       const health = await nfcBluetoothService.checkNFCHealth();
       setNfcHealthStatus(health);
-      
+
       // Show Bluetooth option if NFC is unavailable or broken
       if (health === 'unavailable' || health === 'broken') {
         setShowBluetoothOption(true);
@@ -379,7 +385,7 @@ export const TopUpMemberScreen = () => {
       // Device is already connected in BluetoothDeviceSelector
       setIsBluetoothConnected(true);
       setIsConnectingBluetooth(false);
-      
+
       // Start listening for card via Bluetooth
       startBluetoothCardListener();
     } catch (error: any) {
@@ -404,7 +410,7 @@ export const TopUpMemberScreen = () => {
   const startBluetoothCardListener = async () => {
     // Polling mechanism to read card via Bluetooth
     let isPolling = true;
-    
+
     const pollForCard = async () => {
       while (isPolling && !cardData) {
         try {
@@ -419,7 +425,7 @@ export const TopUpMemberScreen = () => {
 
           setIsReadingViaBluetooth(true);
           const readCardData = await nfcBluetoothService.readNFCCardViaBluetooth();
-          
+
           if (readCardData) {
             setCardData(readCardData);
             setIsReadingViaBluetooth(false);
@@ -433,10 +439,10 @@ export const TopUpMemberScreen = () => {
             error?.message?.includes('tidak ada data') ||
             error?.message?.includes('Waktu membaca kartu habis')
           ) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise<void>((resolve) => setTimeout(resolve, 1000));
             continue;
           }
-          
+
           // For connection errors, stop polling
           if (
             error?.message?.includes('tidak terhubung') ||
@@ -449,10 +455,10 @@ export const TopUpMemberScreen = () => {
             isPolling = false;
             return;
           }
-          
+
           // For other errors, show error but continue polling (might be temporary)
           setNfcError(error.message || t('topUp.failedToReadCardViaBluetooth'));
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise<void>((resolve) => setTimeout(resolve, 2000));
         }
       }
     };
@@ -564,9 +570,7 @@ export const TopUpMemberScreen = () => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ArrowLeft2 size={getIconSize('medium')} color={colors.text} variant="Outline" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {t('home.topUpMember')}
-        </Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>{t('home.topUpMember')}</Text>
       </View>
 
       {/* Tab Switcher - Same as HomeScreen */}
@@ -593,10 +597,9 @@ export const TopUpMemberScreen = () => {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           scrollEventThrottle={16}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: true },
-          )}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+            useNativeDriver: true,
+          })}
           onMomentumScrollEnd={handlePagerMomentumEnd}
           style={styles.pagerContainer}
         >
@@ -611,517 +614,534 @@ export const TopUpMemberScreen = () => {
               keyboardDismissMode="interactive"
               bounces={false}
             >
-            <View style={styles.section}>
-            {/* Saldo Tujuan */}
-            <View style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>{t('topUp.balanceTarget')}</Text>
-            <TouchableOpacity
-              style={[
-                styles.dropdown,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                },
-              ]}
-              onPress={() => setShowBalanceDropdown(!showBalanceDropdown)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.dropdownText, { color: colors.text }]}>
-                {selectedBalance?.name || t('topUp.selectBalanceTarget')}
-              </Text>
-              <Animated.View
-                style={{
-                  transform: [
-                    {
-                      rotate: dropdownAnimation.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '180deg'],
-                      }),
-                    },
-                  ],
-                }}
-              >
-                <ArrowDown2
-                  size={getIconSize('small')}
-                  color={colors.textSecondary}
-                  variant="Outline"
-                />
-              </Animated.View>
-            </TouchableOpacity>
-
-            {isDropdownVisible && (
-              <Animated.View
-                style={[
-                  styles.dropdownMenu,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.border,
-                    opacity: dropdownOpacity,
-                    transform: [
-                      {
-                        translateY: dropdownAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [-10, 0],
-                        }),
-                      },
-                      {
-                        scale: dropdownAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.95, 1],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                {BALANCE_TARGETS.map((target) => (
-                  <TouchableOpacity
-                    key={target.id}
-                    style={[
-                      styles.dropdownItem,
-                      balanceTarget === target.id && {
-                        backgroundColor: colors.primary + '20',
-                      },
-                    ]}
-                    onPress={() => {
-                      setBalanceTarget(target.id);
-                      setShowBalanceDropdown(false);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      style={[
-                        styles.dropdownItemText,
-                        {
-                          color: balanceTarget === target.id ? colors.primary : colors.text,
-                          fontFamily:
-                            balanceTarget === target.id
-                              ? FontFamily.monasans.semiBold
-                              : FontFamily.monasans.regular,
-                        },
-                      ]}
-                    >
-                      {target.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </Animated.View>
-            )}
-          </View>
-
-          {/* Nominal */}
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>{t('topUp.amount')}</Text>
-            <View
-              style={[
-                styles.amountContainer,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <Text style={[styles.currencyPrefix, { color: colors.text }]}>Rp</Text>
-              <TextInput
-                style={[styles.amountInput, { color: colors.text }]}
-                value={displayAmount}
-                onChangeText={handleAmountChange}
-                placeholder="0"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="numeric"
-                selectTextOnFocus
-                onFocus={() => {
-                  setTimeout(() => {
-                    if (activeTab === 'id-member' && idMemberScrollRef.current) {
-                      idMemberScrollRef.current.scrollTo({ y: moderateVerticalScale(100), animated: true });
-                    }
-                  }, 100);
-                }}
-              />
-            </View>
-          </View>
-
-              {/* ID Member Input */}
-              <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>{t('topUp.memberId')}</Text>
-                <TextInput
-                  style={[
-                    styles.textInput,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                      color: colors.text,
-                    },
-                  ]}
-                  value={memberId}
-                  onChangeText={setMemberId}
-                  placeholder={t('topUp.enterMemberId')}
-                  placeholderTextColor={colors.textSecondary}
-                  autoCapitalize="characters"
-                />
-              </View>
-            </View>
-            </ScrollView>
-          </View>
-
-        {/* Excel Page */}
-        <View style={[styles.pagerPage, { width: screenWidth }]}>
-          <ScrollView
-            ref={excelScrollRef}
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="interactive"
-            bounces={false}
-          >
-            <View style={styles.section}>
-              {/* Saldo Tujuan */}
-              <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>{t('topUp.balanceTarget')}</Text>
-                <TouchableOpacity
-                  style={[
-                    styles.dropdown,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                  onPress={() => setShowBalanceDropdown(!showBalanceDropdown)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.dropdownText, { color: colors.text }]}>
-                    {selectedBalance?.name || t('topUp.selectBalanceTarget')}
+              <View style={styles.section}>
+                {/* Saldo Tujuan */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>
+                    {t('topUp.balanceTarget')}
                   </Text>
-                  <Animated.View
-                    style={{
-                      transform: [
-                        {
-                          rotate: dropdownAnimation.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '180deg'],
-                          }),
-                        },
-                      ],
-                    }}
-                  >
-                    <ArrowDown2
-                      size={getIconSize('small')}
-                      color={colors.textSecondary}
-                      variant="Outline"
-                    />
-                  </Animated.View>
-                </TouchableOpacity>
-
-                {isDropdownVisible && (
-                  <Animated.View
+                  <TouchableOpacity
                     style={[
-                      styles.dropdownMenu,
+                      styles.dropdown,
                       {
                         backgroundColor: colors.surface,
                         borderColor: colors.border,
-                        opacity: dropdownOpacity,
+                      },
+                    ]}
+                    onPress={() => setShowBalanceDropdown(!showBalanceDropdown)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.dropdownText, { color: colors.text }]}>
+                      {selectedBalance?.name || t('topUp.selectBalanceTarget')}
+                    </Text>
+                    <Animated.View
+                      style={{
                         transform: [
                           {
-                            translateY: dropdownAnimation.interpolate({
+                            rotate: dropdownAnimation.interpolate({
                               inputRange: [0, 1],
-                              outputRange: [-10, 0],
-                            }),
-                          },
-                          {
-                            scale: dropdownAnimation.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0.95, 1],
+                              outputRange: ['0deg', '180deg'],
                             }),
                           },
                         ],
-                      },
-                    ]}
-                  >
-                    {BALANCE_TARGETS.map((target) => (
-                      <TouchableOpacity
-                        key={target.id}
-                        style={[
-                          styles.dropdownItem,
-                          balanceTarget === target.id && {
-                            backgroundColor: colors.primary + '20',
-                          },
-                        ]}
-                        onPress={() => {
-                          setBalanceTarget(target.id);
-                          setShowBalanceDropdown(false);
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        <Text
-                          style={[
-                            styles.dropdownItemText,
+                      }}
+                    >
+                      <ArrowDown2
+                        size={getIconSize('small')}
+                        color={colors.textSecondary}
+                        variant="Outline"
+                      />
+                    </Animated.View>
+                  </TouchableOpacity>
+
+                  {isDropdownVisible && (
+                    <Animated.View
+                      style={[
+                        styles.dropdownMenu,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                          opacity: dropdownOpacity,
+                          transform: [
                             {
-                              color: balanceTarget === target.id ? colors.primary : colors.text,
-                              fontFamily:
-                                balanceTarget === target.id
-                                  ? FontFamily.monasans.semiBold
-                                  : FontFamily.monasans.regular,
+                              translateY: dropdownAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-10, 0],
+                              }),
+                            },
+                            {
+                              scale: dropdownAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.95, 1],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      {BALANCE_TARGETS.map((target) => (
+                        <TouchableOpacity
+                          key={target.id}
+                          style={[
+                            styles.dropdownItem,
+                            balanceTarget === target.id && {
+                              backgroundColor: colors.primary + '20',
                             },
                           ]}
+                          onPress={() => {
+                            setBalanceTarget(target.id);
+                            setShowBalanceDropdown(false);
+                          }}
+                          activeOpacity={0.7}
                         >
-                          {target.name}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </Animated.View>
-                )}
-              </View>
-
-              {/* Nominal */}
-              <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>{t('topUp.amount')}</Text>
-                <View
-                  style={[
-                    styles.amountContainer,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.currencyPrefix, { color: colors.text }]}>Rp</Text>
-                  <TextInput
-                    style={[styles.amountInput, { color: colors.text }]}
-                    value={displayAmount}
-                    onChangeText={handleAmountChange}
-                    placeholder="0"
-                    placeholderTextColor={colors.textSecondary}
-                    keyboardType="numeric"
-                    selectTextOnFocus
-                  />
+                          <Text
+                            style={[
+                              styles.dropdownItemText,
+                              {
+                                color: balanceTarget === target.id ? colors.primary : colors.text,
+                                fontFamily:
+                                  balanceTarget === target.id
+                                    ? FontFamily.monasans.semiBold
+                                    : FontFamily.monasans.regular,
+                              },
+                            ]}
+                          >
+                            {target.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </Animated.View>
+                  )}
                 </View>
-              </View>
 
-              {/* Excel Upload */}
-              <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>Upload File</Text>
-                {excelFile ? (
+                {/* Nominal */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>{t('topUp.amount')}</Text>
                   <View
                     style={[
-                      styles.filePreview,
+                      styles.amountContainer,
                       {
                         backgroundColor: colors.surface,
                         borderColor: colors.border,
                       },
                     ]}
                   >
-                    <Text style={[styles.fileName, { color: colors.text }]}>{excelFile}</Text>
+                    <Text style={[styles.currencyPrefix, { color: colors.text }]}>Rp</Text>
+                    <TextInput
+                      style={[styles.amountInput, { color: colors.text }]}
+                      value={displayAmount}
+                      onChangeText={handleAmountChange}
+                      placeholder="0"
+                      placeholderTextColor={colors.textSecondary}
+                      keyboardType="numeric"
+                      selectTextOnFocus
+                      onFocus={() => {
+                        setTimeout(() => {
+                          if (activeTab === 'id-member' && idMemberScrollRef.current) {
+                            idMemberScrollRef.current.scrollTo({
+                              y: moderateVerticalScale(100),
+                              animated: true,
+                            });
+                          }
+                        }, 100);
+                      }}
+                    />
+                  </View>
+                </View>
+
+                {/* ID Member Input */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>{t('topUp.memberId')}</Text>
+                  <TextInput
+                    style={[
+                      styles.textInput,
+                      {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                        color: colors.text,
+                      },
+                    ]}
+                    value={memberId}
+                    onChangeText={setMemberId}
+                    placeholder={t('topUp.enterMemberId')}
+                    placeholderTextColor={colors.textSecondary}
+                    autoCapitalize="characters"
+                  />
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Excel Page */}
+          <View style={[styles.pagerPage, { width: screenWidth }]}>
+            <ScrollView
+              ref={excelScrollRef}
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
+              bounces={false}
+            >
+              <View style={styles.section}>
+                {/* Saldo Tujuan */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>
+                    {t('topUp.balanceTarget')}
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.dropdown,
+                      {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                    onPress={() => setShowBalanceDropdown(!showBalanceDropdown)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.dropdownText, { color: colors.text }]}>
+                      {selectedBalance?.name || t('topUp.selectBalanceTarget')}
+                    </Text>
+                    <Animated.View
+                      style={{
+                        transform: [
+                          {
+                            rotate: dropdownAnimation.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: ['0deg', '180deg'],
+                            }),
+                          },
+                        ],
+                      }}
+                    >
+                      <ArrowDown2
+                        size={getIconSize('small')}
+                        color={colors.textSecondary}
+                        variant="Outline"
+                      />
+                    </Animated.View>
+                  </TouchableOpacity>
+
+                  {isDropdownVisible && (
+                    <Animated.View
+                      style={[
+                        styles.dropdownMenu,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                          opacity: dropdownOpacity,
+                          transform: [
+                            {
+                              translateY: dropdownAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-10, 0],
+                              }),
+                            },
+                            {
+                              scale: dropdownAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.95, 1],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      {BALANCE_TARGETS.map((target) => (
+                        <TouchableOpacity
+                          key={target.id}
+                          style={[
+                            styles.dropdownItem,
+                            balanceTarget === target.id && {
+                              backgroundColor: colors.primary + '20',
+                            },
+                          ]}
+                          onPress={() => {
+                            setBalanceTarget(target.id);
+                            setShowBalanceDropdown(false);
+                          }}
+                          activeOpacity={0.7}
+                        >
+                          <Text
+                            style={[
+                              styles.dropdownItemText,
+                              {
+                                color: balanceTarget === target.id ? colors.primary : colors.text,
+                                fontFamily:
+                                  balanceTarget === target.id
+                                    ? FontFamily.monasans.semiBold
+                                    : FontFamily.monasans.regular,
+                              },
+                            ]}
+                          >
+                            {target.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </Animated.View>
+                  )}
+                </View>
+
+                {/* Nominal */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>{t('topUp.amount')}</Text>
+                  <View
+                    style={[
+                      styles.amountContainer,
+                      {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.currencyPrefix, { color: colors.text }]}>Rp</Text>
+                    <TextInput
+                      style={[styles.amountInput, { color: colors.text }]}
+                      value={displayAmount}
+                      onChangeText={handleAmountChange}
+                      placeholder="0"
+                      placeholderTextColor={colors.textSecondary}
+                      keyboardType="numeric"
+                      selectTextOnFocus
+                    />
+                  </View>
+                </View>
+
+                {/* Excel Upload */}
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, { color: colors.text }]}>
+                    {t('common.uploadFile') || 'Upload File'}
+                  </Text>
+                  {excelFile ? (
+                    <View
+                      style={[
+                        styles.filePreview,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.fileName, { color: colors.text }]}>{excelFile}</Text>
+                      <TouchableOpacity
+                        style={[styles.uploadActionButton, { backgroundColor: colors.primary }]}
+                        onPress={handleExcelUpload}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.uploadActionButtonText}>{t('topUp.upload')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
                     <TouchableOpacity
                       style={[
-                        styles.uploadActionButton,
-                        { backgroundColor: colors.primary },
+                        styles.uploadButton,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                        },
                       ]}
                       onPress={handleExcelUpload}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.uploadActionButtonText}>{t('topUp.upload')}</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={[
-                      styles.uploadButton,
-                      {
-                        backgroundColor: colors.surface,
-                        borderColor: colors.border,
-                      },
-                    ]}
-                    onPress={handleExcelUpload}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[styles.uploadButtonText, { color: colors.textSecondary }]}>
-                      {t('topUp.selectExcelFile')}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                <View style={styles.templateLinkContainer}>
-                  <Text style={[styles.templateLinkText, { color: colors.textSecondary }]}>
-                    Seluruh punya template?{' '}
-                  </Text>
-                  <TouchableOpacity onPress={handleDownloadTemplate} activeOpacity={0.7}>
-                    <Text style={[styles.templateLink, { color: colors.primary }]}>
-                      Unduh Template
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* Tap Kartu Page */}
-        <View style={[styles.pagerPage, { width: screenWidth }]}>
-          <ScrollView
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.section}>
-              <View style={styles.tapKartuContainer}>
-              {/* NFC Tap Icon */}
-              <View style={styles.nfcIconContainer}>
-                <View
-                  style={[
-                    styles.phoneIcon,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.cardIcon,
-                      {
-                        backgroundColor: colors.primary,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-
-              {/* NFC Health Status */}
-              {nfcHealthStatus === 'checking' && (
-                <View style={styles.statusContainer}>
-                  <Text style={[styles.statusText, { color: colors.textSecondary }]}>
-                    Memeriksa NFC...
-                  </Text>
-                </View>
-              )}
-
-              {/* NFC Unavailable/Broken - Show Bluetooth Option */}
-              {showBluetoothOption && nfcHealthStatus !== 'checking' && (
-                <View style={[styles.bluetoothOptionContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                  <Text style={[styles.bluetoothOptionTitle, { color: colors.text }]}>
-                    {nfcHealthStatus === 'unavailable' 
-                      ? t('topUp.nfcNotAvailable')
-                      : t('topUp.nfcNotWorking')}
-                  </Text>
-                  <Text style={[styles.bluetoothOptionText, { color: colors.textSecondary }]}>
-                    {t('topUp.useBluetoothAlternative')}
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.bluetoothOptionButton, { backgroundColor: colors.primary }]}
-                    onPress={() => setShowBluetoothSelector(true)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.bluetoothOptionButtonText}>
-                      {t('topUp.useNFCBluetooth')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Bluetooth Connected Status */}
-              {isBluetoothConnected && selectedBluetoothDevice && (
-                <View style={[styles.bluetoothConnectedContainer, { backgroundColor: '#10B981', borderColor: colors.border }]}>
-                  <Text style={styles.bluetoothConnectedText}>
-                    {t('topUp.connected')}: {selectedBluetoothDevice.name || t('topUp.bluetoothDevice')}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.bluetoothDisconnectButton}
-                    onPress={handleDisconnectBluetooth}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.bluetoothDisconnectButtonText}>
-                      {t('topUp.disconnect')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* NFC Listening Status */}
-              {!showBluetoothOption && !isBluetoothConnected && (
-                <Text style={[styles.tapKartuInstruction, { color: colors.text }]}>
-                  {isNFCListening
-                    ? t('topUp.tapCardOnPhone')
-                    : isReadingViaBluetooth
-                    ? t('topUp.tapCardOnBluetooth')
-                    : t('topUp.tapCardHere')}
-                </Text>
-              )}
-
-              {/* Bluetooth Reading Status */}
-              {isReadingViaBluetooth && (
-                <View style={styles.loadingContainer}>
-                  <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-                    {t('topUp.readingCardViaBluetooth')}
-                  </Text>
-                </View>
-              )}
-
-              {nfcError && (
-                <View style={styles.errorContainer}>
-                  <Text style={[styles.errorText, { color: '#FF3B30' }]}>
-                    {nfcError}
-                  </Text>
-                  {nfcError.includes('tidak aktif') && (
-                    <TouchableOpacity
-                      style={[styles.settingsButton, { backgroundColor: colors.primary }]}
-                      onPress={async () => {
-                        try {
-                          await nfcBluetoothService.openNFCSettings();
-                        } catch (error) {
-                          console.error('Error opening NFC settings:', error);
-                        }
-                      }}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={styles.settingsButtonText}>{t('topUp.openNFCSettings')}</Text>
+                      <Text style={[styles.uploadButtonText, { color: colors.textSecondary }]}>
+                        {t('topUp.selectExcelFile')}
+                      </Text>
                     </TouchableOpacity>
                   )}
+                  <View style={styles.templateLinkContainer}>
+                    <Text style={[styles.templateLinkText, { color: colors.textSecondary }]}>
+                      Seluruh punya template?{' '}
+                    </Text>
+                    <TouchableOpacity onPress={handleDownloadTemplate} activeOpacity={0.7}>
+                      <Text style={[styles.templateLink, { color: colors.primary }]}>
+                        Unduh Template
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              )}
-              {isNFCListening && !isReadingViaBluetooth && (
-                <View style={styles.loadingContainer}>
-                  <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-                    {t('topUp.readingCard')}
-                  </Text>
-                </View>
-              )}
+              </View>
+            </ScrollView>
+          </View>
 
-              {/* Card Data Display */}
-              {cardData && (
-                <View
-                  style={[
-                    styles.cardInfoContainer,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.cardInfoTitle, { color: colors.text }]}>
-                    {t('topUp.cardDetected')}
-                  </Text>
-                  <Text style={[styles.cardInfoName, { color: colors.text }]}>
-                    {cardData.memberName}
-                  </Text>
-                  <Text style={[styles.cardInfoId, { color: colors.textSecondary }]}>
-                    ID: {cardData.memberId}
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.resetButton, { backgroundColor: colors.primary }]}
-                    onPress={() => {
-                      setCardData(null);
-                      setNfcError(null);
-                      startNFCListener();
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.resetButtonText}>{t('topUp.readCardAgain')}</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+          {/* Tap Kartu Page */}
+          <View style={[styles.pagerPage, { width: screenWidth }]}>
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.section}>
+                <View style={styles.tapKartuContainer}>
+                  {/* NFC Tap Icon */}
+                  <View style={styles.nfcIconContainer}>
+                    <View
+                      style={[
+                        styles.phoneIcon,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.cardIcon,
+                          {
+                            backgroundColor: colors.primary,
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
 
-              {/* Steps */}
+                  {/* NFC Health Status */}
+                  {nfcHealthStatus === 'checking' && (
+                    <View style={styles.statusContainer}>
+                      <Text style={[styles.statusText, { color: colors.textSecondary }]}>
+                        Memeriksa NFC...
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* NFC Unavailable/Broken - Show Bluetooth Option */}
+                  {showBluetoothOption && nfcHealthStatus !== 'checking' && (
+                    <View
+                      style={[
+                        styles.bluetoothOptionContainer,
+                        { backgroundColor: colors.surface, borderColor: colors.border },
+                      ]}
+                    >
+                      <Text style={[styles.bluetoothOptionTitle, { color: colors.text }]}>
+                        {nfcHealthStatus === 'unavailable'
+                          ? t('topUp.nfcNotAvailable')
+                          : t('topUp.nfcNotWorking')}
+                      </Text>
+                      <Text style={[styles.bluetoothOptionText, { color: colors.textSecondary }]}>
+                        {t('topUp.useBluetoothAlternative')}
+                      </Text>
+                      <TouchableOpacity
+                        style={[styles.bluetoothOptionButton, { backgroundColor: colors.primary }]}
+                        onPress={() => setShowBluetoothSelector(true)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.bluetoothOptionButtonText}>
+                          {t('topUp.useNFCBluetooth')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {/* Bluetooth Connected Status */}
+                  {isBluetoothConnected && selectedBluetoothDevice && (
+                    <View
+                      style={[
+                        styles.bluetoothConnectedContainer,
+                        { backgroundColor: '#10B981', borderColor: colors.border },
+                      ]}
+                    >
+                      <Text style={styles.bluetoothConnectedText}>
+                        {t('topUp.connected')}:{' '}
+                        {selectedBluetoothDevice.name || t('topUp.bluetoothDevice')}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.bluetoothDisconnectButton}
+                        onPress={handleDisconnectBluetooth}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.bluetoothDisconnectButtonText}>
+                          {t('topUp.disconnect')}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {/* NFC Listening Status */}
+                  {!showBluetoothOption && !isBluetoothConnected && (
+                    <Text style={[styles.tapKartuInstruction, { color: colors.text }]}>
+                      {isNFCListening
+                        ? t('topUp.tapCardOnPhone')
+                        : isReadingViaBluetooth
+                        ? t('topUp.tapCardOnBluetooth')
+                        : t('topUp.tapCardHere')}
+                    </Text>
+                  )}
+
+                  {/* Bluetooth Reading Status */}
+                  {isReadingViaBluetooth && (
+                    <View style={styles.loadingContainer}>
+                      <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                        {t('topUp.readingCardViaBluetooth')}
+                      </Text>
+                    </View>
+                  )}
+
+                  {nfcError && (
+                    <View style={styles.errorContainer}>
+                      <Text style={[styles.errorText, { color: '#FF3B30' }]}>{nfcError}</Text>
+                      {nfcError.includes('tidak aktif') && (
+                        <TouchableOpacity
+                          style={[styles.settingsButton, { backgroundColor: colors.primary }]}
+                          onPress={async () => {
+                            try {
+                              await nfcBluetoothService.openNFCSettings();
+                            } catch (error) {
+                              console.error('Error opening NFC settings:', error);
+                            }
+                          }}
+                          activeOpacity={0.8}
+                        >
+                          <Text style={styles.settingsButtonText}>
+                            {t('topUp.openNFCSettings')}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
+                  {isNFCListening && !isReadingViaBluetooth && (
+                    <View style={styles.loadingContainer}>
+                      <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                        {t('topUp.readingCard')}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Card Data Display */}
+                  {cardData && (
+                    <View
+                      style={[
+                        styles.cardInfoContainer,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.cardInfoTitle, { color: colors.text }]}>
+                        {t('topUp.cardDetected')}
+                      </Text>
+                      <Text style={[styles.cardInfoName, { color: colors.text }]}>
+                        {cardData.memberName}
+                      </Text>
+                      <Text style={[styles.cardInfoId, { color: colors.textSecondary }]}>
+                        ID: {cardData.memberId}
+                      </Text>
+                      <TouchableOpacity
+                        style={[styles.resetButton, { backgroundColor: colors.primary }]}
+                        onPress={() => {
+                          setCardData(null);
+                          setNfcError(null);
+                          startNFCListener();
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.resetButtonText}>{t('topUp.readCardAgain')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {/* Steps */}
                   <View style={styles.stepsContainer}>
                     <Text style={[styles.stepsTitle, { color: colors.text }]}>
                       {t('topUp.steps')}
@@ -1145,11 +1165,11 @@ export const TopUpMemberScreen = () => {
                       </Text>
                     </View>
                   </View>
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </View>
-      </Animated.ScrollView>
+            </ScrollView>
+          </View>
+        </Animated.ScrollView>
       </KeyboardAvoidingView>
 
       {/* Footer - Show for ID Member, Excel, and Tap Kartu (after card data loaded) */}
@@ -1203,9 +1223,7 @@ export const TopUpMemberScreen = () => {
       <NFCLoadingModal
         visible={isNFCListening || isReadingViaBluetooth}
         message={
-          isReadingViaBluetooth
-            ? t('topUp.readingCardViaBluetooth')
-            : t('topUp.detectingNFCCard')
+          isReadingViaBluetooth ? t('topUp.readingCardViaBluetooth') : t('topUp.detectingNFCCard')
         }
       />
 
@@ -1660,4 +1678,3 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 });
-

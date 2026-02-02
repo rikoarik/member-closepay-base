@@ -48,144 +48,148 @@ interface BerandaTabProps {
   scrollEnabled?: boolean;
 }
 
-export const BerandaTab: React.FC<BerandaTabProps> = React.memo(({
-  isActive = true,
-  isVisible = true,
-  onNavigateToNews,
-  newsInfoProps,
-  recentTransactionsProps,
-  onScroll,
-  scrollEnabled = true,
-}) => {
-  const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
-  const horizontalPadding = getHorizontalPadding();
-  const { t } = useTranslation();
+export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
+  ({
+    isActive = true,
+    isVisible = true,
+    onNavigateToNews,
+    newsInfoProps,
+    recentTransactionsProps,
+    onScroll,
+    scrollEnabled = true,
+  }) => {
+    const { colors } = useTheme();
+    const insets = useSafeAreaInsets();
+    const horizontalPadding = getHorizontalPadding();
+    const { t } = useTranslation();
 
-  // State untuk toggle show/hide saldo (balance)
-  // Default: hidden (false)
-  const [showBalance, setShowBalance] = React.useState(false);
-  const [refreshing, setRefreshing] = React.useState(false);
-  const refreshNewsInfoRef = React.useRef<(() => void) | null>(null);
-  const refreshRecentTransactionsRef = React.useRef<(() => void) | null>(null);
+    // State untuk toggle show/hide saldo (balance)
+    // Default: hidden (false)
+    const [showBalance, setShowBalance] = React.useState(false);
+    const [refreshing, setRefreshing] = React.useState(false);
+    const refreshNewsInfoRef = React.useRef<(() => void) | null>(null);
+    const refreshRecentTransactionsRef = React.useRef<(() => void) | null>(null);
 
-  // Handler untuk refresh BerandaNewsInfo dan RecentTransactions
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      // Trigger refresh di BerandaNewsInfo jika ada
-      if (refreshNewsInfoRef.current) {
-        refreshNewsInfoRef.current();
+    // Handler untuk refresh BerandaNewsInfo dan RecentTransactions
+    const handleRefresh = useCallback(async () => {
+      setRefreshing(true);
+      try {
+        // Trigger refresh di BerandaNewsInfo jika ada
+        if (refreshNewsInfoRef.current) {
+          refreshNewsInfoRef.current();
+        }
+        // Trigger refresh di RecentTransactions jika ada
+        if (refreshRecentTransactionsRef.current) {
+          refreshRecentTransactionsRef.current();
+        }
+      } catch (error) {
+        console.error('Refresh error:', error);
+      } finally {
+        // Simulate refresh delay
+        setTimeout(() => {
+          setRefreshing(false);
+        }, 1000);
       }
-      // Trigger refresh di RecentTransactions jika ada
-      if (refreshRecentTransactionsRef.current) {
-        refreshRecentTransactionsRef.current();
-      }
-    } catch (error) {
-      console.error('Refresh error:', error);
-    } finally {
-      // Simulate refresh delay
-      setTimeout(() => {
-        setRefreshing(false);
-      }, 1000);
+    }, []);
+
+    // Handler untuk receive refresh function dari BerandaNewsInfo
+    const handleNewsRefreshRequested = useCallback((refreshFn: () => void) => {
+      refreshNewsInfoRef.current = refreshFn;
+    }, []);
+
+    // Handler untuk receive refresh function dari RecentTransactions
+    const handleTransactionsRefreshRequested = useCallback((refreshFn: () => void) => {
+      refreshRecentTransactionsRef.current = refreshFn;
+    }, []);
+
+    const content = (
+      <>
+        {/**
+         * Toggle show/hide saldo (balance)
+         */}
+        <BalanceCard
+          title={t('balance.mainBalance') || 'Saldo Utama'}
+          balance={10000000000}
+          showBalance={showBalance}
+          onToggleBalance={() => setShowBalance((v) => !v)}
+        />
+        {/* Quick Access Buttons */}
+        <View style={styles.menuItem}>
+          <Text style={[styles.menuItemTitle, { color: colors.text }]}>
+            {t('home.quickAccess')}
+          </Text>
+          <QuickAccessButtons />
+        </View>
+
+        {/* Recent Transactions - Komponen terpisah untuk reusability */}
+        <RecentTransactions
+          {...recentTransactionsProps}
+          onRefreshRequested={handleTransactionsRefreshRequested}
+        />
+
+        {/* News Info - Komponen terpisah untuk reusability */}
+        <BerandaNewsInfo
+          {...newsInfoProps}
+          onViewAllPress={onNavigateToNews}
+          onRefreshRequested={handleNewsRefreshRequested}
+        />
+      </>
+    );
+
+    // Jika scrollEnabled={false}, render konten tanpa ScrollView wrapper
+    // (untuk digunakan dengan parent ScrollView dengan sticky header)
+    if (!scrollEnabled) {
+      return (
+        <View
+          style={[
+            styles.contentContainer,
+            {
+              backgroundColor: colors.background,
+              paddingBottom: insets.bottom + moderateVerticalScale(24),
+              paddingHorizontal: horizontalPadding,
+              paddingTop: moderateVerticalScale(16),
+            },
+          ]}
+          pointerEvents={isActive ? 'auto' : 'none'}
+        >
+          {content}
+        </View>
+      );
     }
-  }, []);
 
-  // Handler untuk receive refresh function dari BerandaNewsInfo
-  const handleNewsRefreshRequested = useCallback((refreshFn: () => void) => {
-    refreshNewsInfoRef.current = refreshFn;
-  }, []);
-
-  // Handler untuk receive refresh function dari RecentTransactions
-  const handleTransactionsRefreshRequested = useCallback((refreshFn: () => void) => {
-    refreshRecentTransactionsRef.current = refreshFn;
-  }, []);
-
-  const content = (
-    <>
-      {/**
-        * Toggle show/hide saldo (balance)
-        */}
-      <BalanceCard
-        title="Saldo Utama"
-        balance={10000000000}
-        showBalance={showBalance}
-        onToggleBalance={() => setShowBalance(v => !v)}
-      />
-      {/* Quick Access Buttons */}
-      <View style={styles.menuItem}>
-        <Text style={[styles.menuItemTitle, { color: colors.text }]}>{t('home.quickAccess')}</Text>
-        <QuickAccessButtons />
-      </View>
-
-      {/* Recent Transactions - Komponen terpisah untuk reusability */}
-      <RecentTransactions
-        {...recentTransactionsProps}
-        onRefreshRequested={handleTransactionsRefreshRequested}
-      />
-
-      {/* News Info - Komponen terpisah untuk reusability */}
-      <BerandaNewsInfo
-        {...newsInfoProps}
-        onViewAllPress={onNavigateToNews}
-        onRefreshRequested={handleNewsRefreshRequested}
-      />
-    </>
-  );
-
-  // Jika scrollEnabled={false}, render konten tanpa ScrollView wrapper
-  // (untuk digunakan dengan parent ScrollView dengan sticky header)
-  if (!scrollEnabled) {
+    // Default: render dengan ScrollView
     return (
-      <View
+      <ScrollView
         style={[
-          styles.contentContainer,
+          styles.container,
           {
             backgroundColor: colors.background,
-            paddingBottom: insets.bottom + moderateVerticalScale(24),
-            paddingHorizontal: horizontalPadding,
-            paddingTop: moderateVerticalScale(16),
           },
         ]}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + moderateVerticalScale(24),
+          paddingHorizontal: horizontalPadding,
+          paddingTop: moderateVerticalScale(16),
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+        showsVerticalScrollIndicator={false}
         pointerEvents={isActive ? 'auto' : 'none'}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        scrollEnabled={scrollEnabled}
       >
         {content}
-      </View>
+      </ScrollView>
     );
   }
-
-  // Default: render dengan ScrollView
-  return (
-    <ScrollView
-      style={[
-        styles.container,
-        {
-          backgroundColor: colors.background,
-        }
-      ]}
-      contentContainerStyle={{
-        paddingBottom: insets.bottom + moderateVerticalScale(24),
-        paddingHorizontal: horizontalPadding,
-        paddingTop: moderateVerticalScale(16),
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          colors={[colors.primary]}
-          tintColor={colors.primary}
-        />
-      }
-      showsVerticalScrollIndicator={false}
-      pointerEvents={isActive ? 'auto' : 'none'}
-      onScroll={onScroll}
-      scrollEventThrottle={16}
-      scrollEnabled={scrollEnabled}
-    >
-      {content}
-    </ScrollView>
-  );
-});
+);
 
 BerandaTab.displayName = 'BerandaTab';
 

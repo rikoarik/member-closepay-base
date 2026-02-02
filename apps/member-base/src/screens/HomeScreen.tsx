@@ -58,6 +58,7 @@ export const HomeScreen = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const fabOpacity = useRef(new Animated.Value(0)).current;
   const fabScale = useRef(new Animated.Value(0)).current;
+  const [isComponentReady, setIsComponentReady] = useState(false);
 
   const { config } = useConfig();
   const homeTabs = React.useMemo(() => {
@@ -118,6 +119,14 @@ export const HomeScreen = () => {
       ]).start();
     }
   }, [shouldShowFab, fabOpacity, fabScale]);
+
+  // Set component ready after mount to prevent blur flash
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsComponentReady(true);
+    }, 100); // Small delay to ensure smooth transition
+    return () => clearTimeout(timer);
+  }, []);
 
   // Set activeTab ke tab dengan order 2 (di tengah) saat tabs pertama kali ter-load
   useEffect(() => {
@@ -397,18 +406,20 @@ export const HomeScreen = () => {
       ]}
     >
       {/* Status Bar Blur */}
-      <BlurView
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: insets.top,
-          zIndex: 999,
-        }}
-        blurType={isDark ? 'dark' : 'light'}
-        blurAmount={50}
-      />
+      {isComponentReady && (
+        <BlurView
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: insets.top,
+            zIndex: 999,
+          }}
+          blurType={isDark ? 'dark' : 'light'}
+          blurAmount={0}
+        />
+      )}
 
       {/* Main ScrollView dengan sticky header di TabSwitcher */}
       <ScrollView
@@ -458,17 +469,19 @@ export const HomeScreen = () => {
             // paddingTop: insets.top, // Moved to inner view
           }}
         >
-          <BlurView
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: scale(70), // Height adjusted by user ("bawah nya lebihin")
-            }}
-            blurType={isDark ? 'dark' : 'light'}
-            blurAmount={50}
-          />
+          {isComponentReady && (
+            <BlurView
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: scale(70), // Height adjusted by user ("bawah nya lebihin")
+              }}
+              blurType={isDark ? 'dark' : 'light'}
+              blurAmount={50}
+            />
+          )}
           {tabs.length > 0 && (
             <View
               style={{
@@ -544,11 +557,13 @@ export const HomeScreen = () => {
           }}
           pointerEvents="none"
         >
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType={isDark ? 'dark' : 'light'}
-            blurAmount={10}
-          />
+          {isComponentReady && (
+            <BlurView
+              style={StyleSheet.absoluteFill}
+              blurType={isDark ? 'dark' : 'light'}
+              blurAmount={10}
+            />
+          )}
         </Animated.View>
       )}
 

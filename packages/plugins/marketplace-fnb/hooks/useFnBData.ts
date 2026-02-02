@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { FnBItem, FnBCategory, FnBStore, EntryPoint } from '../models';
+import { isStoreOpen } from '../models';
 
 // Mock data for development
 const MOCK_CATEGORIES: FnBCategory[] = [
@@ -154,30 +155,239 @@ const MOCK_ITEMS: FnBItem[] = [
     },
 ];
 
-const MOCK_STORE: FnBStore = {
-    id: 'store-001',
-    name: 'Warung Makan Sederhana',
-    description: 'Menyajikan makanan rumahan dengan cita rasa autentik',
-    imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600',
-    address: 'Jl. Contoh No. 123, Jakarta',
-    operatingHours: [
-        { dayOfWeek: 0, openTime: '10:00', closeTime: '21:00', isClosed: false },
-        { dayOfWeek: 1, openTime: '08:00', closeTime: '22:00', isClosed: false },
-        { dayOfWeek: 2, openTime: '08:00', closeTime: '22:00', isClosed: false },
-        { dayOfWeek: 3, openTime: '08:00', closeTime: '22:00', isClosed: false },
-        { dayOfWeek: 4, openTime: '08:00', closeTime: '22:00', isClosed: false },
-        { dayOfWeek: 5, openTime: '08:00', closeTime: '23:00', isClosed: false },
-        { dayOfWeek: 6, openTime: '08:00', closeTime: '23:00', isClosed: false },
-    ],
-    isOpen: true,
-    delivery: {
-        enabled: true,
-        radius: 10,
-        fee: 10000,
-        freeDeliveryMinAmount: 100000,
+// Mock stores data - matches FnBScreen STORES
+const MOCK_STORES: Record<string, FnBStore> = {
+    'store-001': {
+        id: 'store-001',
+        name: 'Warung Makan Sederhana',
+        description: 'Menyajikan makanan rumahan dengan cita rasa autentik',
+        imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600',
+        address: 'Jl. Contoh No. 123, Jakarta',
+        operatingHours: [
+            { dayOfWeek: 0, openTime: '10:00', closeTime: '21:00', isClosed: false },
+            { dayOfWeek: 1, openTime: '08:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 2, openTime: '08:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 3, openTime: '08:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 4, openTime: '08:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 5, openTime: '08:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 6, openTime: '08:00', closeTime: '23:00', isClosed: false },
+        ],
+        isOpen: true,
+        delivery: {
+            enabled: true,
+            radius: 10,
+            fee: 10000,
+            freeDeliveryMinAmount: 100000,
+        },
+        orderTypes: ['dine-in', 'take-away', 'delivery'],
     },
-    orderTypes: ['dine-in', 'take-away', 'delivery'],
+    'store-002': {
+        id: 'store-002',
+        name: 'Burger King Clone',
+        description: 'Fast Food dengan menu burger lezat dan ayam crispy',
+        imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600',
+        address: 'Jl. Fast Food No. 45, Jakarta',
+        operatingHours: [
+            { dayOfWeek: 0, openTime: '09:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 1, openTime: '09:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 2, openTime: '09:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 3, openTime: '09:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 4, openTime: '09:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 5, openTime: '09:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 6, openTime: '09:00', closeTime: '23:00', isClosed: false },
+        ],
+        isOpen: true,
+        delivery: {
+            enabled: true,
+            radius: 15,
+            fee: 8000,
+            freeDeliveryMinAmount: 75000,
+        },
+        orderTypes: ['dine-in', 'take-away', 'delivery'],
+    },
+    'store-003': {
+        id: 'store-003',
+        name: 'Bakso Pak Kumis',
+        description: 'Bakso legendaris dengan kuah kaldu sapi asli yang gurih',
+        imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600',
+        address: 'Jl. Bakso No. 88, Jakarta',
+        operatingHours: [
+            { dayOfWeek: 0, openTime: '17:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 1, openTime: '17:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 2, openTime: '17:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 3, openTime: '17:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 4, openTime: '17:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 5, openTime: '17:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 6, openTime: '17:00', closeTime: '23:00', isClosed: false },
+        ],
+        isOpen: true,
+        delivery: {
+            enabled: true,
+            radius: 8,
+            fee: 5000,
+            freeDeliveryMinAmount: 50000,
+        },
+        orderTypes: ['take-away', 'delivery'],
+    },
+    'store-004': {
+        id: 'store-004',
+        name: 'Pizza Hut Delivery',
+        description: 'Pizza dengan berbagai topping dan pasta lezat',
+        imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600',
+        address: 'Jl. Italia No. 99, Jakarta',
+        operatingHours: [
+            { dayOfWeek: 0, openTime: '10:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 1, openTime: '10:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 2, openTime: '10:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 3, openTime: '10:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 4, openTime: '10:00', closeTime: '22:00', isClosed: false },
+            { dayOfWeek: 5, openTime: '10:00', closeTime: '23:00', isClosed: false },
+            { dayOfWeek: 6, openTime: '10:00', closeTime: '23:00', isClosed: false },
+        ],
+        isOpen: true,
+        delivery: {
+            enabled: true,
+            radius: 20,
+            fee: 15000,
+            freeDeliveryMinAmount: 150000,
+        },
+        orderTypes: ['dine-in', 'take-away', 'delivery'],
+    },
 };
+
+// Mock store menu items
+const MOCK_STORE_ITEMS: Record<string, FnBItem[]> = {
+    'store-001': MOCK_ITEMS, // Warung Makan Sederhana (Indonesian food)
+    'store-002': [ // Burger King Clone
+        {
+            id: 'bk-1',
+            name: 'Whopper Classic',
+            description: 'Burger daging sapi panggang api legendaris dengan sayuran segar',
+            price: 55000,
+            imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
+            category: 'food',
+            rating: 4.8,
+            sold: 500,
+            isAvailable: true,
+            preparationTime: 10,
+        },
+        {
+            id: 'bk-2',
+            name: 'Chicken Burger',
+            description: 'Burger ayam crispy dengan selada dan mayones',
+            price: 35000,
+            imageUrl: 'https://images.unsplash.com/photo-1615297348958-81274497e17b?w=400',
+            category: 'food',
+            rating: 4.5,
+            sold: 300,
+            isAvailable: true,
+            preparationTime: 8,
+        },
+        {
+            id: 'bk-3',
+            name: 'French Fries',
+            description: 'Kentang goreng renyah dan gurih',
+            price: 25000,
+            imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400',
+            category: 'snack',
+            rating: 4.7,
+            sold: 800,
+            isAvailable: true,
+            preparationTime: 5,
+        },
+        {
+            id: 'bk-4',
+            name: 'Cola Large',
+            description: 'Minuman bersoda dingin ukuran besar',
+            price: 18000,
+            imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400',
+            category: 'drink',
+            rating: 4.6,
+            sold: 600,
+            isAvailable: true,
+            preparationTime: 2,
+        }
+    ],
+    'store-003': [ // Bakso Pak Kumis
+        {
+            id: 'bpk-1',
+            name: 'Bakso Urat Besar',
+            description: 'Bakso urat sapi ukuran jumbo dengan mie kuning',
+            price: 25000,
+            imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400',
+            category: 'food',
+            rating: 4.9,
+            sold: 1200,
+            isAvailable: true,
+            preparationTime: 5,
+        },
+        {
+            id: 'bpk-2',
+            name: 'Mie Ayam Bakso',
+            description: 'Mie ayam pangsit dengan topping bakso halus',
+            price: 22000,
+            imageUrl: 'https://images.unsplash.com/photo-1598514983318-2f64f8f4796c?w=400',
+            category: 'food',
+            rating: 4.8,
+            sold: 450,
+            isAvailable: true,
+            preparationTime: 5,
+        },
+        {
+            id: 'bpk-3',
+            name: 'Es Jeruk',
+            description: 'Es jeruk peras segar',
+            price: 8000,
+            imageUrl: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=400',
+            category: 'drink',
+            rating: 4.6,
+            sold: 2000,
+            isAvailable: true,
+            preparationTime: 2,
+        }
+    ],
+    'store-004': [ // Pizza Hut Delivery
+        {
+            id: 'ph-1',
+            name: 'Super Supreme Pizza',
+            description: 'Pizza dengan topping daging sapi, ayam, jamur, paprika',
+            price: 120000,
+            imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400',
+            category: 'food',
+            rating: 4.8,
+            sold: 350,
+            isAvailable: true,
+            preparationTime: 25,
+        },
+        {
+            id: 'ph-2',
+            name: 'Meat Lovers Pizza',
+            description: 'Pizza dengan limpahan daging sapi, sosis, dan burger',
+            price: 125000,
+            imageUrl: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400',
+            category: 'food',
+            rating: 4.9,
+            sold: 400,
+            isAvailable: true,
+            preparationTime: 25,
+        },
+        {
+            id: 'ph-3',
+            name: 'Cheese Rolls',
+            description: 'Roti gulung isi keju mozzarella leleh',
+            price: 35000,
+            imageUrl: 'https://images.unsplash.com/photo-1581454051034-be817e828d02?w=400',
+            category: 'snack',
+            rating: 4.7,
+            sold: 500,
+            isAvailable: true,
+            preparationTime: 10,
+        }
+    ]
+};
+
+// Default store for fallback
+const DEFAULT_STORE_ID = 'store-001';
 
 interface UseFnBDataReturn {
     items: FnBItem[];
@@ -193,7 +403,7 @@ interface UseFnBDataReturn {
     setEntryPoint: (entry: EntryPoint) => void;
 }
 
-export const useFnBData = (initialEntryPoint: EntryPoint = 'browse'): UseFnBDataReturn => {
+export const useFnBData = (initialEntryPoint: EntryPoint = 'browse', storeId?: string): UseFnBDataReturn => {
     const [items, setItems] = useState<FnBItem[]>([]);
     const [categories, setCategories] = useState<FnBCategory[]>([]);
     const [store, setStore] = useState<FnBStore | null>(null);
@@ -210,15 +420,28 @@ export const useFnBData = (initialEntryPoint: EntryPoint = 'browse'): UseFnBData
             // Simulate API call
             await new Promise<void>((resolve) => setTimeout(resolve, 800));
 
-            setItems(MOCK_ITEMS);
+            // Get store by ID or use default
+            const targetStoreId = storeId || DEFAULT_STORE_ID;
+            const mockStore = MOCK_STORES[targetStoreId] || MOCK_STORES[DEFAULT_STORE_ID];
+            
+            // Get items for this store
+            const storeItems = MOCK_STORE_ITEMS[targetStoreId] || MOCK_ITEMS;
+            setItems(storeItems);
+
             setCategories(MOCK_CATEGORIES);
-            setStore(MOCK_STORE);
+            
+            // Calculate isOpen dynamically based on operating hours
+            const storeWithStatus = {
+                ...mockStore,
+                isOpen: isStoreOpen(mockStore),
+            };
+            setStore(storeWithStatus);
         } catch (err) {
             setError('Gagal memuat data menu');
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [storeId]);
 
     useEffect(() => {
         fetchData();
