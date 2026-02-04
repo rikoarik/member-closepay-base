@@ -18,6 +18,8 @@
             "TopUpMemberSummaryScreen",
             "TopUpMemberPinScreen",
             "TopUpMemberSuccessScreen",
+            "TransferMemberScreen",
+            "TransferMemberSuccessScreen",
             "TapKartuSummaryScreen",
             "QrScreen",
             "EditQuickAmountScreen",
@@ -41,6 +43,8 @@
             "TopUpMemberSummary": "TopUpMemberSummaryScreen",
             "TopUpMemberPin": "TopUpMemberPinScreen",
             "TopUpMemberSuccess": "TopUpMemberSuccessScreen",
+            "TransferMember": "TransferMemberScreen",
+            "TransferMemberSuccess": "TransferMemberSuccessScreen",
             "TapKartuSummary": "TapKartuSummaryScreen",
             "Qr": "QrScreen",
             "EditQuickAmount": "EditQuickAmountScreen"
@@ -141,6 +145,31 @@
             ],
             "meta": {
                 "title": "Top Up Member Berhasil",
+                "showInMenu": false
+            }
+        },
+        {
+            "name": "TransferMember",
+            "path": "/payment/transfer-member",
+            "component": "TransferMemberScreen",
+            "permissions": [
+                "payment:transfer"
+            ],
+            "meta": {
+                "title": "Transfer Member",
+                "showInMenu": true,
+                "icon": "guest"
+            }
+        },
+        {
+            "name": "TransferMemberSuccess",
+            "path": "/payment/transfer-member/success",
+            "component": "TransferMemberSuccessScreen",
+            "permissions": [
+                "payment:transfer"
+            ],
+            "meta": {
+                "title": "Transfer Member Berhasil",
                 "showInMenu": false
             }
         },

@@ -11,6 +11,7 @@
  * See PLUGIN_LOADERS.md for detailed documentation.
  */
 
+import { TransferMemberPinBottomSheet } from '@plugins/payment/components/transfer-member';
 import { PluginRegistry } from './PluginRegistry';
 import type { PluginManifest } from './types';
 import React from 'react';
@@ -37,6 +38,10 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     TopUpMemberSummaryScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberSummaryScreen'),
     TopUpMemberPinScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberPinScreen'),
     TopUpMemberSuccessScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberSuccessScreen'),
+    TransferMemberScreen: () => import('../../../plugins/payment/components/transfer-member/TransferMemberScreen'),
+    TransferMemberSuccessScreen: () => import('../../../plugins/payment/components/transfer-member/TransferMemberSuccessScreen'),
+    TransferMemberPinBottomSheet: () => import('../../../plugins/payment/components/transfer-member/TransferMemberPinBottomSheet'),
+    TransferMemberSummaryBottomSheet: () => import('../../../plugins/payment/components/transfer-member/TransferMemberSummaryBottomSheet'),
     TapKartuSummaryScreen: () => import('../../../plugins/payment/components/topup/TapKartuSummaryScreen'),
     QrScreen: () => import('../../../plugins/payment/components/qr/QrScreen'),
     EditQuickAmountScreen: () => import('../../../plugins/payment/components/qr/EditQuickAmountScreen'),

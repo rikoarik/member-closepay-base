@@ -44,6 +44,13 @@ export interface AppConfig {
   // QR Button configuration
   showQrButton?: boolean; // Show/hide QR scan button on home screen
 
+  /**
+   * Quick Access (Akses Cepat) menu items for home screen.
+   * When set, only these items are shown; order preserved.
+   * Used e.g. for member balance-management: topupva, transfermember, kartu virtual, transferbank.
+   */
+  quickAccessMenu?: QuickAccessMenuItemConfig[];
+
   // Support configuration
   support?: {
     whatsappNumber?: string; // WhatsApp number for customer support (format: country code + number without +)
@@ -109,6 +116,15 @@ export interface QrButtonConfig {
   backgroundColor?: string; // Background color of QR button
   iconColor?: string; // Icon color (default: #FAFAFA)
   size?: number; // Button size in dp
+}
+
+/** Single item for Akses Cepat: id (unique), route (screen name), labelKey (i18n key) */
+export interface QuickAccessMenuItemConfig {
+  id: string;
+  route: string;
+  labelKey: string;
+  icon?: string;
+  order?: number;
 }
 
 /**

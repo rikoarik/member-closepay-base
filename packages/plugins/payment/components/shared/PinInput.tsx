@@ -4,12 +4,7 @@
  * Responsive untuk semua device termasuk EDC
  */
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '@core/theme';
 import {
   scale,
@@ -17,7 +12,9 @@ import {
   getMinTouchTarget,
   getResponsiveFontSize,
   FontFamily,
+  getIconSize,
 } from '@core/config';
+import { TagCross } from 'iconsax-react-nativejs';
 
 export interface PinInputProps {
   /** Length of PIN (default: 6) */
@@ -110,7 +107,7 @@ export const PinInput: React.FC<PinInputProps> = ({
       ['1', '2', '3'],
       ['4', '5', '6'],
       ['7', '8', '9'],
-      ['*', '0', '#'],
+      ['', '0', 'delete'],
     ];
 
     return (
@@ -118,9 +115,32 @@ export const PinInput: React.FC<PinInputProps> = ({
         {numbers.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.keypadRow}>
             {row.map((key) => {
-              if (key === '*' || key === '#') {
-                return <View key={key} style={styles.keypadKey} />;
+              if (key === '') {
+                return <View key={`empty-${rowIndex}`} style={styles.keypadKey} />;
               }
+
+              if (key === 'delete') {
+                return (
+                  <TouchableOpacity
+                    key="delete"
+                    style={[
+                      styles.keypadKey,
+                      styles.deleteButton,
+                      {
+                        backgroundColor: colors.surface, // Keep transparent/background color
+                      },
+                    ]}
+                    onPress={handleDelete}
+                    activeOpacity={0.7}
+                    disabled={pin.length === 0}
+                  >
+                    <View style={[styles.deleteButtonIcon, { backgroundColor: colors.surface }]}>
+                      <TagCross size={getIconSize('large')} color={colors.error} variant="Linear" />
+                    </View>
+                  </TouchableOpacity>
+                );
+              }
+
               return (
                 <TouchableOpacity
                   key={key}
@@ -128,7 +148,6 @@ export const PinInput: React.FC<PinInputProps> = ({
                     styles.keypadKey,
                     {
                       backgroundColor: colors.surface,
-                      borderColor: colors.border,
                     },
                   ]}
                   onPress={() => handleNumberPress(key)}
@@ -149,35 +168,6 @@ export const PinInput: React.FC<PinInputProps> = ({
             })}
           </View>
         ))}
-        {/* Delete Button Row */}
-        <View style={styles.keypadRow}>
-          <View style={styles.keypadKey} />
-          <TouchableOpacity
-            style={[
-              styles.keypadKey,
-              styles.deleteButton,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={handleDelete}
-            activeOpacity={0.7}
-            disabled={pin.length === 0}
-          >
-            <Text
-              style={[
-                styles.deleteButtonText,
-                {
-                  color: pin.length > 0 ? colors.text : colors.textSecondary,
-                },
-              ]}
-            >
-              ⌫
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.keypadKey} />
-        </View>
       </View>
     );
   };
@@ -211,57 +201,66 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pinContainer: {
+    position: 'relative',
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: scale(12),
-    marginBottom: moderateVerticalScale(24),
+    gap: scale(8),
+   
   },
   pinDot: {
-    width: scale(16),
-    height: scale(16),
+    width: scale(40),
+    height: scale(50),
     borderRadius: scale(8),
-    borderWidth: 2,
+    borderWidth: 1.5,
   },
   forgotPinContainer: {
     alignItems: 'center',
-    marginBottom: moderateVerticalScale(32),
+    marginTop: moderateVerticalScale(16),
+    marginBottom: moderateVerticalScale(60),
   },
   forgotPinText: {
     fontSize: getResponsiveFontSize('medium'),
-    fontFamily: FontFamily.monasans.regular,
+    fontFamily: FontFamily.monasans.medium,
   },
   keypad: {
     flex: 1,
     justifyContent: 'center',
-    maxHeight: scale(400),
+    maxHeight: scale(450),
+    paddingHorizontal: scale(24),
   },
   keypadRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: scale(12),
-    marginBottom: moderateVerticalScale(12),
+    justifyContent: 'space-between',
+    marginBottom: moderateVerticalScale(24),
+    paddingHorizontal: scale(12),
   },
   keypadKey: {
-    width: scale(70),
-    height: scale(70),
-    borderRadius: scale(12),
-    borderWidth: 1,
+    width: scale(72),
+    height: scale(72),
+    borderRadius: scale(36),
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: minTouchTarget,
     minWidth: minTouchTarget,
   },
   keypadKeyText: {
-    fontSize: getResponsiveFontSize('xlarge'),
-    fontFamily: FontFamily.monasans.bold,
+    fontSize: scale(28),
+    fontFamily: FontFamily.monasans.semiBold,
   },
   deleteButton: {
     // Delete button styling
   },
+  deleteButtonIcon: {
+    width: scale(24),
+    height: scale(24),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: scale(12),
+    padding: scale(8),
+  },
   deleteButtonText: {
-    fontSize: getResponsiveFontSize('xlarge'),
+    fontSize: scale(24),
     fontFamily: FontFamily.monasans.bold,
   },
 });
-

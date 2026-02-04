@@ -1,45 +1,42 @@
 /**
- * Top Up Member PIN Bottom Sheet
- * Bottom sheet untuk input PIN dengan keypad numerik
+ * Transfer Member PIN Bottom Sheet (Member App)
+ * Bottom sheet untuk input PIN dengan keypad numerik.
  * Menggunakan reusable BottomSheet component dari @core/config
  */
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-// import { ArrowLeft2 } from 'iconsax-react-nativejs';
 import { BottomSheet } from '@core/config';
 import {
   scale,
   moderateVerticalScale,
   getHorizontalPadding,
   getResponsiveFontSize,
-  getIconSize,
   FontFamily,
 } from '@core/config';
 import { PinInput } from '../shared/PinInput';
 
-export interface TopUpMemberPinData {
-  tabType: 'id-member' | 'excel' | 'top-kartu';
-  balanceTarget: string;
-  balanceTargetName: string;
+export interface TransferMemberPinData {
+  memberId: string;
+  memberName: string;
+  memberRefId: string;
   amount: number;
-  memberId?: string;
-  memberName?: string;
   adminFee: number;
   totalAmount: number;
+  note?: string;
 }
 
-interface TopUpMemberPinBottomSheetProps {
+interface TransferMemberPinBottomSheetProps {
   visible: boolean;
   onClose: () => void;
-  data: TopUpMemberPinData | null;
+  data: TransferMemberPinData | null;
   onComplete: (pin: string) => void;
 }
 
 const PIN_LENGTH = 6;
 
-export const TopUpMemberPinBottomSheet: React.FC<TopUpMemberPinBottomSheetProps> = ({
+export const TransferMemberPinBottomSheet: React.FC<TransferMemberPinBottomSheetProps> = ({
   visible,
   onClose,
   data,
@@ -48,41 +45,39 @@ export const TopUpMemberPinBottomSheet: React.FC<TopUpMemberPinBottomSheetProps>
   const { colors } = useTheme();
   const { t } = useTranslation();
 
+  if (!visible) return null;
+
   const handlePinComplete = (pin: string) => {
-    // TODO: Validate PIN with backend
-    console.log('PIN submitted:', pin);
     onComplete(pin);
   };
 
   const handleForgotPin = () => {
     // TODO: Implement forgot PIN flow
-    console.log('Forgot PIN');
   };
 
   return (
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      snapPoints={[90]}
+      // Lebih pendek biar terasa seperti bottom sheet (bukan full page)
+      snapPoints={[80]}
       initialSnapPoint={0}
       enablePanDownToClose={false}
-      disableClose={true}
+      disableClose={false}
     >
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
-          <View style={styles.backButton} />
+          <View style={styles.headerSide} />
           <Text style={[styles.headerTitle, { color: colors.text }]}>{t('topUp.enterPin')}</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.headerSide} />
         </View>
 
-        {/* Content */}
         <View style={styles.content}>
           <PinInput
             length={PIN_LENGTH}
             onComplete={handlePinComplete}
             onForgotPin={handleForgotPin}
-            autoSubmit={true}
+            autoSubmit
             autoSubmitDelay={300}
           />
         </View>
@@ -105,17 +100,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: moderateVerticalScale(24),
   },
-  backButton: {
-    padding: moderateVerticalScale(8),
+  headerSide: {
+    width: scale(40),
+    height: scale(40),
   },
   headerTitle: {
     fontSize: getResponsiveFontSize('large'),
     fontFamily: FontFamily.monasans.bold,
     flex: 1,
     textAlign: 'center',
-  },
-  headerRight: {
-    width: scale(40),
   },
   content: {
     flex: 1,

@@ -29,6 +29,12 @@ import {
 import { useTheme, type ThemeColors } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  IconTopUpVA,
+  IconTransferMember,
+  IconKartuVirtual,
+  IconTransferBank,
+} from './icons';
 
 interface QuickAccessButton {
   id: string;
@@ -52,8 +58,35 @@ interface QuickAccessButtonsProps {
   tabletPortraitGap?: number;
 }
 
+// Asset icons untuk Akses Cepat member (topupva, transfermember, kartuvirtual, transferbank)
+const getQuickAccessAssetIcon = (
+  itemId: string,
+  iconColor: string
+): React.ReactNode | null => {
+  const size = getIconSize('large');
+  switch (itemId) {
+    case 'topupva':
+      return <IconTopUpVA width={size} height={size} color={iconColor} />;
+    case 'transfermember':
+      return <IconTransferMember width={size} height={size} color={iconColor} />;
+    case 'kartuvirtual':
+      return <IconKartuVirtual width={size} height={size} color={iconColor} />;
+    case 'transferbank':
+      return <IconTransferBank width={size} height={size} color={iconColor} />;
+    default:
+      return null;
+  }
+};
+
 // Icon mapping untuk setiap menu - returns icon dengan dynamic color
-const getMenuIcon = (iconColor: string, iconName?: string): React.ReactNode => {
+const getMenuIcon = (
+  iconColor: string,
+  iconName?: string,
+  itemId?: string
+): React.ReactNode => {
+  const assetIcon = itemId ? getQuickAccessAssetIcon(itemId, iconColor) : null;
+  if (assetIcon) return assetIcon;
+
   const size = getIconSize('large');
   switch (iconName) {
     case 'payIPL':
@@ -71,6 +104,8 @@ const getMenuIcon = (iconColor: string, iconName?: string): React.ReactNode => {
     case 'bill':
       return <Game size={size} color={iconColor} variant="Bold" />;
     case 'topup':
+      return <ArrowUp2 size={size} color={iconColor} variant="Bold" />;
+    case 'withdraw':
       return <ArrowUp2 size={size} color={iconColor} variant="Bold" />;
     case 'donation':
       return <People size={size} color={iconColor} variant="Bold" />;
@@ -100,6 +135,8 @@ const getDefaultBgColor = (colors: ThemeColors, iconName?: string): string => {
       return colors.primaryLight;
     case 'topup':
       return colors.successLight;
+    case 'withdraw':
+      return colors.infoLight;
     case 'donation':
       return colors.warningLight;
     case 'marketplace':
@@ -238,8 +275,8 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
     const items = stableEnabledItems.length > 0 ? stableEnabledItems : DEFAULT_BUTTONS;
     const buttons: QuickAccessButton[] = items.map((item) => ({
       id: item.id,
-      label: getMenuLabel(item.id, item.label),
-      icon: getMenuIcon(primaryColor, item.icon as string),
+      label: item.labelKey ? t(item.labelKey) : getMenuLabel(item.id, item.label),
+      icon: getMenuIcon(primaryColor, item.icon as string, item.id),
       iconBgColor: item.iconBgColor || getDefaultBgColor(colorsRef.current, item.icon as string),
       onPress: (item as unknown as QuickMenuItem).route
         ? () => {

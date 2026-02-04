@@ -54,7 +54,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onSignUpPress,
 }) => {
   const navigation = useNavigation();
-  const { login, loginWithNonce, isLoggingIn, error, clearError, user, company } = useAuth();
+  const { login, isLoggingIn, error, clearError, user, company } = useAuth();
   const { colors } = useTheme();
   const { t } = useTranslation();
   const [identifier, setIdentifier] = useState(''); // username, email, or phone
@@ -147,8 +147,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     }
 
     try {
-      // Use loginWithNonce with Basic Auth - pass username and password
-      await loginWithNonce(identifier.trim(), password);
+      // Use login (supports mock & real API via config)
+      await login(identifier.trim(), password);
       // Navigation otomatis via AuthNavigator
       // Error sudah di-handle di store dan ditampilkan via modal
     } catch (err) {

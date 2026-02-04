@@ -27,7 +27,7 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     StoreDetailScreen: '../../../plugins/marketplace/components/screens/StoreDetailScreen',
     CheckoutScreen: '../../../plugins/marketplace/components/screens/CheckoutScreen',
   },
-  marketplace-fnb: {
+  'marketplace-fnb': {
     FnBItemCard: '../../../plugins/marketplace-fnb/components/shared/FnBItemCard',
     FnBCategoryTabs: '../../../plugins/marketplace-fnb/components/shared/FnBCategoryTabs',
     FnBCartBar: '../../../plugins/marketplace-fnb/components/shared/FnBCartBar',
@@ -48,6 +48,10 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     TopUpMemberSummaryScreen: '../../../plugins/payment/components/topup/TopUpMemberSummaryScreen',
     TopUpMemberPinScreen: '../../../plugins/payment/components/topup/TopUpMemberPinScreen',
     TopUpMemberSuccessScreen: '../../../plugins/payment/components/topup/TopUpMemberSuccessScreen',
+    TransferMemberScreen: '../../../plugins/payment/components/transfer-member/TransferMemberScreen',
+    TransferMemberSummaryBottomSheet: '../../../plugins/payment/components/transfer-member/TransferMemberSummaryBottomSheet',
+    TransferMemberPinBottomSheet: '../../../plugins/payment/components/transfer-member/TransferMemberPinBottomSheet',
+    TransferMemberSuccessScreen: '../../../plugins/payment/components/transfer-member/TransferMemberSuccessScreen',
     TapKartuSummaryScreen: '../../../plugins/payment/components/topup/TapKartuSummaryScreen',
     PinInput: '../../../plugins/payment/components/shared/PinInput',
     WithdrawConfirmModal: '../../../plugins/payment/components/withdraw/WithdrawConfirmModal',

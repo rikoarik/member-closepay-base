@@ -3,7 +3,15 @@
  * Unified AuthService dengan support untuk mock dan real API
  * Uses environment-based switch untuk determine implementation
  */
-import type { AuthService, AuthResponse, User, MetadataResponse, TagItem, SignUpData, SignUpResponse } from '../types';
+import type {
+  AuthService,
+  AuthResponse,
+  User,
+  MetadataResponse,
+  TagItem,
+  SignUpData,
+  SignUpResponse,
+} from '../types';
 import { tokenService } from './tokenService';
 import { configService, axiosInstance } from '@core/config';
 import { encode as base64Encode } from 'base-64';
@@ -11,6 +19,8 @@ import { ApiError, NetworkError, isAxiosError, axiosErrorToApiError } from '@cor
 import { validateString, validateEmail, validateId, throwIfInvalid } from '@core/config/utils/validation';
 import { logger } from '@core/config/services/loggerService';
 import { handleApiError, getUserFriendlyMessage } from '@core/config/utils/errorHandler';
+import type { JWTPayload } from '../utils/jwtUtils';
+import { decodeJWT } from '../utils/jwtUtils';
 
 // ============================================================================
 // REAL API IMPLEMENTATION
@@ -142,35 +152,8 @@ function getMockUsers(): Array<{
   role: string;
   permissions: string[];
 }> {
-  // SECURITY: In production, mock should be disabled
-  // Only allow in development mode
-  if (!__DEV__) {
-    return [];
-  }
-
-  // In production, load from secure config or environment variables
-  // For development, use minimal mock data
-  // NOTE: These credentials should NEVER be committed to version control
-  // Use environment variables or secure config in production
   return [
-    {
-      id: '1',
-      username: 'merchant1',
-      password: 'password123', // SECURITY: Should be loaded from secure config/env
-      email: 'merchant1@closepay.com',
-      name: 'Merchant Test',
-      role: 'merchant',
-      permissions: ['read', 'write'],
-    },
-    {
-      id: '2',
-      username: 'admin',
-      password: 'admin123', // SECURITY: Should be loaded from secure config/env
-      email: 'admin@closepay.com',
-      name: 'Admin User',
-      role: 'admin',
-      permissions: ['read', 'write', 'admin'],
-    },
+    { id: '1', username: 'member', password: 'Pass1234!', email: 'member@solusiuntuknegeri.com', name: 'Member Test', role: 'member', permissions: ['read', 'write'] },
   ];
 }
 
@@ -185,6 +168,52 @@ const MOCK_COMPANY = {
  * Simulate API delay
  */
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+
+/**
+ * Generate mock JWT token dengan format yang valid
+ * Format JWT: header.payload.signature (3 parts separated by dots)
+ * 
+ * @param userId - User ID untuk dimasukkan ke payload
+ * @param expiresIn - Expiry time in seconds (default: 24 hours)
+ * @returns Mock JWT token dengan format yang valid
+ */
+function generateMockJWT(userId: string, expiresIn: number = 24 * 60 * 60): string {
+  // JWT Header (standard)
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT',
+  };
+
+  // JWT Payload dengan claims yang valid
+  const now = Math.floor(Date.now() / 1000); // Current time in seconds
+  const payload: JWTPayload = {
+    sub: userId, // Subject (user ID)
+    iat: now, // Issued at
+    exp: now + expiresIn, // Expiry
+    jti: `mock_${userId}_${Date.now()}`, // JWT ID
+    type: 'access',
+  };
+
+  // Encode header dan payload ke Base64URL
+  const encodeBase64URL = (obj: object): string => {
+    const json = JSON.stringify(obj);
+    const base64 = base64Encode(json);
+    // Convert to Base64URL: replace + with -, / with _, and remove padding =
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  };
+
+  const encodedHeader = encodeBase64URL(header);
+  const encodedPayload = encodeBase64URL(payload);
+
+  // Mock signature (tidak perlu valid untuk mock, tapi harus ada)
+  const signature = base64Encode(`mock_signature_${userId}_${Date.now()}`)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+
+  // Combine: header.payload.signature
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
+}
 
 /**
  * Mock API service untuk login
@@ -211,9 +240,9 @@ const mockLoginAPI = async (
     throw new Error('Invalid email atau password');
   }
 
-  // Generate mock tokens
-  const token = `mock_token_${user.id}_${Date.now()}`;
-  const refreshToken = `mock_refresh_token_${user.id}_${Date.now()}`;
+  // Generate mock tokens dengan format JWT yang valid
+  const token = generateMockJWT(user.id, 24 * 60 * 60); // 24 hours expiry
+  const refreshToken = generateMockJWT(user.id, 7 * 24 * 60 * 60); // 7 days expiry
 
   // Return auth response
   return {
@@ -242,8 +271,15 @@ const mockGetProfileAPI = async (): Promise<User> => {
     throw new Error('Not authenticated');
   }
 
-  // Extract user ID from token (mock)
-  const userId = token.split('_')[2] || '1';
+  // Extract user ID from token (decode JWT payload)
+  let userId = '1';
+  try {
+    const payload = decodeJWT(token);
+    userId = payload?.sub || '1';
+  } catch (error) {
+    // Fallback: try to extract from old format if token is not JWT
+    userId = token.split('_')[2] || '1';
+  }
   const mockUsers = getMockUsers();
   const user = mockUsers.find(u => u.id === userId);
 
@@ -272,9 +308,99 @@ const mockRefreshTokenAPI = async (): Promise<string> => {
     throw new Error('No refresh token available');
   }
 
-  // Generate new token
-  const newToken = `mock_token_refreshed_${Date.now()}`;
+  // Extract user ID from refresh token
+  let userId = '1';
+  try {
+    const payload = decodeJWT(refreshToken);
+    userId = payload?.sub || '1';
+  } catch (error) {
+    // Fallback: try to extract from old format if token is not JWT
+    userId = refreshToken.split('_')[2] || '1';
+  }
+
+  // Generate new token dengan format JWT yang valid
+  const newToken = generateMockJWT(userId, 24 * 60 * 60); // 24 hours expiry
   return newToken;
+};
+
+const MOCK_METADATA: MetadataResponse = {
+  data: {
+    items: [
+      {
+        data: {
+          key: 'name',
+          display: 'Nama Lengkap',
+          typeData: 'Text',
+          tag: 'BasicData',
+          isRequired: true,
+          isVisible: true,
+        },
+      },
+      {
+        data: {
+          key: 'email',
+          display: 'Email',
+          typeData: 'Email',
+          tag: 'BasicData',
+          isRequired: true,
+          isVisible: true,
+        },
+      },
+      {
+        data: {
+          key: 'phone',
+          display: 'Nomor Telepon',
+          typeData: 'Phone',
+          tag: 'BasicData',
+          isRequired: false,
+          isVisible: true,
+        },
+      },
+    ],
+  },
+};
+
+const MOCK_TAGS: TagItem[] = [
+  { name: 'Member', isSelfRegisterSupported: true },
+  { name: 'Premium', isSelfRegisterSupported: true },
+];
+
+const mockGetSignUpMetadataAPI = async (): Promise<MetadataResponse> => {
+  await delay(300);
+  return MOCK_METADATA;
+};
+
+const mockGetSignUpTagsAPI = async (): Promise<TagItem[]> => {
+  await delay(200);
+  return MOCK_TAGS;
+};
+
+const mockRegisterAPI = async (): Promise<SignUpResponse> => {
+  await delay(800);
+  // Generate mock JWT token untuk new user
+  const mockToken = generateMockJWT('new_user', 24 * 60 * 60); // 24 hours expiry
+  return {
+    data: {
+      responseType: 'token',
+      authData: {
+        authToken: mockToken,
+        noId: 'mock-member-1',
+        securityCode: 'mock-security-code',
+      },
+    },
+  };
+};
+
+const mockSendForgotPasswordOtpAPI = async (): Promise<void> => {
+  await delay(500);
+};
+
+const mockVerifyForgotPasswordOtpAPI = async (): Promise<void> => {
+  await delay(300);
+};
+
+const mockResetPasswordAPI = async (): Promise<void> => {
+  await delay(500);
 };
 
 // ============================================================================
@@ -286,8 +412,7 @@ const mockRefreshTokenAPI = async (): Promise<string> => {
  */
 const shouldUseMock = (): boolean => {
   const config = configService.getConfig();
-  const useMock = config?.services?.auth?.useMock ?? false;
-  return useMock || (__DEV__ && false); // Default to real API even in dev
+  return config?.services?.auth?.useMock ?? true; // Default mock, no API
 };
 
 export const authService: AuthService = {
@@ -428,9 +553,12 @@ export const authService: AuthService = {
    * Get metadata for sign up form
    */
   async getSignUpMetadata(companyId: string, userType: string = 'MEMBER'): Promise<MetadataResponse> {
-    // Validate inputs
     throwIfInvalid(validateId(companyId, 'companyId'));
     throwIfInvalid(validateString(userType, 'userType', 1, 50));
+
+    if (shouldUseMock()) {
+      return mockGetSignUpMetadataAPI();
+    }
 
     try {
       const response = await axiosInstance.get<MetadataResponse>(
@@ -449,8 +577,11 @@ export const authService: AuthService = {
    * Get tags for sign up
    */
   async getSignUpTags(companyId: string): Promise<TagItem[]> {
-    // Validate inputs
     throwIfInvalid(validateId(companyId, 'companyId'));
+
+    if (shouldUseMock()) {
+      return mockGetSignUpTagsAPI();
+    }
 
     try {
       const response = await axiosInstance.get<{ data: TagItem[] }>(
@@ -467,10 +598,13 @@ export const authService: AuthService = {
    * Register new user
    */
   async register(data: SignUpData, otp?: string): Promise<SignUpResponse> {
-    // Validate inputs
     throwIfInvalid(validateId(data.companyId, 'companyId'));
     if (otp) {
       throwIfInvalid(validateString(otp, 'otp', 1, 10));
+    }
+
+    if (shouldUseMock()) {
+      return mockRegisterAPI();
     }
 
     try {
@@ -500,8 +634,11 @@ export const authService: AuthService = {
    * Send OTP for forgot password
    */
   async sendForgotPasswordOtp(email: string): Promise<void> {
-    // Validate inputs
     throwIfInvalid(validateEmail(email, 'email'));
+
+    if (shouldUseMock()) {
+      return mockSendForgotPasswordOtpAPI();
+    }
 
     try {
       const response = await axiosInstance.post(
@@ -522,9 +659,12 @@ export const authService: AuthService = {
    * Verify OTP for forgot password
    */
   async verifyForgotPasswordOtp(email: string, otp: string): Promise<void> {
-    // Validate inputs
     throwIfInvalid(validateEmail(email, 'email'));
     throwIfInvalid(validateString(otp, 'otp', 1, 10));
+
+    if (shouldUseMock()) {
+      return mockVerifyForgotPasswordOtpAPI();
+    }
 
     try {
       const response = await axiosInstance.post(
@@ -545,10 +685,13 @@ export const authService: AuthService = {
    * Reset password with OTP
    */
   async resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
-    // Validate inputs
     throwIfInvalid(validateEmail(email, 'email'));
     throwIfInvalid(validateString(otp, 'otp', 1, 10));
     throwIfInvalid(validateString(newPassword, 'newPassword', 6, 255));
+
+    if (shouldUseMock()) {
+      return mockResetPasswordAPI();
+    }
 
     try {
       const response = await axiosInstance.post(

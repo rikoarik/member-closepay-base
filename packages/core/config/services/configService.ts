@@ -4,15 +4,11 @@
  */
 
 import { AppConfig, MenuItemConfig } from '../types/AppConfig';
-import { getTenantConfig, getCurrentTenantId } from './tenantService';
+import { getTenantConfig } from './tenantService';
 import { TenantConfig } from '../tenants';
-import axiosInstance from './axiosConfig';
 import { configEventEmitter } from '../utils/configEventEmitter';
 import Config from '../../native/Config';
-import { isAxiosError, axiosErrorToApiError } from '../types/errors';
-import { API_CONSTANTS } from '../constants';
 import { logger } from './loggerService';
-import { handleApiError } from '../utils/errorHandler';
 
 export interface ConfigService {
   loadConfig(): Promise<AppConfig>;
@@ -59,9 +55,7 @@ const DEFAULT_CONFIG: AppConfig = {
 
 class ConfigServiceImpl implements ConfigService {
   private config: AppConfig | null = null;
-  private lastRefreshTime: number = 0; // Timestamp terakhir refresh
-  private cacheExpiry: number = API_CONSTANTS.CONFIG_CACHE_EXPIRY;
-  private pendingRefresh: Promise<AppConfig> | null = null; // Debouncing
+  private lastRefreshTime: number = 0;
 
   /**
    * Load config dari API atau local storage
@@ -151,85 +145,14 @@ class ConfigServiceImpl implements ConfigService {
   }
 
   async refreshConfig(force: boolean = false): Promise<void> {
-    // Debouncing: jika ada pending refresh, return yang sama
-    if (this.pendingRefresh && !force) {
-      logger.debug('Refresh already in progress, reusing pending request');
-      return this.pendingRefresh.then(() => { });
-    }
-
-    // Caching: skip jika masih dalam cache expiry dan tidak force
+    // Mock mode: skip API, gunakan config yang sudah ada
     const now = Date.now();
-    const timeSinceLastRefresh = now - this.lastRefreshTime;
-
-    if (!force && timeSinceLastRefresh < this.cacheExpiry) {
-      logger.debug(`Using cached config (${Math.round(timeSinceLastRefresh / 1000)}s ago, ${Math.round((this.cacheExpiry - timeSinceLastRefresh) / 1000)}s remaining)`);
-      return Promise.resolve();
+    this.lastRefreshTime = now;
+    const config = this.getConfig();
+    if (config) {
+      configEventEmitter.emit(config);
     }
-
-    // Create pending refresh promise untuk debouncing
-    this.pendingRefresh = (async () => {
-      try {
-        // Load dari backend API
-        const companyId = this.config?.companyId || 'member-base';
-
-        // TODO: Sesuaikan endpoint dengan backend API
-        // Expected endpoint: GET /config/app/{companyId}
-        const response = await axiosInstance.get<AppConfig>(
-          `/config/app/${companyId}`
-        );
-
-        // Update config dengan data dari backend
-        const newConfig = response.data;
-
-        // Merge dengan tenant config jika ada
-        if (newConfig.tenantId || newConfig.companyId) {
-          const tenantId = newConfig.tenantId || newConfig.companyId;
-          const tenantConfig = getTenantConfig(tenantId as string);
-
-          if (tenantConfig) {
-            this.config = {
-              ...newConfig,
-              tenantId: tenantId,
-              enabledFeatures: tenantConfig.enabledFeatures,
-              homeVariant: tenantConfig.homeVariant || newConfig.homeVariant,
-              branding: {
-                ...newConfig.branding,
-                logo: tenantConfig.theme.logo || newConfig.branding.logo,
-                appName: tenantConfig.theme.appName || newConfig.branding.appName,
-              },
-            };
-            this.lastRefreshTime = Date.now();
-            // Emit event untuk notify subscribers
-            configEventEmitter.emit(this.config);
-            return this.config;
-          }
-        }
-
-        this.config = newConfig;
-        this.lastRefreshTime = Date.now();
-        // Emit event untuk notify subscribers
-        configEventEmitter.emit(this.config);
-        return this.config;
-      } catch (error: unknown) {
-        logger.error('Failed to refresh config from API', error);
-        // JANGAN throw error - keep existing config
-        // Fallback ke existing config, tidak overwrite dengan default
-        if (!this.config) {
-          this.config = DEFAULT_CONFIG;
-          this.lastRefreshTime = Date.now();
-          // Emit event untuk default config
-          configEventEmitter.emit(this.config);
-        }
-        // Re-throw untuk hook bisa handle cooldown
-        // Convert to ApiError if it's an AxiosError for consistent error handling
-        throw handleApiError(error);
-      } finally {
-        // Clear pending setelah selesai
-        this.pendingRefresh = null;
-      }
-    })();
-
-    return this.pendingRefresh.then(() => { });
+    return Promise.resolve();
   }
 }
 

@@ -4,6 +4,7 @@
  */
 import SecureStorage from '../../native/SecureStorage';
 import { PluginRegistry } from '../plugins/PluginRegistry';
+import { configService } from './configService';
 
 export interface QuickMenuItem {
   id: string;
@@ -12,6 +13,8 @@ export interface QuickMenuItem {
   icon?: string;
   iconBgColor?: string;
   route?: string; // Route name untuk navigation
+  /** i18n key for label when using AppConfig.quickAccessMenu */
+  labelKey?: string;
 }
 
 const QUICK_MENU_STORAGE_KEY = '@quick_menu_settings';
@@ -54,16 +57,38 @@ export const getEnabledQuickMenuItems = async (): Promise<QuickMenuItem[]> => {
 };
 
 /**
- * Get menu items from plugin routes that have showInMenu: true
+ * Get menu items from plugin routes.
+ * When AppConfig.quickAccessMenu is set (e.g. member balance-management), returns only those items in order.
+ * Otherwise returns all plugin routes that have showInMenu: true.
  */
 export const getPluginMenuItems = (): QuickMenuItem[] => {
   if (!PluginRegistry.isInitialized()) {
     return [];
   }
 
+  const config = configService.getConfig();
+  const quickAccess = config?.quickAccessMenu;
+  if (quickAccess?.length) {
+    const menuItems: QuickMenuItem[] = [];
+    for (const item of quickAccess) {
+      const route = PluginRegistry.getRouteByName(item.route);
+      if (route) {
+        menuItems.push({
+          id: item.id,
+          label: route.meta?.title || item.route,
+          enabled: true,
+          icon: item.icon || route.meta?.icon || 'default',
+          iconBgColor: undefined,
+          route: item.route,
+          labelKey: item.labelKey,
+        });
+      }
+    }
+    return menuItems;
+  }
+
   const routes = PluginRegistry.getEnabledRoutes();
   const menuItems: QuickMenuItem[] = [];
-
   for (const route of routes) {
     if (route.meta?.showInMenu) {
       menuItems.push({
@@ -71,12 +96,11 @@ export const getPluginMenuItems = (): QuickMenuItem[] => {
         label: route.meta.title || route.name,
         enabled: true,
         icon: route.meta.icon || 'default',
-        iconBgColor: undefined, // Will use default from getDefaultBgColor
+        iconBgColor: undefined,
         route: route.name,
       });
     }
   }
-
   return menuItems;
 };
 

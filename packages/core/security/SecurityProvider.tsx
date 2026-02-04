@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useMemo, useCallback, useEf
 import { Alert, BackHandler, Platform } from 'react-native';
 import { useFreeRasp, SuspiciousAppInfo } from 'freerasp-react-native';
 import { securityConfig, shouldInitializeFreeRasp } from './SecurityConfig';
-import { axiosInstance } from '@core/config';
 import { SecurityAlertBottomSheet } from './SecurityAlertBottomSheet';
 import { securityEmitter, SECURITY_EVENTS, ThreatDetectedEvent } from './native/SecurityEventEmitter';
 
@@ -19,27 +18,10 @@ const SecurityContext = createContext<SecurityContextType>({
 export const useSecurity = () => useContext(SecurityContext);
 
 /**
- * Report security threats to server for monitoring and analysis
- * This is a non-blocking fire-and-forget call
- * Silent logging - no console output in production
+ * Report security threats to server (mock - no API call)
  */
-const reportThreatToServer = async (
-  threatType: string,
-  details: Record<string, unknown> = {}
-): Promise<void> => {
-  try {
-    await axiosInstance.post('/security/report-threat', {
-      threatType,
-      timestamp: new Date().toISOString(),
-      platform: Platform.OS,
-      platformVersion: Platform.Version,
-      isProd: securityConfig.isProd,
-      ...details,
-    });
-    // Silent - no logging in production
-  } catch (error) {
-    // Silently fail - don't block app for failed threat reports
-  }
+const reportThreatToServer = async (): Promise<void> => {
+  // Mock mode: skip API call
 };
 
 // Inner component that uses useFreeRasp hook
@@ -52,104 +34,64 @@ const SecurityProviderInner: React.FC<{
   // All callbacks are optional - implement the ones you need
   // Critical threats are reported to server for security monitoring
   const threatActions = useMemo(() => ({
-    // Root/Jailbreak detection
     privilegedAccess: () => {
-      reportThreatToServer('ROOT_DETECTED');
+      reportThreatToServer();
       onThreatDetected('Root Access Detected', 'This device appears to be rooted. The app cannot run securely.');
     },
-
-    // Debugger detection (only triggers in release builds)
     debug: () => {
-      reportThreatToServer('DEBUGGER_DETECTED');
+      reportThreatToServer();
       onThreatDetected('Debugger Detected', 'A debugger is attached to the app. Please close any debugging tools.');
     },
-
-    // Emulator/Simulator detection (only triggers in release builds)
     simulator: () => {
       if (securityConfig.isProd) {
-        reportThreatToServer('EMULATOR_DETECTED');
+        reportThreatToServer();
         onThreatDetected('Emulator Detected', 'Running on an emulator is not allowed in production.');
       }
     },
-
-    // App integrity/tampering detection (only triggers in release builds)
     appIntegrity: () => {
-      reportThreatToServer('TAMPERING_DETECTED');
+      reportThreatToServer();
       onThreatDetected('Tampering Detected', 'The app signature does not match or it has been modified.');
     },
-
-    // Unofficial store detection (only triggers in release builds)
     unofficialStore: () => {
-      reportThreatToServer('UNOFFICIAL_STORE');
+      reportThreatToServer();
       onThreatDetected('Unofficial Store', 'App was installed from an unofficial store.');
     },
-
-    // Hooking framework detection (Frida, Xposed, etc.)
     hooks: () => {
-      reportThreatToServer('HOOKING_DETECTED');
+      reportThreatToServer();
       onThreatDetected('Hooking Detected', 'A hooking framework like Frida or Xposed was detected.');
     },
-
-    // Device binding check failure
     deviceBinding: () => {
-      reportThreatToServer('DEVICE_BINDING_FAILED');
+      reportThreatToServer();
       onThreatDetected('Device Binding Failed', 'Device binding check failed.');
     },
-
-    // Device ID anomaly
     deviceID: () => {
-      reportThreatToServer('DEVICE_ID_ANOMALY');
+      reportThreatToServer();
       onThreatDetected('Device ID Anomaly', 'Device ID anomaly detected.');
     },
-
-    // Hardware-backed keystore not available (DeviceState)
     secureHardwareNotAvailable: () => {
-      reportThreatToServer('NO_SECURE_HARDWARE');
+      reportThreatToServer();
       onThreatDetected('No Secure Hardware', 'Hardware-backed keystore not available.');
     },
-
-    // Obfuscation issues detection
     obfuscationIssues: () => {
-      reportThreatToServer('OBFUSCATION_ISSUES');
+      reportThreatToServer();
       onThreatDetected('Obfuscation Issues', 'Code obfuscation may not be properly enabled.');
     },
-
-    // Developer mode enabled (DeviceState)
     devMode: () => {
-      reportThreatToServer('DEV_MODE_ENABLED');
+      reportThreatToServer();
       onThreatDetected('Developer Mode', 'Developer mode is enabled. This is not allowed.');
     },
-
-    // System VPN active (DeviceState)
-    systemVPN: () => {
-      // Don't report VPN as threat - it's a legitimate privacy tool
-      // Optional: You may allow VPN usage
-    },
-
-    // Malware detection
+    systemVPN: () => {},
     malware: (suspiciousApps: SuspiciousAppInfo[]) => {
-      const appDetails = suspiciousApps.map((appInfo) => ({
-        packageName: appInfo.packageInfo.packageName,
-        reason: appInfo.reason,
-      }));
-      reportThreatToServer('MALWARE_DETECTED', {
-        count: suspiciousApps.length,
-        apps: appDetails,
-      });
+      reportThreatToServer();
       onThreatDetected('Malware Detected', `${suspiciousApps.length} suspicious app(s) detected on device.`);
     },
-
-    // ADB debugging enabled (DeviceState)
     adbEnabled: () => {
       if (securityConfig.isProd) {
-        reportThreatToServer('ADB_ENABLED');
+        reportThreatToServer();
       }
-      // Optional: Warn in production
     },
-
-    // Multiple app instances running
     multiInstance: () => {
-      reportThreatToServer('MULTI_INSTANCE_DETECTED');
+      reportThreatToServer();
       onThreatDetected('Multi Instance', 'Multiple instances of the app detected. This is not allowed.');
     },
   }), [onThreatDetected]);

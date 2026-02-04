@@ -20,7 +20,10 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { useBalance, TransactionType, TransactionItemSkeleton, BalanceCard } from '../../index';
+import { useBalance } from '../../hooks/useBalance';
+import { TransactionType } from '../../models/TransactionType';
+import { TransactionItemSkeleton } from '../ui/TransactionItemSkeleton';
+import { BalanceCard } from '../ui/BalanceCard';
 import {
   ArrowLeft2,
   Wallet3,
@@ -399,8 +402,9 @@ const MOCK_TRANSACTIONS: Record<string, any[]> = {
 const horizontalPadding = getHorizontalPadding();
 
 // Bottom sheet snap points
-const SHEET_MIN_HEIGHT = scale(450);
-const SHEET_MAX_HEIGHT = SCREEN_HEIGHT - scale(50); // Almost full screen
+const SHEET_MIN_HEIGHT = Platform.OS === 'ios' ? scale(450) : scale(480);
+const SHEET_MAX_HEIGHT_ANDROID = Platform.OS === 'ios' ? scale(50) : scale(40);
+const SHEET_MAX_HEIGHT = SCREEN_HEIGHT - SHEET_MAX_HEIGHT_ANDROID; // Almost full screen
 
 export const BalanceDetailScreen = () => {
   const navigation = useNavigation();
@@ -786,22 +790,15 @@ const styles = StyleSheet.create({
   backButton: { padding: scale(4), marginRight: scale(8) },
   headerTitle: { fontSize: getResponsiveFontSize('xlarge'), fontFamily: FontFamily.monasans.bold },
   headerRight: { flex: 1 },
-  content: { flex: 1 },
+  content: { flex: 1,
+    paddingVertical: moderateVerticalScale(16),
+   },
   carouselContent: { paddingHorizontal: horizontalPadding, gap: scale(16) },
 
   cardWrapper: {
-    width: scale(343),
+    width: scale(345),
     borderRadius: scale(16),
     overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-      },
-      android: { elevation: 3 },
-    }),
   },
 
   actionSection: {

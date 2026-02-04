@@ -19,7 +19,10 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { useBalance, TransactionType, BalanceMutation, TransactionItemSkeleton } from '../../index';
+import { useBalance } from '../../hooks/useBalance';
+import { TransactionType } from '../../models/TransactionType';
+import { BalanceMutation } from '../../models/BalanceMutation';
+import { TransactionItemSkeleton } from '../ui/TransactionItemSkeleton';
 import {
   ArrowLeft2,
 } from 'iconsax-react-nativejs';

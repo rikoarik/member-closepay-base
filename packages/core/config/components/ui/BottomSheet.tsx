@@ -11,7 +11,7 @@ import {
   Platform,
   PanResponder,
   Animated,
-  TouchableWithoutFeedback,
+  Pressable,
   KeyboardAvoidingView,
   Keyboard,
 } from 'react-native';
@@ -174,10 +174,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     transform: [{ translateY }],
   };
 
-  if (!visible) {
-    return null;
-  }
-
   return (
     <Modal
       visible={visible}
@@ -187,15 +183,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       statusBarTranslucent
     >
       <View style={styles.container}>
-        {/* Backdrop with Blur */}
-        <TouchableWithoutFeedback onPress={disableClose ? undefined : onClose}>
+        {/* Backdrop with Blur - Pressable agar tap area kosong bisa close */}
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={disableClose ? undefined : onClose}
+        >
           <Animated.View
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                opacity: backdropOpacity,
-              },
-            ]}
+            style={[StyleSheet.absoluteFill, { opacity: backdropOpacity }]}
+            pointerEvents="none"
           >
             {Platform.OS === 'ios' ? (
               <BlurView
@@ -207,7 +202,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
             )}
           </Animated.View>
-        </TouchableWithoutFeedback>
+        </Pressable>
         <Animated.View
           style={[
             styles.sheet,

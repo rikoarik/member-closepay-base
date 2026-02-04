@@ -3,7 +3,7 @@
  * Dashboard screen sesuai design
  * Responsive untuk semua device termasuk EDC
  */
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
 import {
   View,
   ScrollView,
@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
@@ -36,21 +36,19 @@ import {
   AktivitasTab,
   MarketplaceTab,
   FnBTab,
+  BerandaNewsInfo,
 } from '../components/home';
 import { useNewsState } from '../components/home/TabContent/NewsTab';
 import { useNotifications } from '@core/notification';
 import Toast from 'react-native-toast-message';
 import { QrScanIcon } from '@core/config/components/icons';
 import { scale, moderateScale } from '@core/config';
-import { ProgressiveBlurView } from '../components/ProgressiveBlurView';
-import BlurView from '@sbaiahmed1/react-native-blur';
 
-export const HomeScreen = () => {
+const HomeScreenComponent = () => {
   const navigation = useNavigation();
   const { colors, isDark } = useTheme();
   const { t } = useTranslation();
   const { width: screenWidth, height: screenHeight } = useDimensions();
-  const insets = useSafeAreaInsets();
   // State for News Tab (Lifted Up)
   const newsState = useNewsState();
 
@@ -58,8 +56,6 @@ export const HomeScreen = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const fabOpacity = useRef(new Animated.Value(0)).current;
   const fabScale = useRef(new Animated.Value(0)).current;
-  const [isComponentReady, setIsComponentReady] = useState(false);
-
   const { config } = useConfig();
   const homeTabs = React.useMemo(() => {
     return config?.homeTabs || [];
@@ -120,28 +116,29 @@ export const HomeScreen = () => {
     }
   }, [shouldShowFab, fabOpacity, fabScale]);
 
-  // Set component ready after mount to prevent blur flash
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsComponentReady(true);
-    }, 100); // Small delay to ensure smooth transition
-    return () => clearTimeout(timer);
-  }, []);
-
   // Set activeTab ke tab dengan order 2 (di tengah) saat tabs pertama kali ter-load
   useEffect(() => {
-    // Reset flag jika tabs berubah (misalnya config reload)
     if (tabs.length > 0 && !hasSetOrder2TabRef.current) {
-      // Tab dengan order 2 (index 1) adalah tab di tengah, atau tab pertama jika < 2 tabs
       const order2TabId = tabs.length >= 2 ? tabs[1].id : tabs[0].id;
-
-      // Hanya update jika activeTab belum sesuai
       if (activeTab !== order2TabId) {
         setActiveTab(order2TabId);
       }
       hasSetOrder2TabRef.current = true;
     }
   }, [tabs, activeTab]);
+
+  // Scroll pager ke tab default (tengah) agar indicator dan konten sinkron
+  const hasInitialPagerScrollRef = useRef(false);
+  useEffect(() => {
+    if (hasInitialPagerScrollRef.current || tabs.length === 0) return;
+    const index = tabs.findIndex((t) => t.id === activeTab);
+    if (index < 0) return;
+    hasInitialPagerScrollRef.current = true;
+    scrollX.setValue(index * screenWidth);
+    requestAnimationFrame(() => {
+      pagerRef.current?.scrollTo({ x: index * screenWidth, animated: false });
+    });
+  }, [activeTab, tabs, screenWidth, scrollX]);
 
   const registerTabRefresh = useCallback((tabId: string, refreshFn: () => void) => {
     tabRefreshFunctionsRef.current[tabId] = refreshFn;
@@ -174,6 +171,22 @@ export const HomeScreen = () => {
         );
       }
 
+      if (tabId === 'beranda-news') {
+        return (
+          <BerandaNewsInfo
+            showNewsInfo={true}
+            onNewsPress={() => {
+              navigation.navigate('News' as never);
+            }}
+            onViewAllPress={() => {
+              navigation.navigate('News' as never);
+            }}
+            limit={5}
+            
+          />
+        );
+      }
+
       if (tabId === 'activity' || tabId === 'aktivitas') {
         return (
           <AktivitasTab
@@ -195,14 +208,14 @@ export const HomeScreen = () => {
         );
       }
 
-      // if (tabId === "analytics" || tabId === "analitik") {
-      //   return (
-      //     <AnalyticsTab
-      //       isActive={activeTab === tabId}
-      //       scrollEnabled={false}
-      //     />
-      //   );
-      // }
+      if (tabId === "analytics" || tabId === "analitik") {
+        return (
+          <AnalyticsTab
+            isActive={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
 
       if (tabId === 'fnb') {
         return (
@@ -347,7 +360,10 @@ export const HomeScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      refreshNotifications();
+      const id = requestAnimationFrame(() => {
+        refreshNotifications();
+      });
+      return () => cancelAnimationFrame(id);
     }, [refreshNotifications])
   );
 
@@ -405,22 +421,6 @@ export const HomeScreen = () => {
         },
       ]}
     >
-      {/* Status Bar Blur */}
-      {isComponentReady && (
-        <BlurView
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: insets.top,
-            zIndex: 999,
-          }}
-          blurType={isDark ? 'dark' : 'light'}
-          blurAmount={0}
-        />
-      )}
-
       {/* Main ScrollView dengan sticky header di TabSwitcher */}
       <ScrollView
         style={[styles.scrollView]}
@@ -466,22 +466,9 @@ export const HomeScreen = () => {
         <View
           style={{
             zIndex: 1,
-            // paddingTop: insets.top, // Moved to inner view
+            backgroundColor: colors.background,
           }}
         >
-          {isComponentReady && (
-            <BlurView
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: scale(70), // Height adjusted by user ("bawah nya lebihin")
-              }}
-              blurType={isDark ? 'dark' : 'light'}
-              blurAmount={50}
-            />
-          )}
           {tabs.length > 0 && (
             <View
               style={{
@@ -543,30 +530,6 @@ export const HomeScreen = () => {
         </View>
       </ScrollView>
 
-      {/* QR Blur Background */}
-      {config?.showQrButton !== false && (
-        <Animated.View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: scale(100), // Height adjusted by user
-            opacity: fabOpacity,
-            zIndex: 1,
-          }}
-          pointerEvents="none"
-        >
-          {isComponentReady && (
-            <BlurView
-              style={StyleSheet.absoluteFill}
-              blurType={isDark ? 'dark' : 'light'}
-              blurAmount={10}
-            />
-          )}
-        </Animated.View>
-      )}
-
       {/* FAB QR Button */}
       {config?.showQrButton !== false && (
         <Animated.View
@@ -589,6 +552,8 @@ export const HomeScreen = () => {
     </SafeAreaView>
   );
 };
+
+export const HomeScreen = memo(HomeScreenComponent);
 
 const styles = StyleSheet.create({
   container: {

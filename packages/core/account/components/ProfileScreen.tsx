@@ -3,7 +3,7 @@
  * Screen untuk menampilkan menu profile
  * Responsive untuk semua device termasuk EDC
  */
-import React from 'react';
+import React, { useMemo, memo } from 'react';
 import {
   View,
   Text,
@@ -47,7 +47,7 @@ interface MenuItem {
   onPress: () => void;
 }
 
-export const ProfileScreen: React.FC = () => {
+const ProfileScreenComponent: React.FC = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -55,74 +55,75 @@ export const ProfileScreen: React.FC = () => {
   const logout = useAuthStore((state: any) => state.logout);
   const { user } = useAuth();
 
-  const menuItems: MenuItem[] = [
-    {
-      id: 'edit-profile',
-      label: t('profile.editProfile'),
-      icon: <Profile size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-      onPress: () => {
-        // @ts-ignore - navigation type akan di-setup nanti
-        navigation.navigate('EditProfile');
+  const menuItems: MenuItem[] = useMemo(
+    () => [
+      {
+        id: 'edit-profile',
+        label: t('profile.editProfile'),
+        icon: <Profile size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+        onPress: () => {
+          // @ts-ignore - navigation type akan di-setup nanti
+          navigation.navigate('EditProfile');
+        },
       },
-    },
-    {
-      id: 'language',
-      label: t('profile.language'),
-      icon: <LanguageSquare size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-      onPress: () => {
-        // @ts-ignore - navigation type akan di-setup nanti
-        navigation.navigate('LanguageSelection');
+      {
+        id: 'language',
+        label: t('profile.language'),
+        icon: <LanguageSquare size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+        onPress: () => {
+          // @ts-ignore - navigation type akan di-setup nanti
+          navigation.navigate('LanguageSelection');
+        },
       },
-    },
-    {
-      id: 'quick-menu',
-      label: t('profile.quickMenu'),
-      icon: <Menu size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-      onPress: () => {
-        // @ts-ignore - navigation type akan di-setup nanti
-        navigation.navigate('QuickMenuSettings');
+      {
+        id: 'quick-menu',
+        label: t('profile.quickMenu'),
+        icon: <Menu size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+        onPress: () => {
+          // @ts-ignore - navigation type akan di-setup nanti
+          navigation.navigate('QuickMenuSettings');
+        },
       },
-    },
-    {
-      id: 'theme',
-      label: t('profile.theme'),
-      icon: <Sun1 size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-      onPress: () => {
-        // @ts-ignore - navigation type akan di-setup nanti
-        navigation.navigate('ThemeSettings');
+      {
+        id: 'theme',
+        label: t('profile.theme'),
+        icon: <Sun1 size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+        onPress: () => {
+          // @ts-ignore - navigation type akan di-setup nanti
+          navigation.navigate('ThemeSettings');
+        },
       },
-    },
-    {
-      id: 'terms',
-      label: t('profile.termsAndConditions'),
-      icon: <Document size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-      onPress: () => {
-        // TODO: Navigate to terms and conditions
-        console.log('Terms and conditions');
+      {
+        id: 'terms',
+        label: t('profile.termsAndConditions'),
+        icon: <Document size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+        onPress: () => {
+          console.log('Terms and conditions');
+        },
       },
-    },
-    {
-      id: 'privacy',
-      label: t('profile.privacyPolicy'),
-      icon: <DocumentText size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-      onPress: () => {
-        // TODO: Navigate to privacy policy
-        console.log('Privacy policy');
+      {
+        id: 'privacy',
+        label: t('profile.privacyPolicy'),
+        icon: <DocumentText size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+        onPress: () => {
+          console.log('Privacy policy');
+        },
       },
-    },
-    {
-      id: 'logout',
-      label: t('profile.logout'),
-      icon: (
-        <View style={{ transform: [{ rotate: '180deg' }] }}>
-          <LogoutCurve size={getIconSize('medium')} color={colors.error} variant="Outline" />
-        </View>
-      ),
-      onPress: () => {
-        logout();
+      {
+        id: 'logout',
+        label: t('profile.logout'),
+        icon: (
+          <View style={{ transform: [{ rotate: '180deg' }] }}>
+            <LogoutCurve size={getIconSize('medium')} color={colors.error} variant="Outline" />
+          </View>
+        ),
+        onPress: () => {
+          logout();
+        },
       },
-    },
-  ];
+    ],
+    [t, colors.text, colors.error, navigation, logout]
+  );
 
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
 
@@ -361,6 +362,8 @@ export const ProfileScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+export const ProfileScreen = memo(ProfileScreenComponent);
 
 const styles = StyleSheet.create({
   container: {

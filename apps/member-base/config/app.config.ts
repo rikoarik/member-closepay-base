@@ -1,51 +1,70 @@
 /**
- * Member Base App App Configuration
- * Auto-generated from tenant configuration
+ * Member Base App Configuration
+ * 
+ * Konfigurasi aplikasi untuk Member Base App.
+ * File ini menentukan semua aspek konfigurasi aplikasi termasuk:
+ * - Identitas perusahaan dan tenant
+ * - Fitur dan modul yang diaktifkan
+ * - Konfigurasi UI (tabs, menu, branding)
+ * - Konfigurasi layanan (API, auth, features)
+ * - Konfigurasi support dan QR button
  */
 
 import type { AppConfig } from '../../../packages/core/config/types/AppConfig';
 import Config from '../../../packages/core/native/Config';
 
 export const appConfig: AppConfig = {
+  // ============================================================================
+  // COMPANY & TENANT IDENTIFICATION
+  // ============================================================================
   companyInitial: 'TKIFTP', // Company initial (uppercase) - PRIMARY IDENTIFIER
   companyId: 'tki-ftp', // Company ID (kebab-case) - Auto-generated from companyInitial if not provided
   companyName: 'TKIFTP',
   tenantId: 'tki-ftp',
   segmentId: 'balance-management',
 
-  // Enabled features (feature flags)
-  enabledFeatures: [],
+  // ============================================================================
+  // FEATURES & MODULES
+  // ============================================================================
+  enabledFeatures: [], // Feature flags (currently unused)
+  enabledModules: [
+    'balance',
+    'payment',
+    'marketplace',
+    'marketplace-fnb',
+  ],
 
-  // Enabled modules/plugins
-  enabledModules: ['balance', 'payment', 'marketplace', 'marketplace-fnb'],
-
-  // Home variant from tenant config
-  homeVariant: 'member',
+  // ============================================================================
+  // UI CONFIGURATION
+  // ============================================================================
+  
+  // Home screen variant
+  homeVariant: 'dashboard', // Options: 'dashboard' | 'simple' | 'member' | 'custom'
 
   // Home tabs configuration (for member variant)
+  // Tabs akan ditampilkan di home screen dengan urutan sesuai order
   homeTabs: [
     {
-      id: 'fnb',
-      label: 'Pesan Makanan',
+      id: 'analytics',
+      label: 'F&B',
       visible: true,
       order: 1,
     },
     {
-      id: 'marketplace',
-      label: 'Marketplace',
-      visible: true,
-      order: 3,
-    },
-    {
-      id: 'home',
+      id: 'beranda',
       label: 'Beranda',
       visible: true,
       order: 2,
     },
-
+    {
+      id: 'news',
+      label: 'Marketplace',
+      visible: true,
+      order: 3,
+    },
   ],
 
-  // Menu configuration
+  // Menu configuration (bottom navigation / drawer menu)
   menuConfig: [
     {
       id: 'home',
@@ -54,50 +73,77 @@ export const appConfig: AppConfig = {
       route: 'Home',
       visible: true,
       order: 2,
-    }
+    },
   ],
 
-  // Payment methods
-  paymentMethods: ['balance', 'bank_transfer', 'virtual_account'],
+  // QR Button configuration
+  showQrButton: true, // Show/hide QR scan button on home screen
 
-  // Branding
+  // Akses Cepat (Quick Access) - hanya untuk member balance-management
+  quickAccessMenu: [
+    { id: 'topupva', route: 'VirtualAccount', labelKey: 'home.topUpVA', icon: 'topup', order: 1 },
+    { id: 'transfermember', route: 'TransferMember', labelKey: 'home.transferMember', icon: 'guest', order: 2 },
+    { id: 'kartuvirtual', route: 'VirtualAccount', labelKey: 'home.kartuVirtual', icon: 'payment', order: 3 },
+    { id: 'transferbank', route: 'Withdraw', labelKey: 'home.transferBank', icon: 'withdraw', order: 4 },
+  ],
+
+  // ============================================================================
+  // BRANDING
+  // ============================================================================
   branding: {
-    logo: 'assets/logo.png', // Set logo URL here (e.g., 'https://example.com/logo.png')
+    logo: 'assets/logo.png', // Logo path (relative path or URL)
     appName: 'Member Base App',
-    primaryColor: '#076409', // Accent color - akan digunakan untuk background card dan semua warna interaktif
+    primaryColor: '#076409', // Accent color - digunakan untuk semua warna interaktif (button, indicator, active states)
   },
 
-  // Login configuration
+  // ============================================================================
+  // PAYMENT CONFIGURATION
+  // ============================================================================
+  paymentMethods: [
+    'balance',
+    'bank_transfer',
+    'virtual_account',
+  ],
+
+  // ============================================================================
+  // AUTHENTICATION CONFIGURATION
+  // ============================================================================
   login: {
     showSignUp: true, // Show/hide sign up link
     showSocialLogin: true, // Show/hide social login buttons
-    socialLoginProviders: ['google'], // Available social login providers (only Google, no Facebook)
+    socialLoginProviders: ['google'], // Available providers: 'google' (Facebook tidak didukung)
   },
 
-  // Service configuration
+  // ============================================================================
+  // SERVICES CONFIGURATION
+  // ============================================================================
   services: {
+    // API Configuration
     api: {
-      // Use environment variable from .env.staging or .env.production
-      // Fallback to production URL for safety
+      // Base URL dari environment variable (.env.staging atau .env.production)
+      // Fallback ke production URL untuk safety
       baseUrl: Config.API_BASE_URL || 'https://api.solusiuntuknegeri.com',
-      timeout: 30000,
+      timeout: 30000, // Request timeout dalam milliseconds
     },
+
+    // Authentication Service
     auth: {
-      useMock: __DEV__, // Use mock in development, real API in production
+      useMock: true, // Gunakan mock data (no API calls) untuk development
     },
+
+    // Feature Flags
     features: {
-      pushNotification: true,
-      analytics: true,
-      crashReporting: false,
+      pushNotification: true, // Enable push notifications
+      analytics: true, // Enable analytics tracking
+      crashReporting: false, // Enable crash reporting
     },
   },
 
-  // QR Button configuration
-  showQrButton: true,
-
-  // Support configuration
+  // ============================================================================
+  // SUPPORT CONFIGURATION
+  // ============================================================================
   support: {
-    whatsappNumber: Config.SUPPORT_WHATSAPP_NUMBER || '6289526643223', // Format: country code + number without +
+    whatsappNumber: Config.SUPPORT_WHATSAPP_NUMBER || '6289526643223', // Format: country code + number tanpa +
     email: Config.SUPPORT_EMAIL || 'support@closepay.com',
   },
 };

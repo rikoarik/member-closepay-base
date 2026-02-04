@@ -7,7 +7,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import { TenantId, getTenantConfig, PluginRegistry, getPluginComponentLoader, QuickMenuSettingsScreen, OnboardingScreen, onboardingService, logger } from '@core/config';
+import { TenantId, getTenantConfig, getCurrentTenantId, PluginRegistry, getPluginComponentLoader, QuickMenuSettingsScreen, OnboardingScreen, onboardingService, logger } from '@core/config';
 import { ProfileScreen, EditProfileScreen } from '@core/account';
 import { LanguageSelectionScreen } from '@core/i18n';
 import { ThemeSettingsScreen, useTheme } from '@core/theme';
@@ -132,11 +132,13 @@ export function createAppNavigator({
     useEffect(() => {
       const loadNavigation = async () => {
         try {
-          // Get tenant config
-          const tenantConfig = getTenantConfig(tenantId);
-          
+          // Resolve tenant from current app config so loaded config is used (e.g. tki-ftp),
+          // not the app folder name (e.g. member-base) passed to createAppNavigator
+          const effectiveTenantId = getCurrentTenantId() ?? tenantId;
+          const tenantConfig = getTenantConfig(effectiveTenantId);
+
           if (!tenantConfig) {
-            logger.warn(`Tenant config not found for tenantId: ${tenantId}`);
+            logger.warn(`Tenant config not found for tenantId: ${effectiveTenantId}`);
           }
 
           // Wait for plugin registry to be initialized
