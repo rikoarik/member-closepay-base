@@ -7,14 +7,13 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  KeyboardAvoidingView,
   Platform,
   Keyboard,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
@@ -112,11 +111,7 @@ export const TransferMemberScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-      >
+      <View style={styles.flex}>
         <View style={[styles.header, { backgroundColor: colors.background }]}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ArrowLeft2 size={getIconSize('medium')} color={colors.text} variant="Outline" />
@@ -127,11 +122,14 @@ export const TransferMemberScreen = () => {
           <View style={styles.headerRight} />
         </View>
 
-        <ScrollView
+        <KeyboardAwareScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          extraScrollHeight={20}
         >
           <View style={[styles.section]}>
             <View style={[styles.sectionContent, { backgroundColor: colors.inputBackground }]}>
@@ -221,7 +219,7 @@ export const TransferMemberScreen = () => {
               />
             </View>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         <View
           style={[
@@ -241,7 +239,7 @@ export const TransferMemberScreen = () => {
             <Text style={styles.nextButtonText}>{t('common.next')}</Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </View>
 
       <TransferMemberSummaryBottomSheet
         visible={showSummaryBottomSheet}

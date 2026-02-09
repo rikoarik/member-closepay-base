@@ -43,6 +43,7 @@ import {
   getResponsiveFontSize,
   getIconSize,
   FontFamily,
+  useConfig,
 } from '@core/config';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -402,7 +403,7 @@ const MOCK_TRANSACTIONS: Record<string, any[]> = {
 const horizontalPadding = getHorizontalPadding();
 
 // Bottom sheet snap points
-const SHEET_MIN_HEIGHT = Platform.OS === 'ios' ? scale(450) : scale(480);
+const SHEET_MIN_HEIGHT = Platform.OS === 'ios' ? scale(440) : scale(480);
 const SHEET_MAX_HEIGHT_ANDROID = Platform.OS === 'ios' ? scale(50) : scale(40);
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT - SHEET_MAX_HEIGHT_ANDROID; // Almost full screen
 
@@ -411,6 +412,7 @@ export const BalanceDetailScreen = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { config } = useConfig();
   const { loadMutations, refresh, isLoading } = useBalance();
   const [showBalance, setShowBalance] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<number>(0);
@@ -548,6 +550,8 @@ export const BalanceDetailScreen = () => {
 
   const renderBalanceMenuCard = ({ item }: { item: (typeof MOCK_BALANCE_ACCOUNTS)[0] }) => {
     const accountActions = getAccountActionButtons(item);
+    // Get balance card color from config, fallback to primary color
+    const cardColor = config?.balanceCardColors?.[item.title] || colors.primary;
 
     return (
       <View style={[styles.cardWrapper, { backgroundColor: colors.surface }]}>
@@ -557,6 +561,7 @@ export const BalanceDetailScreen = () => {
           showBalance={showBalance}
           onToggleBalance={() => setShowBalance((v) => !v)}
           hideDetailButton={true}
+          backgroundColor={cardColor}
         />
 
         <View

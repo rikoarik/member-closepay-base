@@ -25,6 +25,7 @@ interface BalanceCardProps {
   hideDetailButton?: boolean; // Optional: hide detail button when true
   hideTitle?: boolean; // Optional: hide title when true
   hideBalanceLabel?: boolean; // Optional: hide balance label when true
+  backgroundColor?: string; // Optional: custom background color for the card (default: colors.primary)
   // Action button callbacks
   onTopUp?: () => void;
   onTransferMember?: () => void;
@@ -49,6 +50,7 @@ const areEqual = (prevProps: BalanceCardProps, nextProps: BalanceCardProps) => {
     prevProps.onToggleBalance === nextProps.onToggleBalance &&
     prevProps.hideDetailButton === nextProps.hideDetailButton &&
     prevProps.hideTitle === nextProps.hideTitle &&
+    prevProps.backgroundColor === nextProps.backgroundColor &&
     prevProps.onTopUp === nextProps.onTopUp &&
     prevProps.onTransferMember === nextProps.onTransferMember &&
     prevProps.onTransferBank === nextProps.onTransferBank &&
@@ -64,6 +66,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
   hideBalanceLabel = false,
   hideDetailButton = false, // Default: show detail button
   hideTitle = false, // Default: show title
+  backgroundColor,
   onTopUp,
   onTransferMember,
   onTransferBank,
@@ -86,11 +89,11 @@ export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
       : 'Rp ********';
   }, [balance, showBalance]);
 
-  // Card background style - menggunakan theme colors
+  // Card background style - menggunakan custom backgroundColor atau fallback ke colors.primary
   const cardBackgroundStyle = useMemo(() => [
     styles.cardContainer,
-    { backgroundColor: colors.primary }
-  ], [colors.primary]);
+    { backgroundColor: backgroundColor || colors.primary }
+  ], [backgroundColor, colors.primary]);
 
   // Memoized text styles
   const balanceLabelStyle = useMemo(() => [

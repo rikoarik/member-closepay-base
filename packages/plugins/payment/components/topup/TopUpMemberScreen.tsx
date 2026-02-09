@@ -7,15 +7,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   StyleSheet,
   TextInput,
   Animated,
   Dimensions,
-  KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
@@ -108,8 +107,8 @@ export const TopUpMemberScreen = () => {
   const dropdownOpacity = useRef(new Animated.Value(0)).current;
 
   // ScrollView refs for keyboard handling
-  const idMemberScrollRef = useRef<ScrollView>(null);
-  const excelScrollRef = useRef<ScrollView>(null);
+  const idMemberScrollRef = useRef<KeyboardAwareScrollView>(null);
+  const excelScrollRef = useRef<KeyboardAwareScrollView>(null);
 
   // Tabs configuration
   const tabs: Tab[] = [
@@ -586,11 +585,7 @@ export const TopUpMemberScreen = () => {
       </View>
 
       {/* Horizontal Pager - Swipeable Content */}
-      <KeyboardAvoidingView
-        style={styles.contentWrapper}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
-      >
+      <View style={styles.contentWrapper}>
         <Animated.ScrollView
           ref={pagerRef}
           horizontal
@@ -769,12 +764,12 @@ export const TopUpMemberScreen = () => {
                   />
                 </View>
               </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
           </View>
 
           {/* Excel Page */}
           <View style={[styles.pagerPage, { width: screenWidth }]}>
-            <ScrollView
+            <KeyboardAwareScrollView
               ref={excelScrollRef}
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
@@ -961,16 +956,19 @@ export const TopUpMemberScreen = () => {
                   </View>
                 </View>
               </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
           </View>
 
           {/* Tap Kartu Page */}
           <View style={[styles.pagerPage, { width: screenWidth }]}>
-            <ScrollView
+            <KeyboardAwareScrollView
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
+              enableOnAndroid={true}
+              enableAutomaticScroll={true}
+              extraScrollHeight={20}
             >
               <View style={styles.section}>
                 <View style={styles.tapKartuContainer}>
@@ -1167,13 +1165,13 @@ export const TopUpMemberScreen = () => {
                   </View>
                 </View>
               </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
           </View>
         </Animated.ScrollView>
-      </KeyboardAvoidingView>
+      </View>
 
       {/* Footer - Show for ID Member, Excel, and Tap Kartu (after card data loaded) */}
-      {/* Footer berada di luar KeyboardAvoidingView agar tidak ikut naik saat keyboard muncul */}
+      {/* Footer berada di luar scroll view agar tidak ikut naik saat keyboard muncul */}
       {(activeTab !== 'top-kartu' || cardData) && (
         <View
           style={[

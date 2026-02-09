@@ -24,6 +24,7 @@ import { NotificationScreen } from './src/screens/NotificationScreen';
 import { NewsDetailScreen } from './src/screens/NewsDetailScreen';
 import { NewsScreen } from './src/screens/NewsScreen';
 import { SearchScreen, SearchResultsScreen } from '@plugins/marketplace';
+// Virtual Card screens are loaded automatically from plugin registry
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/CustomToast';
 
@@ -68,6 +69,7 @@ function MemberBaseAppContent(): React.JSX.Element {
         <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
+        {/* Virtual Card screens are loaded automatically from plugin registry */}
       </>
     );
 

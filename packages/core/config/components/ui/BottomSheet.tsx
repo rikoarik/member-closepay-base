@@ -12,7 +12,6 @@ import {
   PanResponder,
   Animated,
   Pressable,
-  KeyboardAvoidingView,
   Keyboard,
 } from 'react-native';
 import { BlurView } from '@sbaiahmed1/react-native-blur';
@@ -173,6 +172,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const animatedSheetStyle = {
     transform: [{ translateY }],
   };
+
+  // Jangan render Modal saat visible=false untuk menghindari BlurView aktif saat app pertama kali di-run
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Modal

@@ -30,6 +30,7 @@ export const appConfig: AppConfig = {
   enabledModules: [
     'balance',
     'payment',
+    'card-transaction',
     'marketplace',
     'marketplace-fnb',
   ],
@@ -57,11 +58,12 @@ export const appConfig: AppConfig = {
       order: 2,
     },
     {
-      id: 'news',
-      label: 'Marketplace',
+      id: 'virtualcard',
+      label: 'Kartu Virtual',
       visible: true,
       order: 3,
     },
+   
   ],
 
   // Menu configuration (bottom navigation / drawer menu)
@@ -83,7 +85,7 @@ export const appConfig: AppConfig = {
   quickAccessMenu: [
     { id: 'topupva', route: 'VirtualAccount', labelKey: 'home.topUpVA', icon: 'topup', order: 1 },
     { id: 'transfermember', route: 'TransferMember', labelKey: 'home.transferMember', icon: 'guest', order: 2 },
-    { id: 'kartuvirtual', route: 'VirtualAccount', labelKey: 'home.kartuVirtual', icon: 'payment', order: 3 },
+    { id: 'kartuvirtual', route: 'VirtualCard', labelKey: 'home.kartuVirtual', icon: 'payment', order: 3 },
     { id: 'transferbank', route: 'Withdraw', labelKey: 'home.transferBank', icon: 'withdraw', order: 4 },
   ],
 
@@ -94,6 +96,20 @@ export const appConfig: AppConfig = {
     logo: 'assets/logo.png', // Logo path (relative path or URL)
     appName: 'Member Base App',
     primaryColor: '#076409', // Accent color - digunakan untuk semua warna interaktif (button, indicator, active states)
+  },
+
+  // ============================================================================
+  // BALANCE CARD COLORS CONFIGURATION
+  // ============================================================================
+  /**
+   * Background colors for different balance card types.
+   * Maps balance account title to background color.
+   * If not specified, uses branding.primaryColor as default.
+   */
+  balanceCardColors: {
+    'Saldo Utama': '#076409', // Green (default/primary)
+    'Saldo Plafon': '#3B82F6', // Blue
+    'Saldo Makan': '#10B981', // Green (lighter shade)
   },
 
   // ============================================================================

@@ -23,11 +23,40 @@ import React from 'react';
  */
 const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>>> = {
   balance: {
+    BalanceDetailScreen: () => import('../../../plugins/balance/components/screens/BalanceDetailScreen'),
     TransactionHistoryScreen: () => import('../../../plugins/balance/components/screens/TransactionHistoryScreen'),
     WithdrawIcon: () => import('../../../plugins/balance/components/ui/WithdrawIcon'),
     TopUpIcon: () => import('../../../plugins/balance/components/ui/TopUpIcon'),
     BalanceCard: () => import('../../../plugins/balance/components/ui/BalanceCard'),
-    BalanceDetailScreen: () => import('../../../plugins/balance/components/screens/BalanceDetailScreen'),
+  },
+  'card-transaction': {
+    VirtualCardScreen: () => import('../../../plugins/card-transaction/components/screens/VirtualCardScreen'),
+    VirtualCardDetailScreen: () => import('../../../plugins/card-transaction/components/screens/VirtualCardDetailScreen'),
+    AddVirtualCardScreen: () => import('../../../plugins/card-transaction/components/screens/AddVirtualCardScreen'),
+  },
+  marketplace: {
+    ProductCard: () => import('../../../plugins/marketplace/components/shared/ProductCard'),
+    ProductCardSkeleton: () => import('../../../plugins/marketplace/components/shared/ProductCardSkeleton'),
+    CartBar: () => import('../../../plugins/marketplace/components/shared/CartBar'),
+    MarketplaceScreen: () => import('../../../plugins/marketplace/components/screens/MarketplaceScreen'),
+    SearchScreen: () => import('../../../plugins/marketplace/components/screens/SearchScreen'),
+    SearchResultsScreen: () => import('../../../plugins/marketplace/components/screens/SearchResultsScreen'),
+    CartScreen: () => import('../../../plugins/marketplace/components/screens/CartScreen'),
+    ProductDetailScreen: () => import('../../../plugins/marketplace/components/screens/ProductDetailScreen'),
+    StoreDetailScreen: () => import('../../../plugins/marketplace/components/screens/StoreDetailScreen'),
+    CheckoutScreen: () => import('../../../plugins/marketplace/components/screens/CheckoutScreen'),
+  },
+  'marketplace-fnb': {
+    FnBItemCard: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemCard'),
+    FnBCategoryTabs: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCategoryTabs'),
+    FnBCartBar: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCartBar'),
+    FnBItemDetailSheet: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemDetailSheet'),
+    MerchantHeader: () => import('../../../plugins/marketplace-fnb/components/shared/MerchantHeader'),
+    FnBFavoritesScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBFavoritesScreen'),
+    FnBScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScreen'),
+    FnBMerchantDetailScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBMerchantDetailScreen'),
+    FnBCheckoutScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBCheckoutScreen'),
+    FnBScanScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScanScreen'),
   },
   payment: {
     TopUpScreen: () => import('../../../plugins/payment/components/topup/TopUpScreen'),
@@ -40,38 +69,12 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     TopUpMemberSuccessScreen: () => import('../../../plugins/payment/components/topup/TopUpMemberSuccessScreen'),
     TransferMemberScreen: () => import('../../../plugins/payment/components/transfer-member/TransferMemberScreen'),
     TransferMemberSuccessScreen: () => import('../../../plugins/payment/components/transfer-member/TransferMemberSuccessScreen'),
-    TransferMemberPinBottomSheet: () => import('../../../plugins/payment/components/transfer-member/TransferMemberPinBottomSheet'),
-    TransferMemberSummaryBottomSheet: () => import('../../../plugins/payment/components/transfer-member/TransferMemberSummaryBottomSheet'),
     TapKartuSummaryScreen: () => import('../../../plugins/payment/components/topup/TapKartuSummaryScreen'),
     QrScreen: () => import('../../../plugins/payment/components/qr/QrScreen'),
     EditQuickAmountScreen: () => import('../../../plugins/payment/components/qr/EditQuickAmountScreen'),
     PinInput: () => import('../../../plugins/payment/components/shared/PinInput'),
     WithdrawConfirmModal: () => import('../../../plugins/payment/components/withdraw/WithdrawConfirmModal'),
     AutoWithdrawModal: () => import('../../../plugins/payment/components/withdraw/AutoWithdrawModal'),
-  },
-  'marketplace': {
-    MarketplaceScreen: () => import('../../../plugins/marketplace/components/screens/MarketplaceScreen'),
-    SearchScreen: () => import('../../../plugins/marketplace/components/screens/SearchScreen'),
-    SearchResultsScreen: () => import('../../../plugins/marketplace/components/screens/SearchResultsScreen'),
-    CartScreen: () => import('../../../plugins/marketplace/components/screens/CartScreen'),
-    ProductDetailScreen: () => import('../../../plugins/marketplace/components/screens/ProductDetailScreen'),
-    CheckoutScreen: () => import('../../../plugins/marketplace/components/screens/CheckoutScreen'),
-    ProductCard: () => import('../../../plugins/marketplace/components/shared/ProductCard'),
-    ProductCardSkeleton: () => import('../../../plugins/marketplace/components/shared/ProductCardSkeleton'),
-    StoreDetailScreen: () => import('../../../plugins/marketplace/components/screens/StoreDetailScreen'),
-    CartBar: () => import('../../../plugins/marketplace/components/shared/CartBar'),
-  },
-  'marketplace-fnb': {
-    FnBMerchantDetailScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBMerchantDetailScreen'),
-    FnBScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScreen'),
-    FnBCheckoutScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBCheckoutScreen'),
-    FnBScanScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScanScreen'),
-    FnBItemCard: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemCard'),
-    FnBCategoryTabs: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCategoryTabs'),
-    FnBCartBar: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCartBar'),
-    FnBItemDetailSheet: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemDetailSheet'),
-    MerchantHeader: () => import('../../../plugins/marketplace-fnb/components/shared/MerchantHeader'),
-    FnBFavoritesScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBFavoritesScreen'),
   },
 };
 
@@ -83,6 +86,9 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
  * @returns Function that returns a Promise resolving to the component module
  */
 function generateComponentLoader(pluginId: string, componentName: string): () => Promise<any> {
+  // Access STATIC_COMPONENT_LOADERS using bracket notation to handle plugin IDs with dashes
+  // Keys with dashes are quoted in the object literal (e.g., 'marketplace-fnb')
+  // but can be accessed using bracket notation with the string value
   const pluginLoaders = STATIC_COMPONENT_LOADERS[pluginId];
   if (!pluginLoaders) {
     throw new Error(`No loader paths found for plugin: ${pluginId}`);

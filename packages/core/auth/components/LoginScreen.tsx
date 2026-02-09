@@ -11,15 +11,14 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleSheet,
   Dimensions,
   Keyboard,
   Image,
   Linking,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '@core/auth';
@@ -68,7 +67,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   const identifierInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
   // Get config dari service (simple, tidak reactive untuk prevent loop)
   const { config } = useConfig();
@@ -220,24 +219,22 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Absolute positioned background to ensure full coverage */}
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
         style={{ flex: 1, backgroundColor: 'transparent' }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -verticalScale(300)}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={{ flex: 1, backgroundColor: 'transparent' }}
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              backgroundColor: 'transparent',
-              flexGrow: 1,
-            },
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-          contentInsetAdjustmentBehavior="automatic">
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            backgroundColor: 'transparent',
+            flexGrow: 1,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={20}>
 
 
           <View style={styles.pageContainer}>
@@ -505,17 +502,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             </View>
           </View>
 
-        </ScrollView>
+      </KeyboardAwareScrollView>
 
-        {/* Error Modal - Only for API response errors */}
-        <ErrorModal
-          visible={showErrorModal}
-          title={t('auth.loginFailed')}
-          message={error || t('auth.loginError')}
-          onClose={handleCloseErrorModal}
-          buttonText={t('common.ok')}
-        />
-      </KeyboardAvoidingView>
+      {/* Error Modal - Only for API response errors */}
+      <ErrorModal
+        visible={showErrorModal}
+        title={t('auth.loginFailed')}
+        message={error || t('auth.loginError')}
+        onClose={handleCloseErrorModal}
+        buttonText={t('common.ok')}
+      />
     </SafeAreaView>
   );
 };

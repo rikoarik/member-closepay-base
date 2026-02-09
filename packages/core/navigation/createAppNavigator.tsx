@@ -175,7 +175,10 @@ export function createAppNavigator({
                     key={route.name}
                     name={route.name}
                     component={LazyComponent}
-                    options={{ title: route.meta?.title }}
+                    options={{ 
+                      title: route.meta?.title,
+                      headerShown: false, // Hide header by default for plugin screens
+                    }}
                   />
                 );
 

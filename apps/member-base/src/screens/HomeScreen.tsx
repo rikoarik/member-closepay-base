@@ -36,6 +36,7 @@ import {
   AktivitasTab,
   MarketplaceTab,
   FnBTab,
+  VirtualCardTab,
   BerandaNewsInfo,
 } from '../components/home';
 import { useNewsState } from '../components/home/TabContent/NewsTab';
@@ -181,8 +182,7 @@ const HomeScreenComponent = () => {
             onViewAllPress={() => {
               navigation.navigate('News' as never);
             }}
-            limit={5}
-            
+            limit={6}
           />
         );
       }
@@ -233,6 +233,15 @@ const HomeScreenComponent = () => {
             isActive={activeTab === tabId}
             isVisible={activeTab === tabId}
             scrollEnabled={false}
+          />
+        );
+      }
+
+      if (tabId === 'virtualcard' || tabId === 'kartu-virtual') {
+        return (
+          <VirtualCardTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
           />
         );
       }

@@ -9,9 +9,51 @@
         "payment"
     ],
     "exports": {
-        "screens": {}
+        "screens": {
+            "VirtualCard": "VirtualCardScreen",
+            "VirtualCardDetail": "VirtualCardDetailScreen",
+            "AddVirtualCard": "AddVirtualCardScreen"
+        }
     },
-    "routes": [],
+    "routes": [
+        {
+            "name": "VirtualCard",
+            "path": "/card-transaction/virtual-card",
+            "component": "VirtualCardScreen",
+            "permissions": [
+                "card:process"
+            ],
+            "meta": {
+                "title": "Virtual Card",
+                "showInMenu": true,
+                "icon": "payment"
+            }
+        },
+        {
+            "name": "VirtualCardDetail",
+            "path": "/card-transaction/virtual-card/detail",
+            "component": "VirtualCardDetailScreen",
+            "permissions": [
+                "card:process"
+            ],
+            "meta": {
+                "title": "Virtual Card Detail",
+                "showInMenu": false
+            }
+        },
+        {
+            "name": "AddVirtualCard",
+            "path": "/card-transaction/virtual-card/add",
+            "component": "AddVirtualCardScreen",
+            "permissions": [
+                "card:process"
+            ],
+            "meta": {
+                "title": "Add Virtual Card",
+                "showInMenu": false
+            }
+        }
+    ],
     "permissions": [
         "card:process"
     ]

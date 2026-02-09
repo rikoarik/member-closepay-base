@@ -10,14 +10,13 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
   Platform,
   Keyboard,
   Image,
   Alert,
   Linking,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Profile, GalleryEdit, Camera, Gallery } from 'iconsax-react-nativejs';
@@ -78,7 +77,7 @@ export const EditProfileScreen: React.FC = () => {
   const nameInputRef = useRef<TextInput>(null);
   const phoneInputRef = useRef<TextInput>(null);
   const addressInputRef = useRef<TextInput>(null);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
   const inputRefs = useRef<{ [key: string]: TextInput | null }>({});
 
   // Setup input refs
@@ -391,51 +390,49 @@ export const EditProfileScreen: React.FC = () => {
       ]}
     >
       <View style={styles.contentWrapper}>
-        <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
-        >
-          {/* Header */}
-          <ScreenHeader
-            title={t('profile.editProfile')}
-            onBackPress={() => navigation.goBack()}
-            style={{
-              paddingBottom: moderateVerticalScale(16),
-            }}
-            rightComponent={
-              isDirty ? (
-                <TouchableOpacity
-                  onPress={handleSave}
-                  disabled={isSaving}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        {/* Header */}
+        <ScreenHeader
+          title={t('profile.editProfile')}
+          onBackPress={() => navigation.goBack()}
+          style={{
+            paddingBottom: moderateVerticalScale(16),
+          }}
+          rightComponent={
+            isDirty ? (
+              <TouchableOpacity
+                onPress={handleSave}
+                disabled={isSaving}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Text
+                  style={{
+                    color: colors.primary,
+                    fontFamily: FontFamily.monasans.bold,
+                    fontSize: getResponsiveFontSize('medium'),
+                  }}
                 >
-                  <Text
-                    style={{
-                      color: colors.primary,
-                      fontFamily: FontFamily.monasans.bold,
-                      fontSize: getResponsiveFontSize('medium'),
-                    }}
-                  >
-                    {isSaving ? t('common.loading') : t('common.save')}
-                  </Text>
-                </TouchableOpacity>
-              ) : null
-            }
-          />
+                  {isSaving ? t('common.loading') : t('common.save')}
+                </Text>
+              </TouchableOpacity>
+            ) : null
+          }
+        />
 
-          {/* Form */}
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.scrollView}
-            contentContainerStyle={[
-              styles.scrollContent,
-              { paddingHorizontal: getHorizontalPadding() },
-            ]}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-          >
+        {/* Form */}
+        <KeyboardAwareScrollView
+          ref={scrollViewRef}
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingHorizontal: getHorizontalPadding() },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          extraScrollHeight={20}
+        >
             {/* Profile Photo Section */}
             <View style={styles.profilePhotoSection}>
               <View style={styles.profilePhotoContainer}>
@@ -688,8 +685,7 @@ export const EditProfileScreen: React.FC = () => {
                 }}
               />
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
       </View>
 
       {/* Photo Picker Bottom Sheet */}

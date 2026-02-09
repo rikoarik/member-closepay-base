@@ -10,14 +10,13 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleSheet,
   Linking,
   Alert,
   Dimensions,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 import { useAuth, authService, type MetadataItem, type SignUpData, type TagItem } from '@core/auth';
 import {
@@ -89,7 +88,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   const [otp, setOtp] = useState('');
   const [showOtpModal, setShowOtpModal] = useState(false);
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
 
   // Load metadata on mount - Using dummy data instead of API
   useEffect(() => {
@@ -976,26 +975,23 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
         />
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
         style={{ flex: 1, backgroundColor: 'transparent' }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            backgroundColor: 'transparent',
+            flexGrow: 1,
+          },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={20}
       >
-        <ScrollView
-          ref={scrollViewRef}
-          style={{ flex: 1, backgroundColor: 'transparent' }}
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              backgroundColor: 'transparent',
-              flexGrow: 1,
-            },
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-          contentInsetAdjustmentBehavior="automatic"
-        >
           <View style={[styles.content, { backgroundColor: 'transparent', paddingTop: 0 }]}>
             {/* Sign Up Form - At bottom */}
             <View style={[styles.formContainer, { backgroundColor: 'transparent' }]}>
@@ -1102,8 +1098,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               </View>
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
 
       {/* Error Modal */}
       <ErrorModal

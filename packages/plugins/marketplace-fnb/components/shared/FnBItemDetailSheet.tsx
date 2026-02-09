@@ -10,15 +10,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ScrollView,
   TextInput,
   Modal,
   StatusBar,
   Platform,
-  KeyboardAvoidingView,
   Keyboard,
   Dimensions,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft2, Add, Minus, Heart } from 'iconsax-react-nativejs';
 import { scale, moderateVerticalScale, FontFamily, getHorizontalPadding } from '@core/config';
@@ -67,7 +66,7 @@ export const FnBItemDetailSheet: React.FC<FnBItemDetailSheetProps> = ({
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const horizontalPadding = getHorizontalPadding();
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
   const prevVisibleRef = useRef(false);
 
   // Determine if editing existing cart item - needs to be recalculated when props change
@@ -161,62 +160,59 @@ export const FnBItemDetailSheet: React.FC<FnBItemDetailSheetProps> = ({
     >
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={0}
+        {/* Header with back button - overlays image */}
+        <View
+          style={[
+            styles.header,
+            {
+              paddingTop: insets.top + scale(8),
+            },
+          ]}
         >
-          {/* Header with back button - overlays image */}
-          <View
-            style={[
-              styles.header,
-              {
-                paddingTop: insets.top + scale(8),
-              },
-            ]}
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: 'rgba(0,0,0,0.4)' }]}
+            onPress={handleClose}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
+            <ArrowLeft2 size={scale(24)} color="#FFFFFF" variant="Linear" />
+          </TouchableOpacity>
+
+          {/* Favorite button */}
+          {onToggleFavorite && item && (
             <TouchableOpacity
-              style={[styles.backButton, { backgroundColor: 'rgba(0,0,0,0.4)' }]}
-              onPress={handleClose}
+              style={[styles.favoriteButton, { backgroundColor: 'rgba(0,0,0,0.4)' }]}
+              onPress={() => onToggleFavorite(item)}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <ArrowLeft2 size={scale(24)} color="#FFFFFF" variant="Linear" />
+              <Heart
+                size={scale(24)}
+                color={isFavorite ? '#E53935' : '#FFFFFF'}
+                variant={isFavorite ? 'Bold' : 'Linear'}
+              />
             </TouchableOpacity>
+          )}
+        </View>
 
-            {/* Favorite button */}
-            {onToggleFavorite && item && (
-              <TouchableOpacity
-                style={[styles.favoriteButton, { backgroundColor: 'rgba(0,0,0,0.4)' }]}
-                onPress={() => onToggleFavorite(item)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Heart
-                  size={scale(24)}
-                  color={isFavorite ? '#E53935' : '#FFFFFF'}
-                  variant={isFavorite ? 'Bold' : 'Linear'}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Scrollable content */}
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.scrollView}
-            contentContainerStyle={[
-              styles.scrollContent,
-              {
-                paddingBottom: keyboardVisible
-                  ? moderateVerticalScale(20)
-                  : insets.bottom + scale(100),
-              },
-            ]}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="interactive"
-            bounces={true}
-            overScrollMode="always"
-          >
+        {/* Scrollable content */}
+        <KeyboardAwareScrollView
+          ref={scrollViewRef}
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingBottom: keyboardVisible
+                ? moderateVerticalScale(20)
+                : insets.bottom + scale(100),
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          bounces={true}
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          extraScrollHeight={20}
+        >
             {/* Hero Image */}
             <View style={styles.imageContainer}>
               {item.imageUrl ? (
@@ -431,7 +427,7 @@ export const FnBItemDetailSheet: React.FC<FnBItemDetailSheetProps> = ({
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
 
           {/* Fixed bottom bar */}
           <View
@@ -495,7 +491,6 @@ export const FnBItemDetailSheet: React.FC<FnBItemDetailSheetProps> = ({
               </Text>
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
@@ -503,9 +498,6 @@ export const FnBItemDetailSheet: React.FC<FnBItemDetailSheetProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  keyboardAvoidingView: {
     flex: 1,
   },
   header: {

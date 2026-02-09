@@ -5,11 +5,10 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
   Platform,
   Keyboard,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Edit2, Trash, TickCircle } from 'iconsax-react-nativejs';
@@ -45,7 +44,7 @@ export const EditQuickAmountScreen: React.FC = () => {
   const [quickAmounts, setQuickAmounts] = useState<number[]>(initialAmounts);
   const [editingAmount, setEditingAmount] = useState<{ index: number; value: number } | null>(null);
   const [newAmount, setNewAmount] = useState('');
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
   const inputRefs = useRef<{ [key: number]: TextInput | null }>({});
   const itemRefs = useRef<{ [key: number]: View | null }>({});
 
@@ -197,21 +196,19 @@ export const EditQuickAmountScreen: React.FC = () => {
         }
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingHorizontal: getHorizontalPadding(), paddingBottom: insets.bottom },
+        ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={20}
       >
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingHorizontal: getHorizontalPadding(), paddingBottom: insets.bottom },
-          ]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
           {quickAmounts.map((quickAmount, index) => (
             <View
               key={`edit-${quickAmount}-${index}`}
@@ -333,8 +330,7 @@ export const EditQuickAmountScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };

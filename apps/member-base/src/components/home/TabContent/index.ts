@@ -9,6 +9,7 @@ export { BerandaTab } from './BerandaTab';
 export { AktivitasTab } from './AktivitasTab';
 export { MarketplaceTab } from './MarketplaceTab';
 export { FnBTab } from './FnBTab';
+export { VirtualCardTab } from './VirtualCardTab';
 export { BerandaNewsInfo, type BerandaNewsInfoProps } from './BerandaNewsInfo';
 export { RecentTransactions, type RecentTransactionsProps } from './RecentTransactions';
 

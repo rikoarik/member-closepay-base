@@ -14,6 +14,14 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
   balance: {
     BalanceDetailScreen: '../../../plugins/balance/components/screens/BalanceDetailScreen',
     TransactionHistoryScreen: '../../../plugins/balance/components/screens/TransactionHistoryScreen',
+    WithdrawIcon: '../../../plugins/balance/components/ui/WithdrawIcon',
+    TopUpIcon: '../../../plugins/balance/components/ui/TopUpIcon',
+    BalanceCard: '../../../plugins/balance/components/ui/BalanceCard',
+  },
+  card-transaction: {
+    VirtualCardScreen: '../../../plugins/card-transaction/components/screens/VirtualCardScreen',
+    VirtualCardDetailScreen: '../../../plugins/card-transaction/components/screens/VirtualCardDetailScreen',
+    AddVirtualCardScreen: '../../../plugins/card-transaction/components/screens/AddVirtualCardScreen',
   },
   marketplace: {
     ProductCard: '../../../plugins/marketplace/components/shared/ProductCard',
@@ -27,17 +35,17 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     StoreDetailScreen: '../../../plugins/marketplace/components/screens/StoreDetailScreen',
     CheckoutScreen: '../../../plugins/marketplace/components/screens/CheckoutScreen',
   },
-  'marketplace-fnb': {
+  marketplace-fnb: {
     FnBItemCard: '../../../plugins/marketplace-fnb/components/shared/FnBItemCard',
     FnBCategoryTabs: '../../../plugins/marketplace-fnb/components/shared/FnBCategoryTabs',
     FnBCartBar: '../../../plugins/marketplace-fnb/components/shared/FnBCartBar',
     FnBItemDetailSheet: '../../../plugins/marketplace-fnb/components/shared/FnBItemDetailSheet',
     MerchantHeader: '../../../plugins/marketplace-fnb/components/shared/MerchantHeader',
+    FnBFavoritesScreen: '../../../plugins/marketplace-fnb/components/screens/FnBFavoritesScreen',
     FnBScreen: '../../../plugins/marketplace-fnb/components/screens/FnBScreen',
     FnBMerchantDetailScreen: '../../../plugins/marketplace-fnb/components/screens/FnBMerchantDetailScreen',
     FnBCheckoutScreen: '../../../plugins/marketplace-fnb/components/screens/FnBCheckoutScreen',
     FnBScanScreen: '../../../plugins/marketplace-fnb/components/screens/FnBScanScreen',
-    FnBFavoritesScreen: '../../../plugins/marketplace-fnb/components/screens/FnBFavoritesScreen',
   },
   payment: {
     TopUpScreen: '../../../plugins/payment/components/topup/TopUpScreen',
@@ -49,10 +57,10 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     TopUpMemberPinScreen: '../../../plugins/payment/components/topup/TopUpMemberPinScreen',
     TopUpMemberSuccessScreen: '../../../plugins/payment/components/topup/TopUpMemberSuccessScreen',
     TransferMemberScreen: '../../../plugins/payment/components/transfer-member/TransferMemberScreen',
-    TransferMemberSummaryBottomSheet: '../../../plugins/payment/components/transfer-member/TransferMemberSummaryBottomSheet',
-    TransferMemberPinBottomSheet: '../../../plugins/payment/components/transfer-member/TransferMemberPinBottomSheet',
     TransferMemberSuccessScreen: '../../../plugins/payment/components/transfer-member/TransferMemberSuccessScreen',
     TapKartuSummaryScreen: '../../../plugins/payment/components/topup/TapKartuSummaryScreen',
+    QrScreen: '../../../plugins/payment/components/qr/QrScreen',
+    EditQuickAmountScreen: '../../../plugins/payment/components/qr/EditQuickAmountScreen',
     PinInput: '../../../plugins/payment/components/shared/PinInput',
     WithdrawConfirmModal: '../../../plugins/payment/components/withdraw/WithdrawConfirmModal',
     AutoWithdrawModal: '../../../plugins/payment/components/withdraw/AutoWithdrawModal',

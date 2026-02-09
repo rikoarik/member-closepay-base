@@ -32,6 +32,14 @@ export interface AppConfig {
   // Branding
   branding: BrandingConfig;
 
+  /**
+   * Balance card background colors configuration.
+   * Maps balance account title/type to background color.
+   * Example: { 'Saldo Plafon': '#3B82F6', 'Saldo Makan': '#10B981' }
+   * If not specified, uses branding.primaryColor as default.
+   */
+  balanceCardColors?: Record<string, string>;
+
   // Login configuration
   login?: LoginConfig;
 

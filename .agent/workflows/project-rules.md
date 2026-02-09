@@ -122,6 +122,7 @@ const ICON_INSTANCES = {
 ### Prinsip
 
 - Komentar menjelaskan **"mengapa"**, bukan **"apa"**
+- Penggunaan shadow menggunakan box shadow jangan yang lain 
 - Gunakan nama variabel/fungsi yang jelas daripada komentar
 
 ---

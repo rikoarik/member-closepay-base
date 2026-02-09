@@ -49,6 +49,7 @@ function logInfo(message) {
 const ROOT_DIR = path.resolve(__dirname, '..');
 const PLUGINS_DIR = path.join(ROOT_DIR, 'packages', 'plugins');
 const OUTPUT_FILE = path.join(ROOT_DIR, 'packages', 'core', 'config', 'plugins', 'componentLoaderPaths.ts');
+const PLUGIN_COMPONENT_LOADER_FILE = path.join(ROOT_DIR, 'packages', 'core', 'config', 'plugins', 'pluginComponentLoader.ts');
 
 /**
  * Common path patterns to try when finding component files
@@ -59,10 +60,20 @@ const PATH_PATTERNS = [
   (componentName, pluginId) => `components/${componentName}/${componentName}`,
   
   // Pattern 2: components/{folder}/{ComponentName} (for nested structures)
-  // We'll try common folders: topup, withdraw, shared, virtual-account, etc.
+  // Scan all folders in components/ directory
   (componentName, pluginId) => {
-    const commonFolders = ['topup', 'withdraw', 'shared', 'virtual-account', 'topup-member', 'screens'];
-    for (const folder of commonFolders) {
+    const componentsDir = path.join(PLUGINS_DIR, pluginId, 'components');
+    if (!fs.existsSync(componentsDir)) {
+      return null;
+    }
+    
+    // Get all subdirectories in components/
+    const subdirs = fs.readdirSync(componentsDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+    
+    // Try each subdirectory
+    for (const folder of subdirs) {
       const testPath = `components/${folder}/${componentName}`;
       const fullPath = path.join(PLUGINS_DIR, pluginId, testPath);
       if (fs.existsSync(fullPath + '.tsx') || fs.existsSync(fullPath + '.ts')) {
@@ -147,6 +158,67 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {`
 }
 
 /**
+ * Generate TypeScript code for STATIC_COMPONENT_LOADERS in pluginComponentLoader.ts
+ */
+function generateStaticComponentLoadersCode(loaders) {
+  const entries = [];
+  
+  for (const [pluginId, components] of Object.entries(loaders)) {
+    const componentEntries = [];
+    
+    for (const [componentName, componentPath] of Object.entries(components)) {
+      componentEntries.push(`    ${componentName}: () => import('${componentPath}'),`);
+    }
+    
+    // Wrap plugin ID with quotes if it contains dash
+    const pluginKey = pluginId.includes('-') ? `'${pluginId}'` : pluginId;
+    entries.push(`  ${pluginKey}: {`);
+    entries.push(...componentEntries);
+    entries.push(`  },`);
+  }
+  
+  return entries.join('\n');
+}
+
+/**
+ * Update STATIC_COMPONENT_LOADERS in pluginComponentLoader.ts
+ */
+function updatePluginComponentLoader(loaders) {
+  if (!fs.existsSync(PLUGIN_COMPONENT_LOADER_FILE)) {
+    logWarning(`File not found: ${PLUGIN_COMPONENT_LOADER_FILE}`);
+    return;
+  }
+
+  const fileContent = fs.readFileSync(PLUGIN_COMPONENT_LOADER_FILE, 'utf8');
+  
+  // Find the STATIC_COMPONENT_LOADERS block using regex
+  const regex = /(const STATIC_COMPONENT_LOADERS: Record<string, Record<string, \(\) => Promise<any>>> = \{)([\s\S]*?)(\};)/;
+  const match = fileContent.match(regex);
+  
+  if (!match) {
+    logWarning('Could not find STATIC_COMPONENT_LOADERS block in pluginComponentLoader.ts');
+    return;
+  }
+  
+  // Generate new STATIC_COMPONENT_LOADERS code
+  const newLoadersCode = generateStaticComponentLoadersCode(loaders);
+  
+  // Replace the block content (keep the declaration and closing brace)
+  const newContent = fileContent.replace(
+    regex,
+    `$1\n${newLoadersCode}\n$3`
+  );
+  
+  // Write back to file
+  try {
+    fs.writeFileSync(PLUGIN_COMPONENT_LOADER_FILE, newContent, 'utf8');
+    logSuccess(`Updated: ${path.relative(ROOT_DIR, PLUGIN_COMPONENT_LOADER_FILE)}`);
+  } catch (error) {
+    logError(`Failed to update pluginComponentLoader.ts: ${error.message}`);
+  }
+}
+
+/**
  * Main function
  */
 function generateLoaders() {
@@ -191,13 +263,23 @@ function generateLoaders() {
       // Also include screens if they exist
       if (manifest.exports?.screens) {
         // screens is an object { "ExportName": "ComponentName" }
-        // We want the ComponentName values
+        // We want the ComponentName values (the actual component names, not export names)
         const screenComponents = Object.values(manifest.exports.screens);
         components = [...components, ...screenComponents];
       }
       
       // Remove duplicates
       components = [...new Set(components)];
+      
+      // Also check if any component names in exports.components are actually screen export names
+      // If so, resolve them to actual component names from exports.screens
+      if (manifest.exports?.screens) {
+        const screenMap = manifest.exports.screens;
+        components = components.map(compName => {
+          // If this is an export name (key) in screens, use the actual component name (value)
+          return screenMap[compName] || compName;
+        });
+      }
       
       if (components.length === 0) {
         logWarning(`No components exported by plugin: ${pluginId}`);
@@ -240,7 +322,7 @@ function generateLoaders() {
   
   const code = generateTypeScriptCode(allLoaders);
   
-  // Write to file
+  // Write componentLoaderPaths.ts
   try {
     fs.writeFileSync(OUTPUT_FILE, code, 'utf8');
     logSuccess(`\nGenerated: ${path.relative(ROOT_DIR, OUTPUT_FILE)}`);
@@ -248,6 +330,9 @@ function generateLoaders() {
     logError(`Failed to write file: ${error.message}`);
     process.exit(1);
   }
+  
+  // Update STATIC_COMPONENT_LOADERS in pluginComponentLoader.ts
+  updatePluginComponentLoader(allLoaders);
   
   // Show warnings
   if (warnings.length > 0) {
@@ -258,7 +343,7 @@ function generateLoaders() {
   
   logSuccess('\n✓ Plugin loader generation completed!');
   logInfo('\nNext steps:');
-  logInfo('  1. Review the generated file');
+  logInfo('  1. Review the generated files');
   logInfo('  2. Manually add any missing components if needed');
   logInfo('  3. Run: npm run generate:loaders (whenever you add new components)');
 }
