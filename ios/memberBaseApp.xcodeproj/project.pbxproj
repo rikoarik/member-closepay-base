@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0C80B921A6F3F58F76C31292 /* libPods-MemberBaseApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-MemberBaseApp.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		1BEBA55EC61C47D1B7904A13 /* MonaSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 215FC220CB9F49F7862F9E9F /* MonaSans-ExtraBoldItalic.ttf */; };
 		1E30C51C7E764DD7A63D6057 /* MonaSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2012B94E9299437E80542C16 /* MonaSans-Light.ttf */; };
@@ -28,6 +27,7 @@
 		843175BC905143F999BC3EFA /* MonaSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CAC2CF82BBF74A968C210E0D /* MonaSans-Regular.ttf */; };
 		85C2E4ADF3DA4DC680CEDF48 /* MonaSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 210E6CAAACDE45B19AE5AD9F /* MonaSans-Italic.ttf */; };
 		865858287E3A487B8368BDEF /* MonaSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A6E9287B487B410ABE6BBF19 /* MonaSans-ExtraLight.ttf */; };
+		CB0F81EE37C35F260135974B /* Pods_MemberBaseApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63E0F76155B1C22FB7A1F1A9 /* Pods_MemberBaseApp.framework */; };
 		E952D3E25FDF2D660C5CDC40 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		F19A59DEF9F6471D890A7203 /* MonaSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAB3E5E21B2243A093D543E6 /* MonaSans-LightItalic.ttf */; };
 /* End PBXBuildFile section */
@@ -45,11 +45,10 @@
 		210E6CAAACDE45B19AE5AD9F /* MonaSans-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-Italic.ttf"; path = "../assets/fonts/MonaSans-Italic.ttf"; sourceTree = "<group>"; };
 		215FC220CB9F49F7862F9E9F /* MonaSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-ExtraBoldItalic.ttf"; path = "../assets/fonts/MonaSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
 		2B7B06AA6599492BB71BFB41 /* MonaSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-Bold.ttf"; path = "../assets/fonts/MonaSans-Bold.ttf"; sourceTree = "<group>"; };
-		3B4392A12AC88292D35C810B /* Pods-MemberBaseApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemberBaseApp.debug.xcconfig"; path = "Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp.debug.xcconfig"; sourceTree = "<group>"; };
-		5709B34CF0A7D63546082F79 /* Pods-MemberBaseApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemberBaseApp.release.xcconfig"; path = "Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp.release.xcconfig"; sourceTree = "<group>"; };
 		5977D438025A4E5C9DECB755 /* README.md */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = README.md; path = ../assets/fonts/README.md; sourceTree = "<group>"; };
-		5DCACB8F33CDC322A6C60F78 /* libPods-MemberBaseApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MemberBaseApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5B278F01A8359B744CA79605 /* Pods-MemberBaseApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemberBaseApp.release.xcconfig"; path = "Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp.release.xcconfig"; sourceTree = "<group>"; };
 		60DFD519B50C492084F35AA5 /* MonaSans-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-Black.ttf"; path = "../assets/fonts/MonaSans-Black.ttf"; sourceTree = "<group>"; };
+		63E0F76155B1C22FB7A1F1A9 /* Pods_MemberBaseApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MemberBaseApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F78D99644C54237B8330EAF /* MonaSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-SemiBold.ttf"; path = "../assets/fonts/MonaSans-SemiBold.ttf"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = MemberBaseApp/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = MemberBaseApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -59,6 +58,7 @@
 		CAC2CF82BBF74A968C210E0D /* MonaSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-Regular.ttf"; path = "../assets/fonts/MonaSans-Regular.ttf"; sourceTree = "<group>"; };
 		D177049DC3484A9F8B371E76 /* MonaSans-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-MediumItalic.ttf"; path = "../assets/fonts/MonaSans-MediumItalic.ttf"; sourceTree = "<group>"; };
 		D37A25319BD745D49456A4A6 /* MonaSans-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-BlackItalic.ttf"; path = "../assets/fonts/MonaSans-BlackItalic.ttf"; sourceTree = "<group>"; };
+		ECA920EA9BD32E73E455FFFA /* Pods-MemberBaseApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemberBaseApp.debug.xcconfig"; path = "Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAB3E5E21B2243A093D543E6 /* MonaSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "MonaSans-LightItalic.ttf"; path = "../assets/fonts/MonaSans-LightItalic.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -68,7 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C80B921A6F3F58F76C31292 /* libPods-MemberBaseApp.a in Frameworks */,
+				CB0F81EE37C35F260135974B /* Pods_MemberBaseApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,7 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				5DCACB8F33CDC322A6C60F78 /* libPods-MemberBaseApp.a */,
+				63E0F76155B1C22FB7A1F1A9 /* Pods_MemberBaseApp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -155,8 +155,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				3B4392A12AC88292D35C810B /* Pods-MemberBaseApp.debug.xcconfig */,
-				5709B34CF0A7D63546082F79 /* Pods-MemberBaseApp.release.xcconfig */,
+				ECA920EA9BD32E73E455FFFA /* Pods-MemberBaseApp.debug.xcconfig */,
+				5B278F01A8359B744CA79605 /* Pods-MemberBaseApp.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -168,13 +168,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "MemberBaseApp" */;
 			buildPhases = (
-				C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */,
+				B08EAEE99C8D85CF6732F61F /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
-				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				2440167691C68BDA515FB146 /* [CP] Embed Pods Frameworks */,
+				364693D7A8496D833B4C1E8F /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -264,7 +264,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n# Quote paths so '&' in path (e.g. member-app&web) is not interpreted by shell\n/bin/sh -c \"\\\"$WITH_ENVIRONMENT\\\" \\\"$REACT_NATIVE_XCODE\\\"\"\n";
 		};
-		00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */ = {
+		2440167691C68BDA515FB146 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -281,7 +281,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
+		364693D7A8496D833B4C1E8F /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B08EAEE99C8D85CF6732F61F /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -303,23 +320,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MemberBaseApp/Pods-MemberBaseApp-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -336,7 +336,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-MemberBaseApp.debug.xcconfig */;
+			baseConfigurationReference = ECA920EA9BD32E73E455FFFA /* Pods-MemberBaseApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -364,7 +364,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-MemberBaseApp.release.xcconfig */;
+			baseConfigurationReference = 5B278F01A8359B744CA79605 /* Pods-MemberBaseApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -437,6 +437,19 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
@@ -506,6 +519,19 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,

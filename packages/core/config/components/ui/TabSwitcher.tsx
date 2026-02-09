@@ -215,13 +215,18 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
   const tabLayouts = useRef<{ [key: string]: TabLayout }>({});
   const [containerWidth, setContainerWidth] = useState(0);
 
-  // Initialize animated values hanya sekali
+  // Initialize animated values hanya sekali (perlu setidaknya 1 tab untuk interpolate)
   const animatedValues = useRef<{ [key: string]: Animated.Value }>(null!);
   if (!animatedValues.current) {
     animatedValues.current = tabs.reduce((acc, tab) => {
       acc[tab.id] = new Animated.Value(activeTab === tab.id ? 1 : 0);
       return acc;
     }, {} as { [key: string]: Animated.Value });
+  }
+
+  // Jangan render tab switcher jika tidak ada tab (hindari crash interpolate outputRange)
+  if (tabs.length === 0) {
+    return <View style={[styles.container, { paddingHorizontal: containerPaddingHorizontal }, config.containerStyle]} />;
   }
 
   // Animated values untuk sliding indicator
@@ -316,8 +321,9 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
   );
 
   // Calculate interpolated indicator position if scrollX is present
+  // outputRange must have at least 2 elements (React Native Animated requirement)
   const interpolatedIndicatorTranslateX = useMemo(() => {
-    if (scrollX && pagerWidth && containerWidth > 0 && tabs.length > 0) {
+    if (scrollX && pagerWidth && containerWidth > 0 && tabs.length >= 2) {
       const totalPadding = scale(4) * 2; // Padding horizontal wrapper
       const availableWidth = containerWidth - totalPadding;
       const tabWidth = availableWidth / tabs.length;
@@ -325,7 +331,6 @@ export const TabSwitcher: React.FC<TabSwitcherProps> = React.memo(({
       // Input range: [0, pagerWidth, 2*pagerWidth, ...]
       const inputRange = tabs.map((_, i) => i * pagerWidth);
       // Output range: [startX, startX + tabWidth, startX + 2*tabWidth, ...]
-      // startX is usually paddingLeft which is scale(4)
       const startX = scale(4);
       const outputRange = tabs.map((_, i) => startX + (i * tabWidth));
 

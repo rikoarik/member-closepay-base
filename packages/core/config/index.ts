@@ -41,6 +41,7 @@ export { QuickMenuSettingsScreen } from './components/ui/QuickMenuSettingsScreen
 export * from './services/permissionService';
 export * from './services/onboardingService';
 export * from './services/quickMenuService';
+export * from './services/homeTabSettingsService';
 
 // Notification
 export * from '../notification';

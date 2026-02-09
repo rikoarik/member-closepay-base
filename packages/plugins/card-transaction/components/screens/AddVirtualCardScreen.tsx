@@ -20,12 +20,11 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft2 } from 'iconsax-react-nativejs';
-import LinearGradient from 'react-native-linear-gradient';
+import { ArrowLeft2, Wifi } from 'iconsax-react-nativejs';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { scale, moderateScale, moderateVerticalScale } from '@core/config';
+import { scale, moderateScale, moderateVerticalScale, SvgLinearGradientView } from '@core/config';
 
 const { width: W } = Dimensions.get('window');
 const CARD_PREVIEW_W = W * 0.82;
@@ -111,7 +110,7 @@ function LiveCardPreview({
   const { t } = useTranslation();
   return (
     <View style={styles.cardOuter}>
-      <LinearGradient colors={colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardBg}>
+      <SvgLinearGradientView colors={colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardBg}>
         <View style={styles.pattern1} />
         <View style={styles.pattern2} />
         <View style={styles.pattern3} />
@@ -122,11 +121,13 @@ function LiveCardPreview({
               <Text style={styles.brand} numberOfLines={1}>{cardName || t('home.closepayBrand')}</Text>
               <Text style={styles.subBrand} numberOfLines={1}>{t('home.member')}</Text>
             </View>
+            <View style={{ transform: [{ rotate: '90deg' }] }}>
+              <Wifi size={scale(34)} color={'white'} variant="Outline" />
+            </View>
           </View>
           <View style={styles.cardMid}>
             <View style={styles.chipNfc}>
               <ChipIcon />
-              <NfcIcon />
             </View>
           </View>
           <View style={styles.cardFooter}>
@@ -140,7 +141,7 @@ function LiveCardPreview({
             </View>
           </View>
         </View>
-      </LinearGradient>
+      </SvgLinearGradientView>
     </View>
   );
 }
@@ -190,7 +191,7 @@ export function AddVirtualCardScreen() {
             onPress={() => setColorPickerVisible(true)}
             activeOpacity={0.7}
           >
-            <LinearGradient
+            <SvgLinearGradientView
               colors={gradientColors}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -348,7 +349,7 @@ export function AddVirtualCardScreen() {
                   }}
                   activeOpacity={0.8}
                 >
-                  <LinearGradient
+                  <SvgLinearGradientView
                     colors={preset.colors}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}

@@ -88,5 +88,7 @@ declare module 'iconsax-react-nativejs' {
   export class Copy2 extends Component<IconProps> { }
   export class Wifi extends Component<IconProps> { }
   export class Brush extends Component<IconProps> { }
+  export class InfoCircle extends Component<IconProps> { }
+  export class DocumentDownload extends Component<IconProps> { }
 }
 

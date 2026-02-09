@@ -226,7 +226,6 @@ function MemberBaseAppContent(): React.JSX.Element {
     <>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
-        translucent={true}
       />
       <AppNavigator />
       <Toast config={toastConfig} />

@@ -6,7 +6,6 @@
  */
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList, Platform } from 'react-native';
-import { BlurView } from '@sbaiahmed1/react-native-blur';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import {
@@ -260,14 +259,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       hardwareAccelerated
     >
       <View style={styles.modal}>
-        {Platform.OS === 'ios' && (
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="systemThinMaterial"
-            blurAmount={10}
-            overlayColor="rgba(255, 255, 255, 0.5)"
-          />
-        )}
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
         <View
           style={[
             styles.container,
@@ -386,6 +378,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'transparent',
+    overflow: 'hidden',
   },
   container: {
     borderTopLeftRadius: scale(20),

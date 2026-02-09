@@ -76,7 +76,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const showSignUp = loginConfig.showSignUp !== false; // Default true
   const showSocialLogin = loginConfig.showSocialLogin === true; // Default false
   const socialProviders = loginConfig.socialLoginProviders || ['google']; // Default only Google, no Facebook
-  const logoUri = config?.branding?.logo || '';
+  const logoFromConfig = config?.branding?.logo || '';
+  const logoUri = typeof logoFromConfig === 'string' && (logoFromConfig.startsWith('http://') || logoFromConfig.startsWith('https://'))
+    ? logoFromConfig
+    : '';
   const [appVersion, setAppVersion] = useState<string>('1.0.0');
 
   // Get app version on mount (async)
@@ -270,6 +273,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               <View style={styles.formContainer}>
                 <View style={styles.formSection}>
                   <Text style={[styles.title, { color: colors.text }]}>{t('auth.login')}</Text>
+                  <View style={[styles.demoInfoBox, { backgroundColor: colors.infoLight || colors.surfaceSecondary, borderColor: colors.info }]}>
+                    <Text style={[styles.demoInfoText, { color: colors.textSecondary }]}>
+                      {t('auth.loginDemoInfo')}
+                    </Text>
+                  </View>
                   {/* Identifier Input - Username, Email, or Phone */}
                   <View style={styles.inputContainer}>
                     <Text style={[styles.label, { color: colors.text }]}>{t('auth.identifierLabel')}</Text>
@@ -605,6 +613,18 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     marginTop: moderateVerticalScale(34),
     marginBottom: moderateVerticalScale(16),
+  },
+  demoInfoBox: {
+    paddingVertical: moderateVerticalScale(10),
+    paddingHorizontal: scale(14),
+    borderRadius: scale(12),
+    borderWidth: 1,
+    marginBottom: moderateVerticalScale(16),
+  },
+  demoInfoText: {
+    fontSize: getResponsiveFontSize('small'),
+    fontFamily: FontFamily.monasans.regular,
+    textAlign: 'left',
   },
   subtitle: {
     fontSize: getResponsiveFontSize('medium'),

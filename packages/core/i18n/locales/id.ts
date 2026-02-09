@@ -94,6 +94,7 @@ export const id = {
   },
   auth: {
     login: 'Login',
+    loginDemoInfo: 'Info login: Username: member | Password: Pass1234!',
     email: 'Email',
     password: 'Password',
     forgotPassword: 'Lupa Password?',
@@ -173,6 +174,7 @@ export const id = {
     topUpVA: 'Top Up VA',
     transferMember: 'Transfer Member',
     kartuVirtual: 'Kartu Virtual',
+    virtualCardDetail: 'Detail Kartu Virtual',
     virtualcard: 'Kartu Virtual',
     transferBank: 'Transfer Bank',
     payIPL: 'Bayar IPL',
@@ -184,6 +186,7 @@ export const id = {
     analytics: 'Analitik',
     transactions: 'Transaksi',
     news: 'Berita',
+    berandaNews: 'Beranda & Berita',
     newsInfo: 'Info Berita',
     viewAll: 'Lihat Semua',
     pay: 'Bayar',
@@ -197,6 +200,7 @@ export const id = {
     recentTransactions: 'Transaksi Terbaru',
     yesterday: 'Kemarin',
     marketplace: 'Marketplace',
+    fnb: 'Food & Beverage',
     copyCardNumber: 'Salin Nomor Kartu',
     cardNumberCopied: 'Nomor kartu berhasil disalin',
     virtualCardInfo: 'Informasi Kartu Virtual',
@@ -543,8 +547,23 @@ export const id = {
     useMockImage: 'Gunakan Foto Mock',
     noMenuEnabled: 'Saat ini menu tidak tersedia',
     enableMenuToPreview: 'Aktifkan menu untuk melihat preview',
+    homeTabs: 'Tab Beranda',
   },
-  quickMenu: {},
+  homeTabSettings: {
+    title: 'Tab Beranda',
+    maxTabsHint: 'Pilih maksimal {max} tab. Urutan = Kiri, Tengah (Beranda), Kanan.',
+    emptyHint: 'Jika tidak ada yang dipilih, semua tab dari konfigurasi akan ditampilkan.',
+    noTabsConfigured: 'Tidak ada tab dikonfigurasi.',
+    orderTitle: 'Urutan tampilan',
+    positionLeft: 'Kiri',
+    positionCenter: 'Tengah (Beranda)',
+    positionRight: 'Kanan',
+    moveUp: 'Pindah kiri',
+    moveDown: 'Pindah kanan',
+  },
+  quickMenu: {
+    maxItemsHint: 'Maksimal {max} item akses cepat.',
+  },
   qr: {
     title: 'MPM / CPM',
     display: 'Buat Kode QR',
@@ -641,6 +660,25 @@ export const id = {
     noDevicesFound: 'Tidak ada perangkat ditemukan',
     selectFromList: 'Pilih perangkat dari daftar untuk terhubung',
   },
-
+  virtualCardDetail: {
+    alreadySet: 'Sudah Diatur',
+    accumulationTitle: 'Akumulasi Saldo',
+    accumulationDesc:
+      'Akumulsi saldo berfungsi untuk menaikkan batas (limit) sekali transaksi dan total transaksi harian. Penambahan batas transaksi berasal dari transaksi harian yang tersisa. Sehingga pemilik akun dapat melakukan pembelian melebihi batas sekali transaksi ataupun batas transaksi harian.',
+    example: 'Contoh:',
+    accumulationExample:
+      'Batas transaksi harian sebesar Rp10.000 Jika pemilik akun pada hari ini hanya melakukan transaksi sebesar Rp7.000, maka dihari berikutnya pemilik akun akan mendapat kenaikan batas transaksi sebesar Rp3.000. Jadi total batas transaksi menjadi Rp13.000',
+    disableFeatureNote: 'Untuk menonaktifkan fitur ini, isi Batas Transaksi Akumulasi Saldo Rp0',
+    mockCardName: 'Kartu Coba',
+    mockDescription: 'Coba saldo aza',
+    dailyLimitCard: 'Kartu Limit Harian',
+    monthlyShopping: 'Untuk belanja bulanan',
+    active: 'Aktif',
+    identityCard: 'Kartu Identitas',
+    profilePhoto: 'Foto Profile',
+    noFileSelected: 'Tidak ada file yang dipilih',
+    fullName: 'Nama Lengkap',
+    accountId: 'ID Akun',
+  },
 };
 

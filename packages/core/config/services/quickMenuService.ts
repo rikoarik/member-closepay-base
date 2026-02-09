@@ -71,18 +71,16 @@ export const getPluginMenuItems = (): QuickMenuItem[] => {
   if (quickAccess?.length) {
     const menuItems: QuickMenuItem[] = [];
     for (const item of quickAccess) {
-      const route = PluginRegistry.getRouteByName(item.route);
-      if (route) {
-        menuItems.push({
-          id: item.id,
-          label: route.meta?.title || item.route,
-          enabled: true,
-          icon: item.icon || route.meta?.icon || 'default',
-          iconBgColor: undefined,
-          route: item.route,
-          labelKey: item.labelKey,
-        });
-      }
+      const route = PluginRegistry.isInitialized() ? PluginRegistry.getRouteByName(item.route) : undefined;
+      menuItems.push({
+        id: item.id,
+        label: route?.meta?.title || item.route,
+        enabled: true,
+        icon: item.icon || route?.meta?.icon || 'default',
+        iconBgColor: undefined,
+        route: item.route,
+        labelKey: item.labelKey,
+      });
     }
     return menuItems;
   }
@@ -138,7 +136,7 @@ export const getAllMenuItems = async (): Promise<QuickMenuItem[]> => {
 };
 
 /**
- * Get enabled menu items (from storage + plugin routes)
+ * Get enabled menu items (from storage + plugin routes), no limit
  */
 export const getEnabledMenuItems = async (): Promise<QuickMenuItem[]> => {
   const allItems = await getAllMenuItems();

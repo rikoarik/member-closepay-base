@@ -5,14 +5,7 @@
  */
 import React, { useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import {
-  ArrowDown2,
-  Call,
-  People,
-  Game,
-  ArrowUp2,
-  Shop,
-} from 'iconsax-react-nativejs';
+import { ArrowDown2, Call, People, Game, ArrowUp2, Shop, TruckFast } from 'iconsax-react-nativejs';
 import {
   scale,
   moderateVerticalScale,
@@ -29,12 +22,7 @@ import {
 import { useTheme, type ThemeColors } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import {
-  IconTopUpVA,
-  IconTransferMember,
-  IconKartuVirtual,
-  IconTransferBank,
-} from './icons';
+import { IconTopUpVA, IconTransferMember, IconKartuVirtual, IconTransferBank } from './icons';
 
 interface QuickAccessButton {
   id: string;
@@ -59,10 +47,7 @@ interface QuickAccessButtonsProps {
 }
 
 // Asset icons untuk Akses Cepat member (topupva, transfermember, kartuvirtual, transferbank)
-const getQuickAccessAssetIcon = (
-  itemId: string,
-  iconColor: string
-): React.ReactNode | null => {
+const getQuickAccessAssetIcon = (itemId: string, iconColor: string): React.ReactNode | null => {
   const size = getIconSize('large');
   switch (itemId) {
     case 'topupva':
@@ -79,11 +64,7 @@ const getQuickAccessAssetIcon = (
 };
 
 // Icon mapping untuk setiap menu - returns icon dengan dynamic color
-const getMenuIcon = (
-  iconColor: string,
-  iconName?: string,
-  itemId?: string
-): React.ReactNode => {
+const getMenuIcon = (iconColor: string, iconName?: string, itemId?: string): React.ReactNode => {
   const assetIcon = itemId ? getQuickAccessAssetIcon(itemId, iconColor) : null;
   if (assetIcon) return assetIcon;
 
@@ -111,6 +92,8 @@ const getMenuIcon = (
       return <People size={size} color={iconColor} variant="Bold" />;
     case 'marketplace':
       return <Shop size={size} color={iconColor} variant="Bold" />;
+    case 'fnb':
+      return <TruckFast size={size} color={iconColor} variant="Bold" />;
     default:
       return <Game size={size} color={iconColor} variant="Bold" />;
   }
@@ -141,13 +124,15 @@ const getDefaultBgColor = (colors: ThemeColors, iconName?: string): string => {
       return colors.warningLight;
     case 'marketplace':
       return colors.infoLight;
+    case 'fnb':
+      return colors.warningLight;
     default:
       return colors.surfaceSecondary || colors.surface;
   }
 };
 
 // Default fallback buttons - empty array
-const DEFAULT_BUTTONS: QuickAccessButton[] = [];
+const DEFAULT_MENU_ITEMS: QuickMenuItem[] = [];
 
 // Skeleton component for loading state
 const QuickAccessSkeleton = React.memo(() => {
@@ -160,7 +145,7 @@ const QuickAccessSkeleton = React.memo(() => {
   const itemsPerRow = 4;
   const buttonWidth = useMemo(() => {
     const totalGap = gap * (itemsPerRow - 1);
-    const availableWidth = screenWidth - (horizontalPadding * 2);
+    const availableWidth = screenWidth - horizontalPadding * 2;
     return Math.floor((availableWidth - totalGap) / itemsPerRow);
   }, [screenWidth, horizontalPadding, gap, itemsPerRow]);
 
@@ -196,173 +181,168 @@ const areEqualQuickAccess = (
     if (prevProps.buttons.length !== nextProps.buttons.length) {
       return false;
     }
-    return prevProps.buttons.every(
-      (btn, index) => btn.id === nextProps.buttons![index].id
-    );
+    return prevProps.buttons.every((btn, index) => btn.id === nextProps.buttons![index].id);
   }
   // Jika buttons tidak diberikan, component akan menggunakan internal state
   // yang sudah di-handle oleh useQuickMenu, jadi return true untuk skip re-render
   return prevProps.buttons === nextProps.buttons;
 };
 
-export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(({
-  buttons,
-  tabletLandscapeGap,
-  tabletPortraitGap,
-}) => {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-  const navigation = useNavigation();
-  const { enabledItems, isLoading, refresh } = useQuickMenu();
-  const { width: screenWidth } = useDimensions();
-  
-  // Stabilize colors untuk mencegah re-render yang tidak perlu
-  const primaryColor = colors.primary;
-  const surfaceColor = colors.surface;
-  const textColor = colors.text;
-  
-  // Stabilize screenWidth dengan rounding untuk mencegah re-render kecil
-  const stableScreenWidth = useMemo(() => {
-    // Round ke 10 terdekat untuk mencegah re-render karena perubahan kecil
-    return Math.round(screenWidth / 10) * 10;
-  }, [screenWidth]);
-  
-  // Get gap yang sesuai dengan device dan orientation
-  const gap = useMemo(() => scale(12), []);
-  
-  // Stabilize enabledItems dengan useRef untuk mencegah re-render
-  const previousEnabledItemsRef = React.useRef<typeof enabledItems>(enabledItems);
-  const previousEnabledItemsKeyRef = React.useRef<string>('');
-  
-  const stableEnabledItems = useMemo(() => {
-    const currentKey = JSON.stringify(enabledItems.map(item => ({ 
-      id: item.id, 
-      enabled: item.enabled,
-      icon: item.icon,
-      iconBgColor: item.iconBgColor 
-    })));
-    
-    // Jika sama dengan previous, return previous array (reference yang sama)
-    if (currentKey === previousEnabledItemsKeyRef.current) {
-      return previousEnabledItemsRef.current;
-    }
-    
-    // Update refs
-    previousEnabledItemsKeyRef.current = currentKey;
-    previousEnabledItemsRef.current = enabledItems;
-    return enabledItems;
-  }, [enabledItems]);
-  
-  // Memoized menu label getter - menggunakan ref untuk mencegah re-render
-  const menuLabelMapRef = React.useRef<Record<string, string>>({});
-  
-  const getMenuLabel = useCallback((menuId: string, fallbackLabel: string): string => {
-    const translationKey = menuLabelMapRef.current[menuId];
-    return translationKey ? t(translationKey) : fallbackLabel;
-  }, [t]);
+export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
+  ({ buttons, tabletLandscapeGap, tabletPortraitGap }) => {
+    const { colors } = useTheme();
+    const { t } = useTranslation();
+    const navigation = useNavigation();
+    const { enabledItems, isLoading, refresh } = useQuickMenu();
+    const { width: screenWidth } = useDimensions();
 
-  // Convert enabled menu items ke format QuickAccessButton
-  // Hanya recalculate jika enabledItems benar-benar berubah
-  const previousMenuButtonsRef = React.useRef<QuickAccessButton[]>([]);
-  const colorsRef = React.useRef(colors);
-  colorsRef.current = colors; // Update ref tanpa trigger re-render
-  
-  const menuButtons = useMemo((): QuickAccessButton[] => {
-    // Jika masih loading, jangan render apa-apa dulu, biarkan skeleton yang tampil
+    // Stabilize colors untuk mencegah re-render yang tidak perlu
+    const primaryColor = colors.primary;
+    const surfaceColor = colors.surface;
+    const textColor = colors.text;
+
+    // Stabilize screenWidth dengan rounding untuk mencegah re-render kecil
+    const stableScreenWidth = useMemo(() => {
+      // Round ke 10 terdekat untuk mencegah re-render karena perubahan kecil
+      return Math.round(screenWidth / 10) * 10;
+    }, [screenWidth]);
+
+    // Get gap yang sesuai dengan device dan orientation
+    const gap = useMemo(() => scale(12), []);
+
+    // Stabilize enabledItems dengan useRef untuk mencegah re-render
+    const previousEnabledItemsRef = React.useRef<typeof enabledItems>(enabledItems);
+    const previousEnabledItemsKeyRef = React.useRef<string>('');
+
+    const stableEnabledItems = useMemo(() => {
+      const currentKey = JSON.stringify(
+        enabledItems.map((item) => ({
+          id: item.id,
+          enabled: item.enabled,
+          icon: item.icon,
+          iconBgColor: item.iconBgColor,
+        }))
+      );
+
+      // Jika sama dengan previous, return previous array (reference yang sama)
+      if (currentKey === previousEnabledItemsKeyRef.current) {
+        return previousEnabledItemsRef.current;
+      }
+
+      // Update refs
+      previousEnabledItemsKeyRef.current = currentKey;
+      previousEnabledItemsRef.current = enabledItems;
+      return enabledItems;
+    }, [enabledItems]);
+
+    // Memoized menu label getter - menggunakan ref untuk mencegah re-render
+    const menuLabelMapRef = React.useRef<Record<string, string>>({});
+
+    const getMenuLabel = useCallback(
+      (menuId: string, fallbackLabel: string): string => {
+        const translationKey = menuLabelMapRef.current[menuId];
+        return translationKey ? t(translationKey) : fallbackLabel;
+      },
+      [t]
+    );
+
+    // Convert enabled menu items ke format QuickAccessButton
+    // Hanya recalculate jika enabledItems benar-benar berubah
+    const previousMenuButtonsRef = React.useRef<QuickAccessButton[]>([]);
+    const colorsRef = React.useRef(colors);
+    colorsRef.current = colors; // Update ref tanpa trigger re-render
+
+    const menuButtons = useMemo((): QuickAccessButton[] => {
+      // Jika masih loading, jangan render apa-apa dulu, biarkan skeleton yang tampil
+      if (isLoading) {
+        return [];
+      }
+      const items = stableEnabledItems.length > 0 ? stableEnabledItems : DEFAULT_MENU_ITEMS;
+      const buttons: QuickAccessButton[] = items.map((item) => ({
+        id: item.id,
+        label: item.labelKey ? t(item.labelKey) : getMenuLabel(item.id, item.label),
+        icon: getMenuIcon(primaryColor, item.icon as string, item.id),
+        iconBgColor: item.iconBgColor || getDefaultBgColor(colorsRef.current, item.icon as string),
+        onPress: (item as unknown as QuickMenuItem).route
+          ? () => {
+              // @ts-ignore - navigation type akan di-setup nanti
+              navigation.navigate((item as unknown as QuickMenuItem).route as never);
+            }
+          : undefined,
+      }));
+
+      // Compare dengan previous untuk mencegah re-render jika sama
+      const currentKey = JSON.stringify(
+        buttons.map((b: QuickAccessButton) => ({ id: b.id, label: b.label }))
+      );
+      const previousKey = JSON.stringify(
+        previousMenuButtonsRef.current.map((b: QuickAccessButton) => ({ id: b.id, label: b.label }))
+      );
+
+      if (currentKey === previousKey && previousMenuButtonsRef.current.length > 0) {
+        return previousMenuButtonsRef.current;
+      }
+
+      previousMenuButtonsRef.current = buttons;
+      return buttons;
+    }, [stableEnabledItems, getMenuLabel, isLoading, navigation, primaryColor]);
+
+    const buttonsToRender = buttons || menuButtons;
+    const buttonCount = buttonsToRender.length;
+    const itemsPerRow = 4;
+
+    // Hitung width button untuk 4 per row dengan gap
+    const horizontalPadding = getHorizontalPadding();
+    const buttonWidth = useMemo(() => {
+      const totalGap = gap * (itemsPerRow - 1);
+      const availableWidth = stableScreenWidth - horizontalPadding * 2;
+      return Math.floor((availableWidth - totalGap) / itemsPerRow);
+    }, [stableScreenWidth, horizontalPadding, gap, itemsPerRow]);
+
+    // Memoized button style calculator
+    const getButtonStyle = useCallback(
+      (index: number) => {
+        const rowIndex = Math.floor(index / itemsPerRow);
+        const positionInRow = index % itemsPerRow;
+        const isLastInRow = positionInRow === itemsPerRow - 1;
+        const totalRows = Math.ceil(buttonCount / itemsPerRow);
+        const isLastRow = rowIndex === totalRows - 1;
+
+        return {
+          width: buttonWidth,
+          marginRight: isLastInRow ? 0 : gap,
+          marginBottom: isLastRow ? 0 : moderateVerticalScale(12),
+        };
+      },
+      [buttonWidth, gap, buttonCount]
+    );
+
     if (isLoading) {
-      return [];
+      return <QuickAccessSkeleton />;
     }
-    const items = stableEnabledItems.length > 0 ? stableEnabledItems : DEFAULT_BUTTONS;
-    const buttons: QuickAccessButton[] = items.map((item) => ({
-      id: item.id,
-      label: item.labelKey ? t(item.labelKey) : getMenuLabel(item.id, item.label),
-      icon: getMenuIcon(primaryColor, item.icon as string, item.id),
-      iconBgColor: item.iconBgColor || getDefaultBgColor(colorsRef.current, item.icon as string),
-      onPress: (item as unknown as QuickMenuItem).route
-        ? () => {
-            // @ts-ignore - navigation type akan di-setup nanti
-            navigation.navigate((item as unknown as QuickMenuItem).route as never);
-          }
-        : undefined,
-    }));
-    
-    // Compare dengan previous untuk mencegah re-render jika sama
-    const currentKey = JSON.stringify(buttons.map((b: QuickAccessButton) => ({ id: b.id, label: b.label })));
-    const previousKey = JSON.stringify(previousMenuButtonsRef.current.map((b: QuickAccessButton) => ({ id: b.id, label: b.label })));
-    
-    if (currentKey === previousKey && previousMenuButtonsRef.current.length > 0) {
-      return previousMenuButtonsRef.current;
-    }
-    
-    previousMenuButtonsRef.current = buttons;
-    return buttons;
-  }, [stableEnabledItems, getMenuLabel, isLoading, navigation, primaryColor]);
 
-  const buttonsToRender = buttons || menuButtons;
-  const buttonCount = buttonsToRender.length;
-  const itemsPerRow = 4;
-
-  // Hitung width button untuk 4 per row dengan gap
-  const horizontalPadding = getHorizontalPadding();
-  const buttonWidth = useMemo(() => {
-    const totalGap = gap * (itemsPerRow - 1);
-    const availableWidth = stableScreenWidth - (horizontalPadding * 2);
-    return Math.floor((availableWidth - totalGap) / itemsPerRow);
-  }, [stableScreenWidth, horizontalPadding, gap, itemsPerRow]);
-
-  // Memoized button style calculator
-  const getButtonStyle = useCallback((index: number) => {
-    const rowIndex = Math.floor(index / itemsPerRow);
-    const positionInRow = index % itemsPerRow;
-    const isLastInRow = positionInRow === itemsPerRow - 1;
-    const totalRows = Math.ceil(buttonCount / itemsPerRow);
-    const isLastRow = rowIndex === totalRows - 1;
-
-    return {
-      width: buttonWidth,
-      marginRight: isLastInRow ? 0 : gap,
-      marginBottom: isLastRow ? 0 : moderateVerticalScale(12),
-    };
-  }, [buttonWidth, gap, buttonCount]);
-
-  if (isLoading) {
-    return <QuickAccessSkeleton />;
-  }
-
-  return (
-    <View style={styles.aksesCepatRow}>
-      {buttonsToRender.map((button, index) => (
-        <TouchableOpacity
-          key={button.id}
-          style={[
-            styles.aksesCepatButton,
-            getButtonStyle(index),
-          ]}
-          onPress={button.onPress}
-          activeOpacity={0.7}
-        >
-          <View
-            style={[
-              styles.aksesCepatIcon,
-              { backgroundColor: button.iconBgColor },
-            ]}
+    return (
+      <View style={styles.aksesCepatRow}>
+        {buttonsToRender.map((button, index) => (
+          <TouchableOpacity
+            key={button.id}
+            style={[styles.aksesCepatButton, getButtonStyle(index)]}
+            onPress={button.onPress}
+            activeOpacity={0.7}
           >
-            {button.icon}
-          </View>
-          <Text
-            style={[
-              styles.aksesCepatLabel,
-              { color: textColor },
-            ]}
-            numberOfLines={2}
-          >
-            {button.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-}, areEqualQuickAccess);
+            <View style={[styles.aksesCepatIcon, { backgroundColor: button.iconBgColor }]}>
+              {button.icon}
+            </View>
+            <Text style={[styles.aksesCepatLabel, { color: textColor }]} numberOfLines={2}>
+              {button.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  },
+  areEqualQuickAccess
+);
 
 QuickAccessButtons.displayName = 'QuickAccessButtons';
 
@@ -389,5 +369,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
-

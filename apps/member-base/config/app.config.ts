@@ -87,6 +87,8 @@ export const appConfig: AppConfig = {
     { id: 'transfermember', route: 'TransferMember', labelKey: 'home.transferMember', icon: 'guest', order: 2 },
     { id: 'kartuvirtual', route: 'VirtualCard', labelKey: 'home.kartuVirtual', icon: 'payment', order: 3 },
     { id: 'transferbank', route: 'Withdraw', labelKey: 'home.transferBank', icon: 'withdraw', order: 4 },
+    { id: 'marketplace', route: 'Marketplace', labelKey: 'home.marketplace', icon: 'marketplace', order: 5 },
+    { id: 'fnb', route: 'FnB', labelKey: 'home.fnb', icon: 'fnb', order: 6 },
   ],
 
   // ============================================================================

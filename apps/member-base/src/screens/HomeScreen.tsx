@@ -27,6 +27,8 @@ import {
   type Tab,
   useConfig,
   useRefreshWithConfig,
+  loadHomeTabSettings,
+  MAX_HOME_TABS,
 } from '@core/config';
 import {
   TopBar,
@@ -58,20 +60,44 @@ const HomeScreenComponent = () => {
   const fabOpacity = useRef(new Animated.Value(0)).current;
   const fabScale = useRef(new Animated.Value(0)).current;
   const { config } = useConfig();
-  const homeTabs = React.useMemo(() => {
-    return config?.homeTabs || [];
+  const [enabledTabIdsFromSettings, setEnabledTabIdsFromSettings] = useState<string[] | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      loadHomeTabSettings().then((settings) => {
+        if (!cancelled) setEnabledTabIdsFromSettings(settings.enabledTabIds);
+      });
+      return () => { cancelled = true; };
+    }, [])
+  );
+
+  const configHomeTabs = React.useMemo(() => {
+    const raw = config?.homeTabs || [];
+    return raw
+      .filter((tab) => tab.visible !== false)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
   }, [config?.homeTabs]);
 
+  const homeTabs = React.useMemo(() => {
+    if (enabledTabIdsFromSettings === null) return configHomeTabs;
+    if (enabledTabIdsFromSettings.length === 0) return configHomeTabs;
+    const orderedIds = enabledTabIdsFromSettings.slice(0, MAX_HOME_TABS);
+    const tabById = new Map(configHomeTabs.map((tab) => [tab.id, tab]));
+    return orderedIds.map((id) => {
+      const fromConfig = tabById.get(id);
+      if (fromConfig) return fromConfig;
+      return { id, label: id, visible: true as const };
+    });
+  }, [configHomeTabs, enabledTabIdsFromSettings]);
+
   const tabs: Tab[] = React.useMemo(() => {
-    return homeTabs
-      .filter((tab) => tab.visible !== false)
-      .sort((a, b) => (a.order || 0) - (b.order || 0))
-      .map((tab) => {
-        const i18nKey = `home.${tab.id}`;
-        const translatedLabel = t(i18nKey);
-        const label = translatedLabel && translatedLabel !== i18nKey ? translatedLabel : tab.label;
-        return { id: tab.id, label };
-      });
+    return homeTabs.map((tab) => {
+      const i18nKey = `home.${tab.id}`;
+      const translatedLabel = t(i18nKey);
+      const label = translatedLabel && translatedLabel !== i18nKey ? translatedLabel : tab.label;
+      return { id: tab.id, label };
+    });
   }, [homeTabs, t]);
 
   const [activeTab, setActiveTab] = useState<string>('home');
@@ -125,6 +151,16 @@ const HomeScreenComponent = () => {
         setActiveTab(order2TabId);
       }
       hasSetOrder2TabRef.current = true;
+    }
+  }, [tabs, activeTab]);
+
+  // Saat daftar tab berubah (mis. setelah simpan dari Pengaturan), pastikan activeTab masih ada di list
+  useEffect(() => {
+    if (tabs.length === 0) return;
+    const idx = tabs.findIndex((t) => t.id === activeTab);
+    if (idx < 0) {
+      const fallbackId = tabs.length >= 2 ? tabs[1].id : tabs[0].id;
+      setActiveTab(fallbackId);
     }
   }, [tabs, activeTab]);
 

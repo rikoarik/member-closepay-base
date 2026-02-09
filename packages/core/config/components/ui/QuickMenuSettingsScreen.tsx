@@ -49,7 +49,7 @@ import {
 } from '../../services/quickMenuService';
 import type { QuickMenuItem } from '../../services/quickMenuService';
 
-const PREVIEW_SNAP_POINTS = [125];
+const PREVIEW_SNAP_POINTS = [100];
 
 const PreviewQuickAccessButtons = memo<{
   buttons: Array<{
@@ -251,8 +251,8 @@ export const QuickMenuSettingsScreen: React.FC = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const storedItems = await loadQuickMenuSettings();
-        setMenuItems(storedItems);
+        const allItems = await getAllMenuItems();
+        setMenuItems(allItems);
       } catch (error) {
         console.error('Failed to load quick menu settings:', error);
       } finally {
@@ -264,7 +264,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
 
   const handleToggle = (id: string) => {
     setMenuItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item))
+      prev.map((i) => (i.id === id ? { ...i, enabled: !i.enabled } : i))
     );
   };
 
@@ -324,6 +324,12 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       case 'marketplace':
         icon = <Shop size={iconSize} color={colors.info} variant="Bold" />;
         break;
+      case 'withdraw':
+        icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
+        break;
+      case 'fnb':
+        icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
+        break;
       default:
         icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
     }
@@ -373,6 +379,12 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       case 'marketplace':
         icon = <Shop size={iconSize} color={colors.info} variant="Bold" />;
         break;
+      case 'withdraw':
+        icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
+        break;
+      case 'fnb':
+        icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
+        break;
       default:
         icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
     }
@@ -393,6 +405,8 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       case 'topup': return colors.successLight;
       case 'donation': return colors.warningLight;
       case 'marketplace': return colors.infoLight;
+      case 'withdraw': return colors.errorLight;
+      case 'fnb': return colors.warningLight;
       default: return colors.borderLight || colors.surfaceSecondary || colors.surface;
     }
   }, [colors.infoLight, colors.warningLight, colors.successLight, colors.errorLight, colors.borderLight, colors.surfaceSecondary, colors.surface]);
@@ -674,7 +688,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
                   },
                 ]}
               >
-                {item.label}
+                {item.labelKey ? t(item.labelKey) : item.label}
               </Text>
               <Switch
                 value={item.enabled}

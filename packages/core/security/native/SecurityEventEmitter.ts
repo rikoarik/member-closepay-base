@@ -26,6 +26,8 @@ const safeNativeModule =
  * Wrapper for native security module event communication.
  * Handles threat detection events from native layer.
  */
+let hasWarnedNativeModuleUnavailable = false;
+
 class SecurityEventEmitter extends NativeEventEmitter {
   private static instance: SecurityEventEmitter | null = null;
   private moduleAvailable: boolean;
@@ -50,8 +52,11 @@ class SecurityEventEmitter extends NativeEventEmitter {
    */
   async initialize(): Promise<boolean> {
     if (!SecurityNativeModule) {
-      if (__DEV__) {
-        console.warn('[SecurityEventEmitter] Native module not available');
+      if (__DEV__ && !hasWarnedNativeModuleUnavailable) {
+        hasWarnedNativeModuleUnavailable = true;
+        console.warn(
+          '[SecurityEventEmitter] Native module not available (expected in simulator or when FreeRASP is not linked)'
+        );
       }
       return false;
     }

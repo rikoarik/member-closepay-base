@@ -41,6 +41,8 @@ export const NFCLoadingModal: React.FC<NFCLoadingModalProps> = ({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
+  if (!visible) return null;
+
   return (
     <Modal
       visible={visible}
@@ -95,6 +97,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
     ...Platform.select({
       ios: {
         // iOS specific styles if needed

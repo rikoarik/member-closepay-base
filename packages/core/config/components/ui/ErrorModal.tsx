@@ -13,7 +13,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { BlurView } from '@sbaiahmed1/react-native-blur';
 import {
   scale,
   verticalScale,
@@ -88,18 +87,13 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
     }
   };
 
+  if (!visible) return null;
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={handleBackdropPress}>
         <View style={styles.backdrop}>
-          {Platform.OS === 'ios' && (
-            <BlurView
-              style={StyleSheet.absoluteFill}
-              blurType="systemThinMaterial"
-              blurAmount={20}
-              overlayColor="rgba(255, 255, 255, 0.5)"
-            />
-          )}
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
           <TouchableWithoutFeedback onPress={() => {}}>
             <View
               style={[
@@ -147,6 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: scale(20),
+    overflow: 'hidden',
   },
   modalContainer: {
     borderRadius: scale(16),

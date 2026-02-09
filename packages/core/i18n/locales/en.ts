@@ -94,6 +94,7 @@ export const en = {
   },
   auth: {
     login: 'Login',
+    loginDemoInfo: 'Login info: Username: member | Password: Pass1234!',
     email: 'Email',
     password: 'Password',
     forgotPassword: 'Forgot Password?',
@@ -184,6 +185,7 @@ export const en = {
     analytics: 'Analytics',
     transactions: 'Transactions',
     news: 'News',
+    berandaNews: 'Home & News',
     newsInfo: 'News Info',
     viewAll: 'View All',
     pay: 'Pay',
@@ -196,6 +198,7 @@ export const en = {
     welcome: 'Welcome',
     recentTransactions: 'Recent Transactions',
     yesterday: 'Yesterday',
+    fnb: 'Food & Beverage',
     copyCardNumber: 'Copy Card Number',
     cardNumberCopied: 'Card number copied to clipboard',
     virtualCardInfo: 'Virtual Card Information',
@@ -226,6 +229,7 @@ export const en = {
     setPin: 'Set Pin',
     marketplace: 'Marketplace',
     addVirtualCard: 'Add Virtual Card',
+    virtualCardDetail: 'Virtual Card Detail',
     createVirtualCard: 'Create Virtual Card',
     cardColor: 'Card Color',
     selectCardColor: 'Select Card Color',
@@ -541,8 +545,23 @@ export const en = {
     useMockImage: 'Use Mock Image',
     noMenuEnabled: 'Currently menu is not available',
     enableMenuToPreview: 'Enable menu to see preview',
+    homeTabs: 'Home Tabs',
   },
-  quickMenu: {},
+  homeTabSettings: {
+    title: 'Home Tabs',
+    maxTabsHint: 'Select up to {max} tabs. Order = Left, Center (Home), Right.',
+    emptyHint: 'If none selected, all configured tabs will be shown.',
+    noTabsConfigured: 'No tabs configured.',
+    orderTitle: 'Display order',
+    positionLeft: 'Left',
+    positionCenter: 'Center (Home)',
+    positionRight: 'Right',
+    moveUp: 'Move left',
+    moveDown: 'Move right',
+  },
+  quickMenu: {
+    maxItemsHint: 'Maximum {max} quick access items.',
+  },
   qr: {
     title: 'MPM / CPM',
     display: 'Create Code QR',
@@ -637,6 +656,25 @@ export const en = {
     noDevicesFound: 'No devices found',
     selectFromList: 'Select device from list to connect',
   },
-
+  virtualCardDetail: {
+    alreadySet: 'Already Set',
+    accumulationTitle: 'Accumulated Balance',
+    accumulationDesc:
+      'Accumulated balance serves to increase the limit of a single transaction and total daily transactions. The addition of the transaction limit comes from the remaining daily transactions. So the account owner can make purchases exceeding the single transaction limit or daily transaction limit.',
+    example: 'Example:',
+    accumulationExample:
+      'Daily transaction limit of Rp10,000. If the account owner only makes a transaction of Rp7,000 today, then the next day the account owner will get a transaction limit increase of Rp3,000. So the total transaction limit becomes Rp13,000',
+    disableFeatureNote: 'To disable this feature, fill in the Accumulated Balance Transaction Limit Rp0',
+    mockCardName: 'Test Card',
+    mockDescription: 'Just testing balance',
+    dailyLimitCard: 'Daily Limit Card',
+    monthlyShopping: 'For monthly shopping',
+    active: 'Active',
+    identityCard: 'Identity Card',
+    profilePhoto: 'Profile Photo',
+    noFileSelected: 'No file selected',
+    fullName: 'Full Name',
+    accountId: 'Account ID',
+  },
 };
 

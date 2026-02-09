@@ -1,6 +1,6 @@
 /**
  * BottomSheet Component
- * Reusable bottom sheet dengan drag gesture untuk membuka/menutup
+ * FIXED: keyboard-safe (Android & iOS)
  */
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import {
@@ -14,7 +14,6 @@ import {
   Pressable,
   Keyboard,
 } from 'react-native';
-import { BlurView } from '@sbaiahmed1/react-native-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../../theme';
 import { scale, moderateVerticalScale } from '../../utils/responsive';
@@ -25,52 +24,53 @@ interface BottomSheetProps {
   visible: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  snapPoints?: number[]; // Percentage dari screen height, default [25, 75]
-  initialSnapPoint?: number; // Index dari snapPoints, default 0
+  snapPoints?: number[];
+  initialSnapPoint?: number;
   enablePanDownToClose?: boolean;
-  disableClose?: boolean; // Disable close saat ada modal lain terbuka (seperti date picker)
+  disableClose?: boolean;
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
   visible,
   onClose,
   children,
-  snapPoints = [25, 75],
+  snapPoints = [75],
   initialSnapPoint = 0,
   enablePanDownToClose = true,
   disableClose = false,
 }) => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  // Convert snap points dari percentage ke pixel
-  // 0% = full screen (translateY = 0), 100% = hidden (translateY = SCREEN_HEIGHT)
-  // point = percentage dari screen height yang ditampilkan (75 = 75% dari screen height)
-  const snapPointsInPixels = snapPoints.map((point) => {
-    // Clamp point antara 0-100
-    const clampedPoint = Math.max(0, Math.min(100, point));
-    // Jika point = 75, berarti kita ingin menampilkan 75% dari screen height
-    // translateY = SCREEN_HEIGHT * (100 - point) / 100
-    // Contoh: point = 75, translateY = SCREEN_HEIGHT * 0.25 (menampilkan 75% dari bawah)
-    return (SCREEN_HEIGHT * (100 - clampedPoint)) / 100;
-  });
-  const initialPosition = snapPointsInPixels[initialSnapPoint] || snapPointsInPixels[0];
+  const snapPointsInPixels = snapPoints.map(
+    (p) => (SCREEN_HEIGHT * (100 - p)) / 100
+  );
+
+  const initialPosition =
+    snapPointsInPixels[initialSnapPoint] ?? snapPointsInPixels[0];
 
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
 
+  /** 🔥 INI KUNCI */
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  const startY = useRef(0);
+  const currentY = useRef(initialPosition);
+
+  /* === OPEN / CLOSE === */
   useEffect(() => {
     if (visible) {
       Animated.parallel([
         Animated.spring(translateY, {
           toValue: initialPosition,
           useNativeDriver: true,
-          tension: 50,
-          friction: 7,
+          tension: 70,
+          friction: 9,
         }),
         Animated.timing(backdropOpacity, {
           toValue: 1,
-          duration: 300,
+          duration: 250,
           useNativeDriver: true,
         }),
       ]).start();
@@ -79,8 +79,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         Animated.spring(translateY, {
           toValue: SCREEN_HEIGHT,
           useNativeDriver: true,
-          tension: 50,
-          friction: 7,
+          tension: 70,
+          friction: 9,
         }),
         Animated.timing(backdropOpacity, {
           toValue: 0,
@@ -89,140 +89,113 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         }),
       ]).start();
     }
-  }, [visible, initialPosition, translateY]);
+  }, [visible, initialPosition]);
 
-  const startY = useRef(0);
-  const currentY = useRef(initialPosition);
+  /* === KEYBOARD HANDLING (REAL FIX) === */
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
 
+    const hide = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  /* === PAN === */
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => !disableClose && enablePanDownToClose,
-        onMoveShouldSetPanResponder: (_, gestureState) => {
-          if (disableClose || !enablePanDownToClose) return false;
-          return Math.abs(gestureState.dy) > 5;
-        },
+        onStartShouldSetPanResponder: () =>
+          !disableClose && enablePanDownToClose,
+        onMoveShouldSetPanResponder: (_, g) =>
+          Math.abs(g.dy) > 6 && !disableClose,
         onPanResponderGrant: () => {
-          if (disableClose) return;
-          translateY.stopAnimation((value) => {
-            startY.current = value;
-            currentY.current = value;
+          translateY.stopAnimation((v) => {
+            startY.current = v;
+            currentY.current = v;
           });
         },
-        onPanResponderMove: (_, gestureState) => {
-          if (disableClose) return;
-          const newY = startY.current + gestureState.dy;
-          // Allow dragging from 0 (full screen) to SCREEN_HEIGHT (hidden)
-          // Smaller translateY = higher on screen
-          if (newY >= 0 && newY <= SCREEN_HEIGHT) {
-            currentY.current = newY;
-            translateY.setValue(newY);
+        onPanResponderMove: (_, g) => {
+          const y = startY.current + g.dy;
+          if (y >= 0 && y <= SCREEN_HEIGHT) {
+            currentY.current = y;
+            translateY.setValue(y);
           }
         },
-        onPanResponderRelease: (_, gestureState) => {
-          if (disableClose) {
-            // If disabled, just snap back to current position
-            Animated.spring(translateY, {
-              toValue: currentY.current,
-              useNativeDriver: true,
-              tension: 50,
-              friction: 7,
-            }).start();
-            return;
-          }
-
-          const velocity = gestureState.vy;
-          const currentYValue = currentY.current;
-
-          // Find nearest snap point
-          let targetSnap = snapPointsInPixels[0];
-          let minDistance = Math.abs(currentYValue - snapPointsInPixels[0]);
-
-          for (const snap of snapPointsInPixels) {
-            const distance = Math.abs(currentYValue - snap);
-            if (distance < minDistance) {
-              minDistance = distance;
-              targetSnap = snap;
-            }
-          }
-
-          // If dragging down with velocity or past threshold, close
-          if (enablePanDownToClose && (velocity > 0.5 || currentYValue > SCREEN_HEIGHT * 0.9)) {
+        onPanResponderRelease: (_, g) => {
+          if (g.vy > 0.6 || currentY.current > SCREEN_HEIGHT * 0.9) {
             Animated.spring(translateY, {
               toValue: SCREEN_HEIGHT,
               useNativeDriver: true,
-              tension: 50,
-              friction: 7,
-            }).start(() => {
-              onClose();
-            });
+            }).start(onClose);
           } else {
             Animated.spring(translateY, {
-              toValue: targetSnap,
+              toValue: initialPosition,
               useNativeDriver: true,
-              tension: 50,
-              friction: 7,
             }).start();
           }
         },
       }),
-    [disableClose, enablePanDownToClose, onClose, translateY, snapPointsInPixels]
+    [disableClose, enablePanDownToClose]
   );
 
-  const animatedSheetStyle = {
-    transform: [{ translateY }],
-  };
-
-  // Jangan render Modal saat visible=false untuk menghindari BlurView aktif saat app pertama kali di-run
-  if (!visible) {
-    return null;
-  }
+  if (!visible) return null;
 
   return (
     <Modal
-      visible={visible}
+      visible
       transparent
-      animationType="fade"
+      animationType="none"
       onRequestClose={disableClose ? undefined : onClose}
       statusBarTranslucent
     >
       <View style={styles.container}>
-        {/* Backdrop with Blur - Pressable agar tap area kosong bisa close */}
+        {/* BACKDROP */}
         <Pressable
           style={StyleSheet.absoluteFill}
           onPress={disableClose ? undefined : onClose}
         >
           <Animated.View
             style={[StyleSheet.absoluteFill, { opacity: backdropOpacity }]}
-            pointerEvents="none"
           >
-            {Platform.OS === 'ios' ? (
-              <BlurView
-                style={StyleSheet.absoluteFill}
-                blurType={isDark ? 'dark' : 'light'}
-                blurAmount={20}
-              />
-            ) : (
-              <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
-            )}
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: 'rgba(0,0,0,0.5)' },
+              ]}
+            />
           </Animated.View>
         </Pressable>
+
+        {/* SHEET */}
         <Animated.View
           style={[
             styles.sheet,
             {
               backgroundColor: colors.surface,
-              paddingBottom: insets.bottom + moderateVerticalScale(16),
+              transform: [{ translateY }],
+              paddingBottom:
+                keyboardHeight +
+                insets.bottom +
+                moderateVerticalScale(16),
             },
-            animatedSheetStyle,
           ]}
-          pointerEvents={disableClose ? 'box-none' : 'auto'}
           {...panResponder.panHandlers}
         >
-          {/* Drag Handle */}
           {enablePanDownToClose && !disableClose && (
             <View style={styles.dragHandleContainer}>
-              <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />
+              <View
+                style={[
+                  styles.dragHandle,
+                  { backgroundColor: colors.border },
+                ]}
+              />
             </View>
           )}
 
@@ -248,7 +221,6 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.25,
         shadowRadius: 10,
       },
@@ -259,8 +231,7 @@ const styles = StyleSheet.create({
   },
   dragHandleContainer: {
     alignItems: 'center',
-    paddingTop: moderateVerticalScale(12),
-    paddingBottom: moderateVerticalScale(8),
+    paddingVertical: moderateVerticalScale(10),
   },
   dragHandle: {
     width: scale(40),

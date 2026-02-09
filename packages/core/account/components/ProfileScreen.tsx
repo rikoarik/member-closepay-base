@@ -22,6 +22,7 @@ import {
   Document,
   LogoutCurve,
   Menu,
+  Element3,
 } from 'iconsax-react-nativejs';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
@@ -82,6 +83,15 @@ const ProfileScreenComponent: React.FC = () => {
         onPress: () => {
           // @ts-ignore - navigation type akan di-setup nanti
           navigation.navigate('QuickMenuSettings');
+        },
+      },
+      {
+        id: 'home-tabs',
+        label: t('profile.homeTabs'),
+        icon: <Element3 size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+        onPress: () => {
+          // @ts-ignore - navigation type akan di-setup nanti
+          navigation.navigate('HomeTabSettings');
         },
       },
       {

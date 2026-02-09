@@ -17,8 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
-import { ArrowLeft2, Eye, EyeSlash } from 'iconsax-react-nativejs';
+import { ArrowLeft2, Eye, EyeSlash, Wifi } from 'iconsax-react-nativejs';
 import {
   scale as scaleSize,
   moderateScale,
@@ -26,6 +25,8 @@ import {
   getHorizontalPadding,
   getResponsiveFontSize,
   FontFamily,
+  SvgLinearGradientView,
+  scale,
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
@@ -126,7 +127,7 @@ function CardItem({
   return (
     <TouchableOpacity activeOpacity={1} onPress={onPress} style={styles.cardTouchable}>
       <Animated.View style={[styles.cardOuter, { transform: [{ scale: cardScale }], opacity }]}>
-        <LinearGradient colors={item.colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardBg}>
+        <SvgLinearGradientView colors={item.colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardBg}>
           <View style={styles.pattern1} />
           <View style={styles.pattern2} />
           <View style={styles.pattern3} />
@@ -138,12 +139,14 @@ function CardItem({
                 <Text style={styles.brand} numberOfLines={1}>{t('home.closepayBrand')}</Text>
                 <Text style={styles.subBrand} numberOfLines={1}>{t('home.member')}</Text>
               </View>
+              <View style={{ transform: [{ rotate: '90deg' }] }}>
+                <Wifi size={scale(34)} color={'white'} variant="Outline" />
+              </View>
             </View>
 
             <View style={styles.mid}>
               <View style={styles.chipNfc}>
                 <ChipIcon />
-                <NfcIcon />
               </View>
               <View style={styles.balanceWrap}>
                 <Text style={styles.balanceLabel}>Saldo</Text>
@@ -177,7 +180,7 @@ function CardItem({
               </View>
             </View>
           </View>
-        </LinearGradient>
+        </SvgLinearGradientView>
       </Animated.View>
     </TouchableOpacity>
   );

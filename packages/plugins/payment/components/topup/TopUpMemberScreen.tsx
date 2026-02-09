@@ -13,6 +13,7 @@ import {
   Animated,
   Dimensions,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -106,7 +107,7 @@ export const TopUpMemberScreen = () => {
   const dropdownAnimation = useRef(new Animated.Value(0)).current;
   const dropdownOpacity = useRef(new Animated.Value(0)).current;
 
-  // ScrollView refs for keyboard handling
+  // ScrollView refs for keyboard handling (ref forwarded to inner ScrollView for scrollTo)
   const idMemberScrollRef = useRef<KeyboardAwareScrollView>(null);
   const excelScrollRef = useRef<KeyboardAwareScrollView>(null);
 
@@ -600,7 +601,7 @@ export const TopUpMemberScreen = () => {
         >
           {/* ID Member Page */}
           <View style={[styles.pagerPage, { width: screenWidth }]}>
-            <ScrollView
+            <KeyboardAwareScrollView
               ref={idMemberScrollRef}
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
@@ -733,7 +734,7 @@ export const TopUpMemberScreen = () => {
                       onFocus={() => {
                         setTimeout(() => {
                           if (activeTab === 'id-member' && idMemberScrollRef.current) {
-                            idMemberScrollRef.current.scrollTo({
+                            (idMemberScrollRef.current as unknown as ScrollView).scrollTo({
                               y: moderateVerticalScale(100),
                               animated: true,
                             });

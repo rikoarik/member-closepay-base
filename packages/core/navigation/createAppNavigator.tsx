@@ -7,7 +7,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import { TenantId, getTenantConfig, getCurrentTenantId, PluginRegistry, getPluginComponentLoader, QuickMenuSettingsScreen, OnboardingScreen, onboardingService, logger } from '@core/config';
+import { TenantId, getTenantConfig, getCurrentTenantId, PluginRegistry, getPluginComponentLoader, QuickMenuSettingsScreen, HomeTabSettingsScreen, OnboardingScreen, onboardingService, logger } from '@core/config';
 import { ProfileScreen, EditProfileScreen } from '@core/account';
 import { LanguageSelectionScreen } from '@core/i18n';
 import { ThemeSettingsScreen, useTheme } from '@core/theme';
@@ -289,6 +289,7 @@ export function createAppNavigator({
                 <Stack.Screen name="EditProfile" component={EditProfileScreen} />
                 <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} />
                 <Stack.Screen name="QuickMenuSettings" component={QuickMenuSettingsScreen} />
+                <Stack.Screen name="HomeTabSettings" component={HomeTabSettingsScreen} />
                 <Stack.Screen name="ThemeSettings" component={ThemeSettingsScreen} />
               </>
             )}
