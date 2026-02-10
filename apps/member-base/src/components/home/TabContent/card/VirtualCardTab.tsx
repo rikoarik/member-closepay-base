@@ -265,6 +265,10 @@ export const VirtualCardTab: React.FC<VirtualCardTabProps> = ({ isVisible }) => 
         contentContainerStyle={s.list}
         onScroll={onScroll}
         scrollEventThrottle={16}
+        nestedScrollEnabled={true}
+        bounces={false}
+        overScrollMode="always"
+        style={s.cardScrollView}
       >
         {MOCK_CARDS.map((item, index) => (
           <CardItem
@@ -312,7 +316,8 @@ export const VirtualCardTab: React.FC<VirtualCardTabProps> = ({ isVisible }) => 
 
 // --- Styles ---
 const s = StyleSheet.create({
-  root: { alignItems: 'center' },
+  root: { flex: 1, alignItems: 'center', width: '100%' },
+  cardScrollView: { flexGrow: 0, width: '100%' },
   list: { paddingHorizontal: LIST_PAD, paddingVertical: scale(12) },
   cardTouchable: { marginHorizontal: GAP },
 

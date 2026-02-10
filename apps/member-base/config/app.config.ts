@@ -44,26 +44,323 @@ export const appConfig: AppConfig = {
 
   // Home tabs configuration (for member variant)
   // Tabs akan ditampilkan di home screen dengan urutan sesuai order
+  // 35+ kombinasi tab untuk berbagai kebutuhan
   homeTabs: [
-    {
-      id: 'analytics',
-      label: 'F&B',
-      visible: true,
-      order: 1,
-    },
+    // ========== BERANDA & DASHBOARD ==========
     {
       id: 'beranda',
       label: 'Beranda',
       visible: true,
+      order: 1,
+    },
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      visible: false,
       order: 2,
     },
+    
+    // ========== MARKETPLACE - GENERAL ==========
+    {
+      id: 'marketplace',
+      label: 'Marketplace',
+      visible: true,
+      order: 3,
+    },
+    {
+      id: 'marketplace-general',
+      label: 'Belanja',
+      visible: false,
+      order: 4,
+    },
+    {
+      id: 'marketplace-balance',
+      label: 'Market Saldo',
+      visible: false,
+      order: 5,
+    },
+    {
+      id: 'marketplace-transaction',
+      label: 'Transaksi Market',
+      visible: false,
+      order: 6,
+    },
+    
+    // ========== MARKETPLACE - F&B ==========
+    {
+      id: 'analytics',
+      label: 'F&B',
+      visible: true,
+      order: 7,
+    },
+    {
+      id: 'fnb',
+      label: 'Food & Beverage',
+      visible: false,
+      order: 8,
+    },
+    {
+      id: 'fnb-order',
+      label: 'Pesan Makanan',
+      visible: false,
+      order: 9,
+    },
+    {
+      id: 'fnb-history',
+      label: 'Riwayat F&B',
+      visible: false,
+      order: 10,
+    },
+    {
+      id: 'fnb-balance',
+      label: 'Saldo F&B',
+      visible: false,
+      order: 11,
+    },
+    
+    // ========== BALANCE & SALDO ==========
+    {
+      id: 'balance',
+      label: 'Saldo',
+      visible: false,
+      order: 12,
+    },
+    {
+      id: 'balance-main',
+      label: 'Saldo Utama',
+      visible: false,
+      order: 13,
+    },
+    {
+      id: 'balance-plafon',
+      label: 'Saldo Plafon',
+      visible: false,
+      order: 14,
+    },
+    {
+      id: 'balance-meal',
+      label: 'Saldo Makan',
+      visible: false,
+      order: 15,
+    },
+    {
+      id: 'balance-history',
+      label: 'Riwayat Saldo',
+      visible: false,
+      order: 16,
+    },
+    {
+      id: 'balance-transfer',
+      label: 'Transfer Saldo',
+      visible: false,
+      order: 17,
+    },
+    {
+      id: 'balance-topup',
+      label: 'Top Up',
+      visible: false,
+      order: 18,
+    },
+    
+    // ========== VIRTUAL CARD ==========
     {
       id: 'virtualcard',
       label: 'Kartu Virtual',
       visible: true,
-      order: 3,
+      order: 19,
     },
-   
+    {
+      id: 'card-detail',
+      label: 'Detail Kartu',
+      visible: false,
+      order: 20,
+    },
+    {
+      id: 'card-transaction',
+      label: 'Transaksi Kartu',
+      visible: false,
+      order: 21,
+    },
+    {
+      id: 'card-topup',
+      label: 'Isi Ulang Kartu',
+      visible: false,
+      order: 22,
+    },
+    {
+      id: 'card-limit',
+      label: 'Limit Kartu',
+      visible: false,
+      order: 23,
+    },
+    
+    // ========== PAYMENT & PEMBAYARAN ==========
+    {
+      id: 'payment',
+      label: 'Pembayaran',
+      visible: false,
+      order: 24,
+    },
+    {
+      id: 'payment-qris',
+      label: 'Bayar QRIS',
+      visible: false,
+      order: 25,
+    },
+    {
+      id: 'payment-transfer',
+      label: 'Transfer',
+      visible: false,
+      order: 26,
+    },
+    {
+      id: 'payment-va',
+      label: 'Virtual Account',
+      visible: false,
+      order: 27,
+    },
+    {
+      id: 'payment-bank',
+      label: 'Transfer Bank',
+      visible: false,
+      order: 28,
+    },
+    {
+      id: 'payment-member',
+      label: 'Transfer Member',
+      visible: false,
+      order: 29,
+    },
+    
+    // ========== TRANSACTIONS & HISTORY ==========
+    {
+      id: 'transactions',
+      label: 'Transaksi',
+      visible: false,
+      order: 30,
+    },
+    {
+      id: 'transaction-history',
+      label: 'Riwayat Transaksi',
+      visible: false,
+      order: 31,
+    },
+    {
+      id: 'transaction-all',
+      label: 'Semua Transaksi',
+      visible: false,
+      order: 32,
+    },
+    {
+      id: 'transaction-card',
+      label: 'Transaksi Kartu',
+      visible: false,
+      order: 33,
+    },
+    {
+      id: 'transaction-payment',
+      label: 'Transaksi Bayar',
+      visible: false,
+      order: 34,
+    },
+    {
+      id: 'transaction-marketplace',
+      label: 'Transaksi Belanja',
+      visible: false,
+      order: 35,
+    },
+    
+    // ========== PROMO & REWARDS ==========
+    {
+      id: 'promo',
+      label: 'Promo',
+      visible: false,
+      order: 36,
+    },
+    {
+      id: 'rewards',
+      label: 'Hadiah',
+      visible: false,
+      order: 37,
+    },
+    {
+      id: 'voucher',
+      label: 'Voucher',
+      visible: false,
+      order: 38,
+    },
+    {
+      id: 'cashback',
+      label: 'Cashback',
+      visible: false,
+      order: 39,
+    },
+    
+    // ========== PROFILE & SETTINGS ==========
+    {
+      id: 'profile',
+      label: 'Profil',
+      visible: false,
+      order: 40,
+    },
+    {
+      id: 'settings',
+      label: 'Pengaturan',
+      visible: false,
+      order: 41,
+    },
+    {
+      id: 'account',
+      label: 'Akun Saya',
+      visible: false,
+      order: 42,
+    },
+    
+    // ========== ANALYTICS & REPORTS ==========
+    {
+      id: 'analytics-dashboard',
+      label: 'Analitik',
+      visible: false,
+      order: 43,
+    },
+    {
+      id: 'reports',
+      label: 'Laporan',
+      visible: false,
+      order: 44,
+    },
+    {
+      id: 'statistics',
+      label: 'Statistik',
+      visible: false,
+      order: 45,
+    },
+    
+    // ========== QUICK ACTIONS ==========
+    {
+      id: 'withdraw',
+      label: 'Tarik Tunai',
+      visible: false,
+      order: 46,
+    },
+    {
+      id: 'scan-qr',
+      label: 'Scan QR',
+      visible: false,
+      order: 47,
+    },
+    {
+      id: 'request-money',
+      label: 'Minta Uang',
+      visible: false,
+      order: 48,
+    },
+    {
+      id: 'split-bill',
+      label: 'Patungan',
+      visible: false,
+      order: 49,
+    },
   ],
 
   // Menu configuration (bottom navigation / drawer menu)
@@ -80,6 +377,25 @@ export const appConfig: AppConfig = {
 
   // QR Button configuration
   showQrButton: true, // Show/hide QR scan button on home screen
+
+  // Beranda widgets - bisa diatur on/off dan urutan di Profile > Pengaturan Tab Beranda
+  berandaWidgets: [
+    { id: 'greeting-card', visible: true, order: 1 },
+    { id: 'balance-card', visible: true, order: 2 },
+    { id: 'quick-access', visible: true, order: 3 },
+    { id: 'recent-transactions', visible: true, order: 4 },
+    { id: 'news-info', visible: true, order: 5 },
+    { id: 'promo-banner', visible: true, order: 6 },
+    { id: 'store-nearby', visible: true, order: 7 },
+    { id: 'card-summary', visible: true, order: 8 },
+    { id: 'activity-summary', visible: true, order: 9 },
+    { id: 'savings-goal', visible: true, order: 10 },
+    { id: 'referral-banner', visible: true, order: 11 },
+    { id: 'rewards-points', visible: true, order: 12 },
+    { id: 'voucher-available', visible: true, order: 13 },
+    { id: 'fnb-recent-orders', visible: true, order: 14 },
+    { id: 'marketplace-featured', visible: true, order: 15 },
+  ],
 
   // Akses Cepat (Quick Access) - hanya untuk member balance-management
   quickAccessMenu: [

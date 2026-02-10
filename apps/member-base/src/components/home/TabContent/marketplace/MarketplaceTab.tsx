@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SearchNormal, CloseCircle } from 'iconsax-react-nativejs';
 import { ProductCard, Product, ProductCardSkeleton } from '@plugins/marketplace';
-import { StoreCard, Store } from '../stores/StoreCard';
+import { StoreCard, Store } from '../../stores/StoreCard';
 import {
   scale,
   moderateVerticalScale,
@@ -26,7 +26,7 @@ import {
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useMarketplaceData, getCategories } from '@plugins/marketplace';
-import { useStoreData } from '../hooks/useStoreData';
+import { useStoreData } from '../../hooks/useStoreData';
 import { ScrollView } from 'react-native';
 
 interface MarketplaceTabProps {

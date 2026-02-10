@@ -7,3 +7,4 @@ export { QuickAccessButtons } from './quick-actions/QuickAccessButtons';
 export { SectionHeader } from './sections/SectionHeader';
 export { NewsItem, type News } from './news/NewsItem';
 export * from './TabContent';
+export { TabSwitcher } from './TabSwitcher';

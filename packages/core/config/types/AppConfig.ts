@@ -59,6 +59,13 @@ export interface AppConfig {
    */
   quickAccessMenu?: QuickAccessMenuItemConfig[];
 
+  /**
+   * Beranda (Home) widgets configuration.
+   * Widgets shown on Beranda tab - can differ per segment.
+   * When not set, uses default: balance-card, quick-access, recent-transactions, news-info.
+   */
+  berandaWidgets?: BerandaWidgetConfig[];
+
   // Support configuration
   support?: {
     whatsappNumber?: string; // WhatsApp number for customer support (format: country code + number without +)
@@ -132,6 +139,13 @@ export interface QuickAccessMenuItemConfig {
   route: string;
   labelKey: string;
   icon?: string;
+  order?: number;
+}
+
+/** Beranda widget config - id maps to widget component, visible & order control display */
+export interface BerandaWidgetConfig {
+  id: string;
+  visible?: boolean;
   order?: number;
 }
 

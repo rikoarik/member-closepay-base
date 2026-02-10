@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@core/theme';
 import { ScreenHeader } from '@core/config';
 import { useTranslation } from '@core/i18n';
-import { NewsTab } from '../components/home/TabContent/NewsTab';
+import { NewsTab } from '../components/home';
 
 export const NewsScreen = () => {
   const { colors } = useTheme();

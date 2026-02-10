@@ -1,20 +1,22 @@
 /**
  * Home Tab Settings Service
- * Menyimpan preferensi user untuk tab beranda (tab switcher) - maksimal 3 tab aktif
+ * Tengah fixed = Beranda. Kiri & kanan = dropdown pilih tab.
  */
 import SecureStorage from '../../native/SecureStorage';
+import type { BerandaWidgetConfig } from '../types/AppConfig';
 
 const HOME_TAB_SETTINGS_KEY = '@home_tab_settings';
 
 export const MAX_HOME_TABS = 3;
+export const BERANDA_TAB_ID = 'beranda';
 
 export interface HomeTabSettings {
   enabledTabIds: string[];
+  berandaWidgets?: BerandaWidgetConfig[];
 }
 
 /**
- * Semua tab yang bisa ditampilkan di home (sesuai renderTabContent di HomeScreen).
- * User memilih on/off maksimal 3 dari list ini.
+ * Tab untuk dropdown kiri & kanan (Beranda tidak termasuk - fixed di tengah)
  */
 export interface AvailableHomeTab {
   id: string;
@@ -22,7 +24,6 @@ export interface AvailableHomeTab {
 }
 
 export const ALL_AVAILABLE_HOME_TABS: AvailableHomeTab[] = [
-  { id: 'beranda', labelKey: 'home.beranda' },
   { id: 'analytics', labelKey: 'home.analytics' },
   { id: 'virtualcard', labelKey: 'home.virtualcard' },
   { id: 'fnb', labelKey: 'home.fnb' },
@@ -30,6 +31,24 @@ export const ALL_AVAILABLE_HOME_TABS: AvailableHomeTab[] = [
   { id: 'activity', labelKey: 'home.activity' },
   { id: 'news', labelKey: 'home.news' },
   { id: 'beranda-news', labelKey: 'home.berandaNews' },
+];
+
+export const DEFAULT_BERANDA_WIDGETS: BerandaWidgetConfig[] = [
+  { id: 'greeting-card', visible: true, order: 1 },
+  { id: 'balance-card', visible: true, order: 2 },
+  { id: 'quick-access', visible: true, order: 3 },
+  { id: 'recent-transactions', visible: true, order: 4 },
+  { id: 'news-info', visible: true, order: 5 },
+  { id: 'promo-banner', visible: true, order: 6 },
+  { id: 'store-nearby', visible: true, order: 7 },
+  { id: 'card-summary', visible: true, order: 8 },
+  { id: 'activity-summary', visible: true, order: 9 },
+  { id: 'savings-goal', visible: true, order: 10 },
+  { id: 'referral-banner', visible: true, order: 11 },
+  { id: 'rewards-points', visible: true, order: 12 },
+  { id: 'voucher-available', visible: true, order: 13 },
+  { id: 'fnb-recent-orders', visible: true, order: 14 },
+  { id: 'marketplace-featured', visible: true, order: 15 },
 ];
 
 /**
@@ -43,6 +62,7 @@ export const loadHomeTabSettings = async (): Promise<HomeTabSettings> => {
       if (Array.isArray(parsed.enabledTabIds)) {
         return {
           enabledTabIds: parsed.enabledTabIds.slice(0, MAX_HOME_TABS),
+          berandaWidgets: parsed.berandaWidgets,
         };
       }
     }
@@ -53,7 +73,7 @@ export const loadHomeTabSettings = async (): Promise<HomeTabSettings> => {
 };
 
 /**
- * Save home tab settings ke storage (max 3 IDs)
+ * Save home tab settings - format: [leftTabId, 'beranda', rightTabId]
  */
 export const saveHomeTabSettings = async (
   settings: HomeTabSettings
@@ -61,6 +81,7 @@ export const saveHomeTabSettings = async (
   try {
     const toSave: HomeTabSettings = {
       enabledTabIds: settings.enabledTabIds.slice(0, MAX_HOME_TABS),
+      berandaWidgets: settings.berandaWidgets,
     };
     await SecureStorage.setItem(HOME_TAB_SETTINGS_KEY, JSON.stringify(toSave));
   } catch (error) {

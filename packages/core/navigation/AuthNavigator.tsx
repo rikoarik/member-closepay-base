@@ -8,7 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppState, AppStateStatus, View, Text, ActivityIndicator } from 'react-native';
 import { LoginScreen, SignUpScreen, ForgotPasswordScreen, useAuth } from '@core/auth';
-import { OnboardingScreen, onboardingService, PluginRegistry, getPluginComponentLoader, QuickMenuSettingsScreen } from '@core/config';
+import { OnboardingScreen, onboardingService, PluginRegistry, getPluginComponentLoader, QuickMenuSettingsScreen, HomeTabSettingsScreen } from '@core/config';
 import { ProfileScreen, EditProfileScreen } from '@core/account';
 import { LanguageSelectionScreen } from '@core/i18n';
 import { ThemeSettingsScreen, useTheme } from '@core/theme';
@@ -282,6 +282,7 @@ export const AuthNavigator: React.FC<AuthNavigatorProps> = ({ appScreens }) => {
               <Stack.Screen name="EditProfile" component={EditProfileScreen} />
               <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} />
               <Stack.Screen name="QuickMenuSettings" component={QuickMenuSettingsScreen} />
+              <Stack.Screen name="HomeTabSettings" component={HomeTabSettingsScreen} />
               <Stack.Screen name="ThemeSettings" component={ThemeSettingsScreen} />
             </>
           )}

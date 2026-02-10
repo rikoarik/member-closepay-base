@@ -3,8 +3,8 @@ import { View, FlatList, StyleSheet, TextInput, TouchableOpacity, Text, RefreshC
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SearchNormal, Filter } from 'iconsax-react-nativejs';
-import { NewsItem, type News } from '../news/NewsItem';
-import { NewsItemSkeleton } from '../news/NewsItemSkeleton';
+import { NewsItem, type News } from '../../news/NewsItem';
+import { NewsItemSkeleton } from '../../news/NewsItemSkeleton';
 import {
   scale,
   moderateVerticalScale,
@@ -15,9 +15,9 @@ import {
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { CloseCircle } from 'iconsax-react-nativejs';
-import { NewsFilterBottomSheet, type NewsFilterState } from './NewsFilterBottomSheet';
+import { NewsFilterBottomSheet, type NewsFilterState } from '../shared/NewsFilterBottomSheet';
 import { UI_CONSTANTS } from '@core/config/constants';
-import { useNewsData } from '../hooks/useNewsData';
+import { useNewsData } from '../../hooks/useNewsData';
 
 interface NewsTabProps {
   isActive?: boolean;

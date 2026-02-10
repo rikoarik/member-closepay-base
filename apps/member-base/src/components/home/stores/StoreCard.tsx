@@ -26,17 +26,19 @@ export interface Store {
 interface StoreCardProps {
   store: Store;
   onPress?: (store: Store) => void;
+  /** Optional width untuk horizontal scroll (compact) */
+  width?: number;
 }
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/80x80/CCCCCC/FFFFFF?text=Store';
 
-const StoreCardComponent: React.FC<StoreCardProps> = ({ store, onPress }) => {
+const StoreCardComponent: React.FC<StoreCardProps> = ({ store, onPress, width }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { width: screenWidth } = useDimensions();
   const horizontalPadding = getHorizontalPadding();
 
-  const cardWidth = screenWidth - horizontalPadding * 2;
+  const cardWidth = width ?? screenWidth - horizontalPadding * 2;
 
   return (
     <TouchableOpacity

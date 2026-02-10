@@ -1,7 +1,7 @@
 /**
  * Member Base App App Entry Point
  * Template untuk company-specific app
- * 
+ *
  * Usage:
  * 1. Copy this template to apps/{your-company-id}/index.tsx
  * 2. Update imports for your app-specific navigator
@@ -24,25 +24,19 @@ import { NotificationScreen } from './src/screens/NotificationScreen';
 import { NewsDetailScreen } from './src/screens/NewsDetailScreen';
 import { NewsScreen } from './src/screens/NewsScreen';
 import { SearchScreen, SearchResultsScreen } from '@plugins/marketplace';
-// Virtual Card screens are loaded automatically from plugin registry
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/CustomToast';
 
+// Screens from plugins (VirtualAccount, TransferMember, Withdraw, Qr are registered via plugin routes)
+import { QrScreen } from '@plugins/payment';
+import { TransactionHistoryScreen } from '@plugins/balance';
+// Marketplace, ProductDetail, Cart, FnB from plugin routes
+// App screens (VirtualCard, VirtualCardDetail, AddVirtualCard come from card-transaction plugin routes)
+import { ProfileScreen } from '@core/account';
+import { PlaceholderScreen } from './src/screens/PlaceholderScreen';
+
 const Stack = createNativeStackNavigator();
 
-// Option 1: Static config import (for template/demo)
-// import { appConfig } from './config/app.config';
-
-// Option 2: Load config from API (for production)
-// async function loadConfigFromAPI() {
-//   const response = await fetch('https://api.example.com/config/member-base');
-//   return await response.json();
-// }
-
-// Option 3: Load config from local storage (for caching)
-// async function loadConfigFromStorage() {
-//   // Use AsyncStorage or similar
-// }
 
 /**
  * Load config dengan support hot reload di development
@@ -64,12 +58,28 @@ function MemberBaseAppContent(): React.JSX.Element {
   const AppNavigator = useMemo(() => {
     const appScreens = (
       <>
+        {/* Core Screens */}
         <Stack.Screen name="Notifications" component={NotificationScreen} />
         <Stack.Screen name="News" component={NewsScreen} />
         <Stack.Screen name="NewsDetail" component={NewsDetailScreen} />
         <Stack.Screen name="Search" component={SearchScreen} />
         <Stack.Screen name="SearchResults" component={SearchResultsScreen} />
-        {/* Virtual Card screens are loaded automatically from plugin registry */}
+
+        {/* Payment & Transfer Screens - VirtualAccount, TransferMember, Withdraw, Qr come from plugin routes */}
+        <Stack.Screen name="ScanQr" component={QrScreen} />
+        <Stack.Screen name="RequestMoney" component={PlaceholderScreen} />
+        <Stack.Screen name="SplitBill" component={PlaceholderScreen} />
+
+        {/* Marketplace & F&B (Marketplace, FnB, ProductDetail, Cart from plugin routes) */}
+        {/* Search/SearchResults: app-specific names, plugin uses MarketplaceSearch/MarketplaceSearchResults */}
+        {/* Card Screens (VirtualCard from card-transaction plugin) */}
+        <Stack.Screen name="CardTopup" component={PlaceholderScreen} />
+        <Stack.Screen name="CardLimit" component={PlaceholderScreen} />
+
+        {/* Profile from core createAppNavigator; Settings/Account use same component, different route names */}
+        <Stack.Screen name="Settings" component={ProfileScreen} />
+        <Stack.Screen name="Account" component={ProfileScreen} />
+        <Stack.Screen name="Reports" component={TransactionHistoryScreen} />
       </>
     );
 
@@ -88,18 +98,6 @@ function MemberBaseAppContent(): React.JSX.Element {
         // Load app-specific config dengan support hot reload
         const appConfig = loadAppConfig();
         configService.setConfig(appConfig);
-
-        // Option 2: Load from API
-        // const config = await loadConfigFromAPI();
-        // configService.setConfig(config);
-
-        // Option 3: Load from storage (with API fallback)
-        // let config = await loadConfigFromStorage();
-        // if (!config) {
-        //   config = await loadConfigFromAPI();
-        //   await saveConfigToStorage(config);
-        // }
-        // configService.setConfig(config);
 
         setConfigLoaded(true);
 
@@ -136,7 +134,6 @@ function MemberBaseAppContent(): React.JSX.Element {
   }, []);
 
   // Watch config file changes untuk development (polling approach)
-  // Metro HMR akan reload file, tapi kita perlu re-set config
   useEffect(() => {
     if (!__DEV__) return;
 
@@ -146,8 +143,9 @@ function MemberBaseAppContent(): React.JSX.Element {
       try {
         const appConfig = loadAppConfig();
 
-        // Deep comparison untuk detect perubahan (termasuk primaryColor untuk development)
-        const hasChanged = !lastConfig ||
+        // Deep comparison untuk detect perubahan
+        const hasChanged =
+          !lastConfig ||
           lastConfig.branding.logo !== appConfig.branding.logo ||
           lastConfig.branding.appName !== appConfig.branding.appName ||
           lastConfig.branding.primaryColor !== appConfig.branding.primaryColor ||
@@ -164,12 +162,8 @@ function MemberBaseAppContent(): React.JSX.Element {
       }
     };
 
-    // Initial check
     checkConfigUpdate();
-
-    // Check setiap 1 detik untuk catch file changes (balance antara responsiveness dan performance)
     const interval = setInterval(checkConfigUpdate, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -179,11 +173,9 @@ function MemberBaseAppContent(): React.JSX.Element {
 
     const loadThemeColor = (): string | null => {
       try {
-        // Dynamic require untuk support hot reload
         const themeColorModule = require('./config/theme.color');
         return themeColorModule.themeColor || null;
       } catch (error) {
-        // Ignore errors saat file sedang di-edit
         return null;
       }
     };
@@ -198,24 +190,24 @@ function MemberBaseAppContent(): React.JSX.Element {
           logger.debug('Theme color file changed:', lastThemeColor, '→', currentColor);
           lastThemeColor = currentColor;
         }
-      } catch (error) {
-        // Ignore errors saat file sedang di-edit
-      }
+      } catch (error) {}
     };
 
-    // Initial check
     checkThemeColorUpdate();
-
-    // Check setiap 500ms untuk catch file changes lebih cepat (warna penting untuk UX)
     const interval = setInterval(checkThemeColorUpdate, 500);
-
     return () => clearInterval(interval);
   }, []);
 
-  // Show loading while initializing
   if (!configLoaded || !pluginsInitialized) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: colors.background,
+        }}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={{ marginTop: 16, color: colors.textSecondary }}>Memuat aplikasi...</Text>
       </View>
@@ -224,9 +216,7 @@ function MemberBaseAppContent(): React.JSX.Element {
 
   return (
     <>
-      <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-      />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <AppNavigator />
       <Toast config={toastConfig} />
     </>
@@ -248,4 +238,3 @@ function MemberBaseApp(): React.JSX.Element {
 }
 
 export default MemberBaseApp;
-

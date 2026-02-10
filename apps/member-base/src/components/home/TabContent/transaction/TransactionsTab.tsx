@@ -15,8 +15,8 @@ import {
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import { QuickAccessButtons } from '../quick-actions/QuickAccessButtons';
-import { SectionHeader } from '../sections/SectionHeader';
+import { QuickAccessButtons } from '../../quick-actions/QuickAccessButtons';
+import { SectionHeader } from '../../sections/SectionHeader';
 
 interface TransactionsTabProps {
   title: string;

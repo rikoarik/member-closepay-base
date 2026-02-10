@@ -18,6 +18,7 @@ export * from './services/nfcBluetoothService';
 export * from './components/topup';
 export * from './components/withdraw';
 export * from './components/virtual-account';
+export * from './components/transfer-member';
 export * from './components/qr';
 export * from './components/shared';
 

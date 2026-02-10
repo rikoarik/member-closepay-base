@@ -40,8 +40,27 @@ import {
   FnBTab,
   VirtualCardTab,
   BerandaNewsInfo,
+  BalanceTab,
+  PaymentTab,
+  DashboardTab,
+  TransactionHistoryTab,
+  BalanceMainTab,
+  BalancePlafonTab,
+  BalanceMealTab,
+  BalanceHistoryTab,
+  BalanceTransferTab,
+  BalanceTopupTab,
+  PaymentQrisTab,
+  PaymentTransferTab,
+  PaymentVATab,
+  PaymentMemberTab,
+  CardDetailTab,
+  CardTransactionTab,
+  CardLimitTab,
+  TransactionAllTab,
+  TransactionCardTab,
 } from '../components/home';
-import { useNewsState } from '../components/home/TabContent/NewsTab';
+import { useNewsState } from '../components/home';
 import { useNotifications } from '@core/notification';
 import Toast from 'react-native-toast-message';
 import { QrScanIcon } from '@core/config/components/icons';
@@ -68,7 +87,9 @@ const HomeScreenComponent = () => {
       loadHomeTabSettings().then((settings) => {
         if (!cancelled) setEnabledTabIdsFromSettings(settings.enabledTabIds);
       });
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }, [])
   );
 
@@ -244,13 +265,8 @@ const HomeScreenComponent = () => {
         );
       }
 
-      if (tabId === "analytics" || tabId === "analitik") {
-        return (
-          <AnalyticsTab
-            isActive={activeTab === tabId}
-            scrollEnabled={false}
-          />
-        );
+      if (tabId === 'analytics' || tabId === 'analitik') {
+        return <AnalyticsTab isActive={activeTab === tabId} scrollEnabled={false} />;
       }
 
       if (tabId === 'fnb') {
@@ -274,10 +290,188 @@ const HomeScreenComponent = () => {
       }
 
       if (tabId === 'virtualcard' || tabId === 'kartu-virtual') {
+        return <VirtualCardTab isActive={activeTab === tabId} isVisible={activeTab === tabId} />;
+      }
+
+      if (tabId === 'balance' || tabId === 'saldo') {
         return (
-          <VirtualCardTab
+          <BalanceTab
             isActive={activeTab === tabId}
             isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+
+      if (tabId === 'payment' || tabId === 'pembayaran') {
+        return (
+          <PaymentTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+
+      if (tabId === 'dashboard') {
+        return (
+          <DashboardTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+
+      if (tabId === 'transaction-history' || tabId === 'riwayat-transaksi') {
+        return (
+          <TransactionHistoryTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+
+      // Balance Sub-Tabs
+      if (tabId === 'balance-main' || tabId === 'saldo-utama') {
+        return (
+          <BalanceMainTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'balance-plafon' || tabId === 'saldo-plafon') {
+        return (
+          <BalancePlafonTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'balance-meal' || tabId === 'saldo-makan') {
+        return (
+          <BalanceMealTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'balance-history' || tabId === 'riwayat-saldo') {
+        return (
+          <BalanceHistoryTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'balance-transfer' || tabId === 'transfer-saldo') {
+        return (
+          <BalanceTransferTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'balance-topup' || tabId === 'topup-saldo') {
+        return (
+          <BalanceTopupTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+
+      // Payment Sub-Tabs
+      if (tabId === 'payment-qris' || tabId === 'bayar-qris') {
+        return (
+          <PaymentQrisTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'payment-transfer' || tabId === 'bayar-transfer') {
+        return (
+          <PaymentTransferTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'payment-va' || tabId === 'bayar-va') {
+        return (
+          <PaymentVATab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'payment-member' || tabId === 'bayar-member') {
+        return (
+          <PaymentMemberTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+
+      // Card Sub-Tabs
+      if (tabId === 'card-detail' || tabId === 'detail-kartu') {
+        return (
+          <CardDetailTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'card-transaction' || tabId === 'transaksi-kartu') {
+        return (
+          <CardTransactionTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'card-limit' || tabId === 'limit-kartu') {
+        return (
+          <CardLimitTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+
+      // Transaction Sub-Tabs
+      if (tabId === 'transaction-all' || tabId === 'semua-transaksi') {
+        return (
+          <TransactionAllTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
+          />
+        );
+      }
+      if (tabId === 'transaction-card' || tabId === 'transaksi-kartu-only') {
+        return (
+          <TransactionCardTab
+            isActive={activeTab === tabId}
+            isVisible={activeTab === tabId}
+            scrollEnabled={false}
           />
         );
       }

@@ -29,6 +29,8 @@ export interface Product {
 interface ProductCardProps {
   product: Product;
   onPress?: (product: Product) => void;
+  /** Optional width untuk horizontal scroll (compact) */
+  width?: number;
 }
 
 const PLACEHOLDER_IMAGE =
@@ -42,14 +44,15 @@ const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-const ProductCardComponent: React.FC<ProductCardProps> = ({ product, onPress }) => {
+const ProductCardComponent: React.FC<ProductCardProps> = ({ product, onPress, width }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { width: screenWidth } = useDimensions();
   const [imageError, setImageError] = useState(false);
   const horizontalPadding = getHorizontalPadding();
 
-  const cardWidth = (screenWidth - horizontalPadding * 2 - scale(12)) / 2;
+  const cardWidth =
+    width ?? (screenWidth - horizontalPadding * 2 - scale(12)) / 2;
 
   const discountPercentage =
     product.originalPrice && product.originalPrice > product.price
