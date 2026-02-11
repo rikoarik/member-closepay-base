@@ -48,6 +48,20 @@
             "TapKartuSummary": "TapKartuSummaryScreen",
             "Qr": "QrScreen",
             "EditQuickAmount": "EditQuickAmountScreen"
+        },
+        "tabs": {
+            "payment": "PaymentTab",
+            "pembayaran": "PaymentTab",
+            "payment-qris": "PaymentQrisTab",
+            "bayar-qris": "PaymentQrisTab",
+            "payment-transfer": "PaymentTransferTab",
+            "bayar-transfer": "PaymentTransferTab",
+            "payment-va": "PaymentVATab",
+            "bayar-va": "PaymentVATab",
+            "payment-bank": "PaymentBankTab",
+            "bayar-bank": "PaymentBankTab",
+            "payment-member": "PaymentMemberTab",
+            "bayar-member": "PaymentMemberTab"
         }
     },
     "routes": [

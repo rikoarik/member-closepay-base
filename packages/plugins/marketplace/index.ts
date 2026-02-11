@@ -15,7 +15,9 @@ export { ProductCard } from './components/shared/ProductCard';
 export type { Product } from './components/shared/ProductCard';
 export { ProductCardSkeleton } from './components/shared/ProductCardSkeleton';
 export { CartBar } from './components/shared/CartBar';
-export { useMarketplaceData, getCategories } from './hooks/useMarketplaceData';
+export { useMarketplaceData, getCategories, getAllStores } from './hooks/useMarketplaceData';
+export type { Store } from './hooks/useMarketplaceData';
+export { StoreCard } from './components/shared/StoreCard';
 export { useSearch } from './hooks/useSearch';
 export { useMarketplaceCart } from './hooks/useMarketplaceCart';
 

@@ -33,6 +33,7 @@ export const appConfig: AppConfig = {
     'card-transaction',
     'marketplace',
     'marketplace-fnb',
+    'sport-center',
   ],
 
   // ============================================================================
@@ -163,6 +164,12 @@ export const appConfig: AppConfig = {
     },
     
     // ========== VIRTUAL CARD ==========
+    {
+      id: 'sport-center',
+      label: 'Sport Center',
+      visible: false,
+      order: 18,
+    },
     {
       id: 'virtualcard',
       label: 'Kartu Virtual',
@@ -373,6 +380,14 @@ export const appConfig: AppConfig = {
       visible: true,
       order: 2,
     },
+    {
+      id: 'sport-center',
+      label: 'Sport Center',
+      icon: 'sportcenter',
+      route: 'SportCenter',
+      visible: true,
+      order: 3,
+    },
   ],
 
   // QR Button configuration
@@ -395,6 +410,7 @@ export const appConfig: AppConfig = {
     { id: 'voucher-available', visible: true, order: 13 },
     { id: 'fnb-recent-orders', visible: true, order: 14 },
     { id: 'marketplace-featured', visible: true, order: 15 },
+    { id: 'sport-center-featured', visible: true, order: 16 },
   ],
 
   // Akses Cepat (Quick Access) - hanya untuk member balance-management
@@ -405,6 +421,7 @@ export const appConfig: AppConfig = {
     { id: 'transferbank', route: 'Withdraw', labelKey: 'home.transferBank', icon: 'withdraw', order: 4 },
     { id: 'marketplace', route: 'Marketplace', labelKey: 'home.marketplace', icon: 'marketplace', order: 5 },
     { id: 'fnb', route: 'FnB', labelKey: 'home.fnb', icon: 'fnb', order: 6 },
+    { id: 'sportcenter', route: 'SportCenter', labelKey: 'home.sportCenter', icon: 'sportcenter', order: 7 },
   ],
 
   // ============================================================================

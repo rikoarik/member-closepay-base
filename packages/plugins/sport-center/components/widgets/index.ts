@@ -1,0 +1,1 @@
+export { SportCenterFeatured } from './SportCenterFeatured';

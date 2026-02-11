@@ -28,13 +28,37 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     WithdrawIcon: () => import('../../../plugins/balance/components/ui/WithdrawIcon'),
     TopUpIcon: () => import('../../../plugins/balance/components/ui/TopUpIcon'),
     BalanceCard: () => import('../../../plugins/balance/components/ui/BalanceCard'),
+    BalanceTab: () => import('../../../plugins/balance/components/tabs/BalanceTab'),
+    BalanceMainTab: () => import('../../../plugins/balance/components/tabs/BalanceMainTab'),
+    BalancePlafonTab: () => import('../../../plugins/balance/components/tabs/BalancePlafonTab'),
+    BalanceMealTab: () => import('../../../plugins/balance/components/tabs/BalanceMealTab'),
+    BalanceHistoryTab: () => import('../../../plugins/balance/components/tabs/BalanceHistoryTab'),
+    BalanceTransferTab: () => import('../../../plugins/balance/components/tabs/BalanceTransferTab'),
+    BalanceTopupTab: () => import('../../../plugins/balance/components/tabs/BalanceTopupTab'),
+    TransactionHistoryTab: () => import('../../../plugins/balance/components/tabs/TransactionHistoryTab'),
+    TransactionAllTab: () => import('../../../plugins/balance/components/tabs/TransactionAllTab'),
+    TransactionCardTab: () => import('../../../plugins/balance/components/tabs/TransactionCardTab'),
+    ActivitySummary: () => import('../../../plugins/balance/components/widgets/ActivitySummary'),
+    SavingsGoal: () => import('../../../plugins/balance/components/widgets/SavingsGoal'),
+    RecentTransactions: () => import('../../../plugins/balance/components/widgets/RecentTransactions'),
   },
   'card-transaction': {
     VirtualCardScreen: () => import('../../../plugins/card-transaction/components/screens/VirtualCardScreen'),
     VirtualCardDetailScreen: () => import('../../../plugins/card-transaction/components/screens/VirtualCardDetailScreen'),
     AddVirtualCardScreen: () => import('../../../plugins/card-transaction/components/screens/AddVirtualCardScreen'),
+    VirtualCardTab: () => import('../../../plugins/card-transaction/components/tabs/VirtualCardTab'),
+    CardDetailTab: () => import('../../../plugins/card-transaction/components/tabs/CardDetailTab'),
+    CardTransactionTab: () => import('../../../plugins/card-transaction/components/tabs/CardTransactionTab'),
+    CardLimitTab: () => import('../../../plugins/card-transaction/components/tabs/CardLimitTab'),
+    CardTopupTab: () => import('../../../plugins/card-transaction/components/tabs/CardTopupTab'),
+    CardSummary: () => import('../../../plugins/card-transaction/components/widgets/CardSummary'),
   },
   marketplace: {
+    MarketplaceTab: () => import('../../../plugins/marketplace/components/tabs/MarketplaceTab'),
+    MarketplaceGeneralTab: () => import('../../../plugins/marketplace/components/tabs/MarketplaceGeneralTab'),
+    MarketplaceBalanceTab: () => import('../../../plugins/marketplace/components/tabs/MarketplaceBalanceTab'),
+    MarketplaceTransactionTab: () => import('../../../plugins/marketplace/components/tabs/MarketplaceTransactionTab'),
+    MarketplaceFeatured: () => import('../../../plugins/marketplace/components/widgets/MarketplaceFeatured'),
     ProductCard: () => import('../../../plugins/marketplace/components/shared/ProductCard'),
     ProductCardSkeleton: () => import('../../../plugins/marketplace/components/shared/ProductCardSkeleton'),
     CartBar: () => import('../../../plugins/marketplace/components/shared/CartBar'),
@@ -47,6 +71,11 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     CheckoutScreen: () => import('../../../plugins/marketplace/components/screens/CheckoutScreen'),
   },
   'marketplace-fnb': {
+    FnBTab: () => import('../../../plugins/marketplace-fnb/components/tabs/FnBTab'),
+    FnBOrderTab: () => import('../../../plugins/marketplace-fnb/components/tabs/FnBOrderTab'),
+    FnBHistoryTab: () => import('../../../plugins/marketplace-fnb/components/tabs/FnBHistoryTab'),
+    FnBBalanceTab: () => import('../../../plugins/marketplace-fnb/components/tabs/FnBBalanceTab'),
+    FnBRecentOrders: () => import('../../../plugins/marketplace-fnb/components/widgets/FnBRecentOrders'),
     FnBItemCard: () => import('../../../plugins/marketplace-fnb/components/shared/FnBItemCard'),
     FnBCategoryTabs: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCategoryTabs'),
     FnBCartBar: () => import('../../../plugins/marketplace-fnb/components/shared/FnBCartBar'),
@@ -57,6 +86,15 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     FnBMerchantDetailScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBMerchantDetailScreen'),
     FnBCheckoutScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBCheckoutScreen'),
     FnBScanScreen: () => import('../../../plugins/marketplace-fnb/components/screens/FnBScanScreen'),
+  },
+  'sport-center': {
+    SportCenterScreen: () => import('../../../plugins/sport-center/components/screens/SportCenterScreen'),
+    SportCenterFacilityDetailScreen: () => import('../../../plugins/sport-center/components/screens/SportCenterFacilityDetailScreen'),
+    SportCenterBookingScreen: () => import('../../../plugins/sport-center/components/screens/SportCenterBookingScreen'),
+    SportCenterCheckoutScreen: () => import('../../../plugins/sport-center/components/screens/SportCenterCheckoutScreen'),
+    SportCenterMyBookingsScreen: () => import('../../../plugins/sport-center/components/screens/SportCenterMyBookingsScreen'),
+    SportCenterTab: () => import('../../../plugins/sport-center/components/tabs/SportCenterTab'),
+    SportCenterFeatured: () => import('../../../plugins/sport-center/components/widgets/SportCenterFeatured'),
   },
   payment: {
     TopUpScreen: () => import('../../../plugins/payment/components/topup/TopUpScreen'),
@@ -75,6 +113,12 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     PinInput: () => import('../../../plugins/payment/components/shared/PinInput'),
     WithdrawConfirmModal: () => import('../../../plugins/payment/components/withdraw/WithdrawConfirmModal'),
     AutoWithdrawModal: () => import('../../../plugins/payment/components/withdraw/AutoWithdrawModal'),
+    PaymentTab: () => import('../../../plugins/payment/components/tabs/PaymentTab'),
+    PaymentQrisTab: () => import('../../../plugins/payment/components/tabs/PaymentQrisTab'),
+    PaymentTransferTab: () => import('../../../plugins/payment/components/tabs/PaymentTransferTab'),
+    PaymentVATab: () => import('../../../plugins/payment/components/tabs/PaymentVATab'),
+    PaymentMemberTab: () => import('../../../plugins/payment/components/tabs/PaymentMemberTab'),
+    PaymentBankTab: () => import('../../../plugins/payment/components/tabs/PaymentBankTab'),
   },
 };
 
@@ -123,12 +167,14 @@ export async function loadPluginComponent(
     throw new Error(`Plugin ${pluginId} not found`);
   }
 
-  // Check if component is exported (check both components and screens)
+  // Check if component is exported (screens, components, tabs, widgets)
   const exports = plugin.exports;
   const isScreen = exports.screens && Object.values(exports.screens).includes(componentName);
   const isComponent = exports.components?.includes(componentName);
+  const isTab = exports.tabs && Object.values(exports.tabs).includes(componentName);
+  const isWidget = exports.widgets && Object.values(exports.widgets).includes(componentName);
 
-  if (!isScreen && !isComponent) {
+  if (!isScreen && !isComponent && !isTab && !isWidget) {
     throw new Error(`Component ${componentName} not exported by plugin ${pluginId}`);
   }
 

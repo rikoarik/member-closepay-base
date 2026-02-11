@@ -16,6 +16,7 @@ import {
   FontFamily,
   moderateVerticalScale,
   scale,
+  useRefreshRegistry,
 } from '@core/config';
 import { ArrowLeft2 } from 'iconsax-react-nativejs';
 import { useNavigation, CommonActions } from '@react-navigation/native';
@@ -56,8 +57,8 @@ export interface BerandaNewsInfoProps {
    */
   onRefresh?: () => void | Promise<void>;
   /**
-   * Callback untuk expose refresh function ke parent
-   * Berguna untuk trigger refresh dari parent component
+   * @deprecated Use RefreshRegistryContext - register via useRefreshRegistry
+   * Callback untuk expose refresh function ke parent (legacy)
    */
   onRefreshRequested?: (refreshFn: () => void) => void;
 }
@@ -169,12 +170,19 @@ export const BerandaNewsInfo: React.FC<BerandaNewsInfoProps> = React.memo(({
     }
   }, [onRefresh]);
 
-  // Expose refresh function ke parent
+  const refreshRegistry = useRefreshRegistry();
+
   React.useEffect(() => {
     if (onRefreshRequested) {
       onRefreshRequested(handleRefresh);
     }
   }, [onRefreshRequested, handleRefresh]);
+
+  React.useEffect(() => {
+    if (!refreshRegistry) return;
+    const unregister = refreshRegistry.registerRefreshCallback('news-info', handleRefresh);
+    return unregister;
+  }, [refreshRegistry, handleRefresh]);
 
   // Menggunakan data yang sama dengan NewsTab
   // refreshKey digunakan untuk force re-render saat refresh

@@ -24,6 +24,8 @@ export interface PluginExports {
   services?: string[];
   models?: string[];
   screens?: Record<string, string>;
+  tabs?: Record<string, string>;
+  widgets?: Record<string, string>;
 }
 
 export interface PluginManifest {

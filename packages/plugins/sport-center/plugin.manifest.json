@@ -1,0 +1,28 @@
+{
+  "id": "sport-center",
+  "name": "Sport Center",
+  "version": "1.0.0",
+  "description": "Fitness and sports facility booking - gym, court, swimming pool",
+  "type": "segment-plugin",
+  "author": "Closepay Team",
+  "dependencies": ["balance", "payment"],
+  "exports": {
+    "screens": {
+      "SportCenter": "SportCenterScreen",
+      "SportCenterFacilityDetail": "SportCenterFacilityDetailScreen",
+      "SportCenterBooking": "SportCenterBookingScreen",
+      "SportCenterCheckout": "SportCenterCheckoutScreen",
+      "SportCenterMyBookings": "SportCenterMyBookingsScreen"
+    },
+    "tabs": { "sport-center": "SportCenterTab" },
+    "widgets": { "sport-center-featured": "SportCenterFeatured" }
+  },
+  "routes": [
+    {"name": "SportCenter", "path": "/sport-center", "component": "SportCenterScreen", "permissions": ["read:sport-center"], "meta": {"title": "Sport Center", "showInMenu": true}},
+    {"name": "SportCenterFacilityDetail", "path": "/sport-center/facility-detail", "component": "SportCenterFacilityDetailScreen", "permissions": ["read:sport-center"], "meta": {"title": "Detail Fasilitas", "showInMenu": false}},
+    {"name": "SportCenterBooking", "path": "/sport-center/booking", "component": "SportCenterBookingScreen", "permissions": ["write:sport-center"], "meta": {"title": "Booking", "showInMenu": false}},
+    {"name": "SportCenterCheckout", "path": "/sport-center/checkout", "component": "SportCenterCheckoutScreen", "permissions": ["write:sport-center"], "meta": {"title": "Checkout", "showInMenu": false}},
+    {"name": "SportCenterMyBookings", "path": "/sport-center/my-bookings", "component": "SportCenterMyBookingsScreen", "permissions": ["read:sport-center"], "meta": {"title": "Booking Saya", "showInMenu": false}}
+  ],
+  "permissions": ["read:sport-center", "write:sport-center"]
+}

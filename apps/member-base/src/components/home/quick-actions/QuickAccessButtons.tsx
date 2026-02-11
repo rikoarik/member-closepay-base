@@ -94,6 +94,8 @@ const getMenuIcon = (iconColor: string, iconName?: string, itemId?: string): Rea
       return <Shop size={size} color={iconColor} variant="Bold" />;
     case 'fnb':
       return <TruckFast size={size} color={iconColor} variant="Bold" />;
+    case 'sportcenter':
+      return <Game size={size} color={iconColor} variant="Bold" />;
     default:
       return <Game size={size} color={iconColor} variant="Bold" />;
   }
@@ -126,6 +128,8 @@ const getDefaultBgColor = (colors: ThemeColors, iconName?: string): string => {
       return colors.infoLight;
     case 'fnb':
       return colors.warningLight;
+    case 'sportcenter':
+      return colors.successLight;
     default:
       return colors.surfaceSecondary || colors.surface;
   }

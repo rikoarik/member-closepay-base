@@ -58,6 +58,7 @@ const WIDGET_IDS = [
   'voucher-available',
   'fnb-recent-orders',
   'marketplace-featured',
+  'sport-center-featured',
 ] as const;
 
 type Slot = 'left' | 'right';
@@ -195,6 +196,16 @@ export const HomeTabSettingsScreen: React.FC = () => {
     return ordered;
   }, [berandaWidgets]);
 
+  const { activeWidgets, inactiveWidgets } = useMemo(() => {
+    const active: string[] = [];
+    const inactive: string[] = [];
+    orderedWidgets.forEach((id) => {
+      if (getWidgetVisible(id)) active.push(id);
+      else inactive.push(id);
+    });
+    return { activeWidgets: active, inactiveWidgets: inactive };
+  }, [orderedWidgets, berandaWidgets]);
+
   const handleWidgetMove = useCallback((widgetId: string, direction: 'up' | 'down') => {
     setBerandaWidgets((prev) => {
       const base = prev.length ? prev : DEFAULT_BERANDA_WIDGETS;
@@ -229,6 +240,7 @@ export const HomeTabSettingsScreen: React.FC = () => {
       'voucher-available': 'homeTabSettings.widgetVoucherAvailable',
       'fnb-recent-orders': 'homeTabSettings.widgetFnBRecentOrders',
       'marketplace-featured': 'homeTabSettings.widgetMarketplaceFeatured',
+      'sport-center-featured': 'homeTabSettings.widgetSportCenterFeatured',
     };
     return t(mapped[widgetId] || widgetId);
   };
@@ -411,66 +423,125 @@ export const HomeTabSettingsScreen: React.FC = () => {
         </Text>
 
         <View style={styles.widgetList}>
-          {orderedWidgets.map((widgetId, index) => (
-            <View
-              key={widgetId}
-              style={[
-                styles.widgetRow,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                  minHeight: getMinTouchTarget(),
-                },
-              ]}
-            >
-              <View style={styles.widgetOrderControls}>
-                <TouchableOpacity
-                  onPress={() => handleWidgetMove(widgetId, 'up')}
-                  disabled={index === 0}
-                  style={[
-                    styles.orderButton,
-                    {
-                      backgroundColor: colors.surfaceSecondary || colors.border,
-                      opacity: index === 0 ? 0.4 : 1,
-                    },
-                  ]}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <ArrowUp2 size={scale(18)} color={colors.text} variant="Bold" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleWidgetMove(widgetId, 'down')}
-                  disabled={index === orderedWidgets.length - 1}
-                  style={[
-                    styles.orderButton,
-                    {
-                      backgroundColor: colors.surfaceSecondary || colors.border,
-                      opacity: index === orderedWidgets.length - 1 ? 0.4 : 1,
-                      marginTop: scale(4),
-                    },
-                  ]}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <ArrowDown2 size={scale(18)} color={colors.text} variant="Bold" />
-                </TouchableOpacity>
-              </View>
+          {activeWidgets.length > 0 && (
+            <>
               <Text
                 style={[
-                  styles.widgetLabel,
-                  { color: colors.text, fontSize: getResponsiveFontSize('medium') },
+                  styles.widgetSectionLabel,
+                  { color: colors.primary, fontSize: getResponsiveFontSize('small') },
                 ]}
               >
-                {getWidgetLabel(widgetId) || widgetId}
+                {t('homeTabSettings.widgetActiveSection')}
               </Text>
-              <Switch
-                value={getWidgetVisible(widgetId)}
-                onValueChange={(v) => handleWidgetToggle(widgetId, v)}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={getWidgetVisible(widgetId) ? colors.surface : colors.textTertiary}
-                ios_backgroundColor={colors.border}
-              />
-            </View>
-          ))}
+              {activeWidgets.map((widgetId, index) => (
+                <View
+                  key={widgetId}
+                  style={[
+                    styles.widgetRow,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                      minHeight: getMinTouchTarget(),
+                    },
+                  ]}
+                >
+                  <View style={styles.widgetOrderControls}>
+                    <TouchableOpacity
+                      onPress={() => handleWidgetMove(widgetId, 'up')}
+                      disabled={index === 0}
+                      style={[
+                        styles.orderButton,
+                        {
+                          backgroundColor: colors.surfaceSecondary || colors.border,
+                          opacity: index === 0 ? 0.4 : 1,
+                        },
+                      ]}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <ArrowUp2 size={scale(18)} color={colors.text} variant="Bold" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleWidgetMove(widgetId, 'down')}
+                      disabled={index === activeWidgets.length - 1}
+                      style={[
+                        styles.orderButton,
+                        {
+                          backgroundColor: colors.surfaceSecondary || colors.border,
+                          opacity: index === activeWidgets.length - 1 ? 0.4 : 1,
+                          marginTop: scale(4),
+                        },
+                      ]}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <ArrowDown2 size={scale(18)} color={colors.text} variant="Bold" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text
+                    style={[
+                      styles.widgetLabel,
+                      { color: colors.text, fontSize: getResponsiveFontSize('medium') },
+                    ]}
+                  >
+                    {getWidgetLabel(widgetId) || widgetId}
+                  </Text>
+                  <Switch
+                    value={true}
+                    onValueChange={(v) => handleWidgetToggle(widgetId, v)}
+                    trackColor={{ false: colors.border, true: colors.primary }}
+                    thumbColor={colors.surface}
+                    ios_backgroundColor={colors.border}
+                  />
+                </View>
+              ))}
+            </>
+          )}
+          {inactiveWidgets.length > 0 && (
+            <>
+              <Text
+                style={[
+                  styles.widgetSectionLabel,
+                  {
+                    color: colors.textSecondary,
+                    fontSize: getResponsiveFontSize('small'),
+                    marginTop: activeWidgets.length > 0 ? moderateVerticalScale(16) : 0,
+                  },
+                ]}
+              >
+                {t('homeTabSettings.widgetInactiveSection')}
+              </Text>
+              {inactiveWidgets.map((widgetId) => (
+                <View
+                  key={widgetId}
+                  style={[
+                    styles.widgetRow,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                      minHeight: getMinTouchTarget(),
+                      opacity: 0.85,
+                    },
+                  ]}
+                >
+                  <View style={[styles.widgetOrderControls, { minWidth: scale(32) }]} />
+                  <Text
+                    style={[
+                      styles.widgetLabel,
+                      { color: colors.textSecondary, fontSize: getResponsiveFontSize('medium') },
+                    ]}
+                  >
+                    {getWidgetLabel(widgetId) || widgetId}
+                  </Text>
+                  <Switch
+                    value={false}
+                    onValueChange={(v) => handleWidgetToggle(widgetId, v)}
+                    trackColor={{ false: colors.border, true: colors.primary }}
+                    thumbColor={colors.textTertiary}
+                    ios_backgroundColor={colors.border}
+                  />
+                </View>
+              ))}
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -640,6 +711,10 @@ const styles = StyleSheet.create({
   dropdownDisabled: { opacity: 0.9 },
   dropdownText: { fontFamily: fontRegular, flex: 1 },
   widgetList: { gap: moderateVerticalScale(10) },
+  widgetSectionLabel: {
+    fontFamily: fontSemiBold,
+    marginBottom: moderateVerticalScale(6),
+  },
   widgetRow: {
     flexDirection: 'row',
     alignItems: 'center',

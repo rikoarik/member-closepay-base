@@ -29,6 +29,33 @@
         "screens": {
             "BalanceDetail": "BalanceDetailScreen",
             "TransactionHistory": "TransactionHistoryScreen"
+        },
+        "tabs": {
+            "balance": "BalanceTab",
+            "saldo": "BalanceTab",
+            "balance-main": "BalanceMainTab",
+            "saldo-utama": "BalanceMainTab",
+            "balance-plafon": "BalancePlafonTab",
+            "saldo-plafon": "BalancePlafonTab",
+            "balance-meal": "BalanceMealTab",
+            "saldo-makan": "BalanceMealTab",
+            "balance-history": "BalanceHistoryTab",
+            "riwayat-saldo": "BalanceHistoryTab",
+            "balance-transfer": "BalanceTransferTab",
+            "transfer-saldo": "BalanceTransferTab",
+            "balance-topup": "BalanceTopupTab",
+            "topup-saldo": "BalanceTopupTab",
+            "transaction-history": "TransactionHistoryTab",
+            "riwayat-transaksi": "TransactionHistoryTab",
+            "transaction-all": "TransactionAllTab",
+            "semua-transaksi": "TransactionAllTab",
+            "transaction-card": "TransactionCardTab",
+            "transaksi-kartu-only": "TransactionCardTab"
+        },
+        "widgets": {
+            "activity-summary": "ActivitySummary",
+            "savings-goal": "SavingsGoal",
+            "recent-transactions": "RecentTransactions"
         }
     },
     "routes": [

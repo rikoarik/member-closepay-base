@@ -31,6 +31,7 @@ export const ALL_AVAILABLE_HOME_TABS: AvailableHomeTab[] = [
   { id: 'activity', labelKey: 'home.activity' },
   { id: 'news', labelKey: 'home.news' },
   { id: 'beranda-news', labelKey: 'home.berandaNews' },
+  { id: 'sport-center', labelKey: 'home.sportCenter' },
 ];
 
 export const DEFAULT_BERANDA_WIDGETS: BerandaWidgetConfig[] = [
@@ -49,6 +50,7 @@ export const DEFAULT_BERANDA_WIDGETS: BerandaWidgetConfig[] = [
   { id: 'voucher-available', visible: true, order: 13 },
   { id: 'fnb-recent-orders', visible: true, order: 14 },
   { id: 'marketplace-featured', visible: true, order: 15 },
+  { id: 'sport-center-featured', visible: true, order: 16 },
 ];
 
 /**

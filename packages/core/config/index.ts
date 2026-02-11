@@ -46,6 +46,12 @@ export * from './services/homeTabSettingsService';
 // Notification
 export * from '../notification';
 
+// Context
+export {
+  RefreshRegistryProvider,
+  useRefreshRegistry,
+} from './context/RefreshRegistryContext';
+
 // Plugin System
 export {
   PluginRegistry,
@@ -58,7 +64,10 @@ export {
   getPluginComponentLoader,
   getPluginComponentLoaders,
   usePluginComponent,
+  getTabPlugin,
+  getWidgetPlugin,
   type PluginManifest,
+  type TabWidgetPluginMapping,
   type PluginRoute,
   type PluginType,
   type PluginExports,

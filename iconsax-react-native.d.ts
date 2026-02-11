@@ -90,5 +90,10 @@ declare module 'iconsax-react-nativejs' {
   export class Brush extends Component<IconProps> { }
   export class InfoCircle extends Component<IconProps> { }
   export class DocumentDownload extends Component<IconProps> { }
+  export class Box1 extends Component<IconProps> { }
+  export class Drop extends Component<IconProps> { }
+  export class Car extends Component<IconProps> { }
+  export class Buildings2 extends Component<IconProps> { }
+  export class Home2 extends Component<IconProps> { }
 }
 

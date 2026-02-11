@@ -1,0 +1,1 @@
+export { SportCenterTab } from './SportCenterTab';

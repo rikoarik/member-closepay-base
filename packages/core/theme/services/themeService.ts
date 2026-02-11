@@ -20,6 +20,8 @@ const THEME_STORAGE_KEY = '@closepay_theme_mode';
  * Light theme colors
  */
 const lightColors: ThemeColors = {
+  errorContainer: '#F87171',
+  successContainer: '#34D399',
   background: '#F5F5F5',
   surface: '#FFFFFF',
   surfaceSecondary: '#F9FAFB',
@@ -56,6 +58,8 @@ const lightColors: ThemeColors = {
  * Dark theme colors
  */
 const darkColors: ThemeColors = {
+  errorContainer: '#F87171',
+  successContainer: '#34D399',
   background: '#111827',
   surface: '#1F2937',
   surfaceSecondary: '#374151',

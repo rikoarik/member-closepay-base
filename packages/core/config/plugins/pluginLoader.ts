@@ -34,6 +34,7 @@ export const MANIFEST_LOADERS: Record<string, () => Promise<{ default: PluginMan
   'card-transaction': () => import('../../../plugins/card-transaction/plugin.manifest.json').then(m => m as { default: PluginManifest }),
   marketplace: () => import('../../../plugins/marketplace/plugin.manifest.json').then(m => m as unknown as { default: PluginManifest }),
   'marketplace-fnb': () => import('../../../plugins/marketplace-fnb/plugin.manifest.json').then(m => m as { default: PluginManifest }),
+  'sport-center': () => import('../../../plugins/sport-center/plugin.manifest.json').then(m => m as { default: PluginManifest }),
 };
 
 /**

@@ -1,0 +1,1 @@
+export { MarketplaceFeatured } from './MarketplaceFeatured';

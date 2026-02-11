@@ -15,27 +15,23 @@ import {
   getResponsiveFontSize,
   useConfig,
   loadHomeTabSettings,
+  RefreshRegistryProvider,
+  useRefreshRegistry,
 } from '@core/config';
 import { QuickAccessButtons } from '../../quick-actions/QuickAccessButtons';
 import { BalanceCard } from '@plugins/balance/components/ui/BalanceCard';
 import { useTranslation } from '@core/i18n';
 import {
   BerandaNewsInfo,
-  RecentTransactions,
   GreetingCard,
   PromoBanner,
   StoreNearby,
-  CardSummary,
-  ActivitySummary,
-  SavingsGoal,
   ReferralBanner,
   RewardsPoints,
   VoucherAvailable,
-  FnBRecentOrders,
-  MarketplaceFeatured,
   type BerandaNewsInfoProps,
-  type RecentTransactionsProps,
 } from '../../widgets';
+import { PluginWidgetRenderer } from '../../PluginWidgetRenderer';
 
 interface BerandaTabProps {
   isActive?: boolean;
@@ -44,16 +40,7 @@ interface BerandaTabProps {
    * Callback untuk navigasi ke NewsTab saat "Lihat Semua" diklik
    */
   onNavigateToNews?: () => void;
-  /**
-   * Props untuk BerandaNewsInfo component
-   * Semua props news info di-forward ke BerandaNewsInfo
-   */
   newsInfoProps?: Omit<BerandaNewsInfoProps, 'onViewAllPress'>;
-  /**
-   * Props untuk RecentTransactions component
-   * Semua props recent transactions di-forward ke RecentTransactions
-   */
-  recentTransactionsProps?: Omit<RecentTransactionsProps, 'onViewAllPress'>;
   /**
    * Callback untuk scroll event (untuk collapsible header)
    */
@@ -80,15 +67,15 @@ const DEFAULT_BERANDA_WIDGETS = [
   { id: 'voucher-available', visible: true, order: 13 },
   { id: 'fnb-recent-orders', visible: true, order: 14 },
   { id: 'marketplace-featured', visible: true, order: 15 },
+  { id: 'sport-center-featured', visible: true, order: 16 },
 ];
 
-export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
+const BerandaTabContent: React.FC<BerandaTabProps> = React.memo(
   ({
     isActive = true,
     isVisible = true,
     onNavigateToNews,
     newsInfoProps,
-    recentTransactionsProps,
     onScroll,
     scrollEnabled = true,
   }) => {
@@ -119,40 +106,20 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
 
     const [showBalance, setShowBalance] = React.useState(false);
     const [refreshing, setRefreshing] = React.useState(false);
-    const refreshNewsInfoRef = React.useRef<(() => void) | null>(null);
-    const refreshRecentTransactionsRef = React.useRef<(() => void) | null>(null);
+    const refreshRegistry = useRefreshRegistry();
 
-    // Handler untuk refresh BerandaNewsInfo dan RecentTransactions
     const handleRefresh = useCallback(async () => {
       setRefreshing(true);
       try {
-        // Trigger refresh di BerandaNewsInfo jika ada
-        if (refreshNewsInfoRef.current) {
-          refreshNewsInfoRef.current();
-        }
-        // Trigger refresh di RecentTransactions jika ada
-        if (refreshRecentTransactionsRef.current) {
-          refreshRecentTransactionsRef.current();
+        if (refreshRegistry) {
+          await refreshRegistry.refreshAll();
         }
       } catch (error) {
         console.error('Refresh error:', error);
       } finally {
-        // Simulate refresh delay
-        setTimeout(() => {
-          setRefreshing(false);
-        }, 1000);
+        setTimeout(() => setRefreshing(false), 1000);
       }
-    }, []);
-
-    // Handler untuk receive refresh function dari BerandaNewsInfo
-    const handleNewsRefreshRequested = useCallback((refreshFn: () => void) => {
-      refreshNewsInfoRef.current = refreshFn;
-    }, []);
-
-    // Handler untuk receive refresh function dari RecentTransactions
-    const handleTransactionsRefreshRequested = useCallback((refreshFn: () => void) => {
-      refreshRecentTransactionsRef.current = refreshFn;
-    }, []);
+    }, [refreshRegistry]);
 
     const berandaWidgets = useMemo(() => {
       const widgets = widgetOverride ?? config?.berandaWidgets ?? DEFAULT_BERANDA_WIDGETS;
@@ -190,10 +157,11 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
           }
           if (widget.id === 'recent-transactions') {
             return (
-              <RecentTransactions
+              <PluginWidgetRenderer
                 key="recent-transactions"
-                {...recentTransactionsProps}
-                onRefreshRequested={handleTransactionsRefreshRequested}
+                widgetId="recent-transactions"
+                isActive={isActive}
+                isVisible={isVisible}
               />
             );
           }
@@ -203,7 +171,6 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
                 key="news-info"
                 {...newsInfoProps}
                 onViewAllPress={onNavigateToNews}
-                onRefreshRequested={handleNewsRefreshRequested}
               />
             );
           }
@@ -214,13 +181,34 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
             return <StoreNearby key="store-nearby" />;
           }
           if (widget.id === 'card-summary') {
-            return <CardSummary key="card-summary" />;
+            return (
+              <PluginWidgetRenderer
+                key="card-summary"
+                widgetId="card-summary"
+                isActive={isActive}
+                isVisible={isVisible}
+              />
+            );
           }
           if (widget.id === 'activity-summary') {
-            return <ActivitySummary key="activity-summary" />;
+            return (
+              <PluginWidgetRenderer
+                key="activity-summary"
+                widgetId="activity-summary"
+                isActive={isActive}
+                isVisible={isVisible}
+              />
+            );
           }
           if (widget.id === 'savings-goal') {
-            return <SavingsGoal key="savings-goal" />;
+            return (
+              <PluginWidgetRenderer
+                key="savings-goal"
+                widgetId="savings-goal"
+                isActive={isActive}
+                isVisible={isVisible}
+              />
+            );
           }
           if (widget.id === 'referral-banner') {
             return <ReferralBanner key="referral-banner" />;
@@ -232,12 +220,30 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
             return <VoucherAvailable key="voucher-available" />;
           }
           if (widget.id === 'fnb-recent-orders') {
-            return <FnBRecentOrders key="fnb-recent-orders" />;
+            return (
+              <PluginWidgetRenderer
+                key="fnb-recent-orders"
+                widgetId="fnb-recent-orders"
+                isActive={isActive}
+                isVisible={isVisible}
+              />
+            );
           }
           if (widget.id === 'marketplace-featured') {
             return (
-              <MarketplaceFeatured
+              <PluginWidgetRenderer
                 key="marketplace-featured"
+                widgetId="marketplace-featured"
+                isActive={isActive}
+                isVisible={isVisible}
+              />
+            );
+          }
+          if (widget.id === 'sport-center-featured') {
+            return (
+              <PluginWidgetRenderer
+                key="sport-center-featured"
+                widgetId="sport-center-featured"
                 isActive={isActive}
                 isVisible={isVisible}
               />
@@ -302,6 +308,14 @@ export const BerandaTab: React.FC<BerandaTabProps> = React.memo(
     );
   }
 );
+
+BerandaTabContent.displayName = 'BerandaTabContent';
+
+export const BerandaTab: React.FC<BerandaTabProps> = React.memo((props) => (
+  <RefreshRegistryProvider>
+    <BerandaTabContent {...props} />
+  </RefreshRegistryProvider>
+));
 
 BerandaTab.displayName = 'BerandaTab';
 

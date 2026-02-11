@@ -330,6 +330,9 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       case 'fnb':
         icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
         break;
+      case 'sportcenter':
+        icon = <Game size={iconSize} color={colors.success} variant="Bold" />;
+        break;
       default:
         icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
     }
@@ -385,6 +388,9 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       case 'fnb':
         icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
         break;
+      case 'sportcenter':
+        icon = <Game size={iconSize} color={colors.success} variant="Bold" />;
+        break;
       default:
         icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
     }
@@ -407,6 +413,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
       case 'marketplace': return colors.infoLight;
       case 'withdraw': return colors.errorLight;
       case 'fnb': return colors.warningLight;
+      case 'sportcenter': return colors.successLight;
       default: return colors.borderLight || colors.surfaceSecondary || colors.surface;
     }
   }, [colors.infoLight, colors.warningLight, colors.successLight, colors.errorLight, colors.borderLight, colors.surfaceSecondary, colors.surface]);

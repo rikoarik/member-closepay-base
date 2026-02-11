@@ -12,7 +12,8 @@
     "components": [
       "ProductCard",
       "ProductCardSkeleton",
-      "CartBar"
+      "CartBar",
+      "StoreCard"
     ],
     "screens": {
       "MarketplaceScreen": "MarketplaceScreen",
@@ -28,6 +29,15 @@
       "useSearch": "useSearch",
       "getCategories": "getCategories",
       "useMarketplaceCart": "useMarketplaceCart"
+    },
+    "tabs": {
+      "marketplace": "MarketplaceTab",
+      "marketplace-general": "MarketplaceGeneralTab",
+      "marketplace-balance": "MarketplaceBalanceTab",
+      "marketplace-transaction": "MarketplaceTransactionTab"
+    },
+    "widgets": {
+      "marketplace-featured": "MarketplaceFeatured"
     }
   },
   "routes": [

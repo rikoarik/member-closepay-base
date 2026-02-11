@@ -22,6 +22,10 @@ export {
   getPluginComponentLoaders,
 } from './pluginComponentLoader';
 
+// Tab & Widget Mapping
+export { getTabPlugin, getWidgetPlugin } from './tabWidgetPluginMap';
+export type { TabWidgetPluginMapping } from './tabWidgetPluginMap';
+
 // Hooks
 export { usePluginRegistry } from './hooks/usePluginRegistry';
 export type { UsePluginRegistryReturn } from './hooks/usePluginRegistry';
