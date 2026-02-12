@@ -19,7 +19,10 @@ import {
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
+import { useAuth } from '@core/auth';
 import { useSportCenterBookings } from '../../hooks';
+import { paymentService } from '@plugins/payment';
+import { SportCenterPaymentPinBottomSheet } from '../sheets/SportCenterPaymentPinBottomSheet';
 
 const fontRegular = FontFamily?.monasans?.regular ?? 'System';
 const fontSemiBold = FontFamily?.monasans?.semiBold ?? 'System';
@@ -29,6 +32,7 @@ type PaymentMethod = 'full' | 'dp';
 export const SportCenterCheckoutScreen: React.FC = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const navigation = useNavigation();
   const route = useRoute();
   const paddingH = getHorizontalPadding();
@@ -56,29 +60,59 @@ export const SportCenterCheckoutScreen: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('full');
+  const [showPinSheet, setShowPinSheet] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const canSubmit = name.trim().length > 0 && phone.trim().length > 0;
 
   const handleBook = () => {
+    setShowPinSheet(true);
+  };
+
+  const handlePinComplete = async (pin: string) => {
     if (!canSubmit || !facilityId || selectedSlots.length === 0) return;
-    const pricePerSlot = params?.pricePerSlot ?? Math.floor(totalAmount / selectedSlots.length);
-    selectedSlots.forEach((slot) => {
-      addBooking({
+
+    setShowPinSheet(false);
+    setIsProcessing(true);
+
+    try {
+      const actualAmount = paymentMethod === 'full' ? totalAmount : Math.ceil(totalAmount * 0.5);
+
+      const result = await paymentService.payWithBalance(actualAmount, `ORD-SC-${Date.now()}`, {
         facilityId,
         facilityName,
-        category: 'gym',
-        date: params?.selectedDate ?? '',
-        timeSlot: slot,
-        status: 'upcoming',
-        amount: pricePerSlot,
+        selectedSlots,
+        pin,
       });
-    });
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'Home' as never }, { name: 'SportCenterMyBookings' as never }],
-      })
-    );
+
+      if (result.status === 'success') {
+        const pricePerSlot = params?.pricePerSlot ?? Math.floor(totalAmount / selectedSlots.length);
+        selectedSlots.forEach((slot) => {
+          addBooking({
+            facilityId,
+            facilityName,
+            category: 'gym',
+            date: params?.selectedDate ?? '',
+            timeSlot: slot,
+            status: 'upcoming',
+            amount: pricePerSlot,
+            userEmail: user?.email,
+          });
+        });
+
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home' as never }, { name: 'SportCenterMyBookings' as never }],
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Checkout payment failed:', error);
+      // Handle error
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -258,27 +292,35 @@ export const SportCenterCheckoutScreen: React.FC = () => {
           style={[
             styles.bookButton,
             {
-              backgroundColor: canSubmit ? colors.primary : colors.border,
+              backgroundColor: canSubmit && !isProcessing ? colors.primary : colors.border,
               minHeight: getMinTouchTarget(),
             },
           ]}
           onPress={handleBook}
-          disabled={!canSubmit}
+          disabled={!canSubmit || isProcessing}
           activeOpacity={0.8}
         >
           <Text
             style={[
               styles.bookButtonText,
               {
-                color: canSubmit ? colors.surface : colors.textSecondary,
+                color: canSubmit && !isProcessing ? colors.surface : colors.textSecondary,
                 fontSize: getResponsiveFontSize('medium'),
               },
             ]}
           >
-            {t('sportCenter.bookNow')} - Rp {totalAmount.toLocaleString('id-ID')}
+            {isProcessing
+              ? 'Processing...'
+              : `${t('sportCenter.bookNow')} - Rp ${totalAmount.toLocaleString('id-ID')}`}
           </Text>
         </TouchableOpacity>
       </View>
+
+      <SportCenterPaymentPinBottomSheet
+        visible={showPinSheet}
+        onClose={() => setShowPinSheet(false)}
+        onComplete={handlePinComplete}
+      />
     </SafeAreaView>
   );
 };

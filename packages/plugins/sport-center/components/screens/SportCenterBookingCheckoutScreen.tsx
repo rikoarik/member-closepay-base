@@ -24,7 +24,9 @@ import {
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useAuth } from '@core/auth';
-import { getFacilityById } from '../../hooks';
+import { getFacilityById, useSportCenterBookings } from '../../hooks';
+import { paymentService } from '@plugins/payment';
+import { SportCenterPaymentPinBottomSheet } from '../sheets/SportCenterPaymentPinBottomSheet';
 
 const fontRegular = FontFamily?.monasans?.regular ?? 'System';
 const fontSemiBold = FontFamily?.monasans?.semiBold ?? 'System';
@@ -37,6 +39,7 @@ export const SportCenterBookingCheckoutScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
+  const { addBooking } = useSportCenterBookings();
 
   const params = route.params as {
     facilityId: string;
@@ -72,6 +75,8 @@ export const SportCenterBookingCheckoutScreen: React.FC = () => {
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [voucher, setVoucher] = useState('');
+  const [showPinSheet, setShowPinSheet] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   return (
     <View style={[styles.container, { backgroundColor: '#F6F8F7' }]}>
@@ -296,16 +301,59 @@ export const SportCenterBookingCheckoutScreen: React.FC = () => {
         ]}
       >
         <TouchableOpacity
-          style={[styles.payButton, { backgroundColor: colors.primary }]}
-          onPress={() => {
-            // @ts-ignore
-            navigation.navigate('PaymentSelectionScreen', {
-              totalAmount: total,
-              targetScreen: 'SportCenterPaymentSuccess',
-              targetParams: {
+          style={[
+            styles.payButton,
+            { backgroundColor: isProcessing ? colors.border : colors.primary },
+          ]}
+          onPress={() => setShowPinSheet(true)}
+          disabled={!name || isProcessing}
+        >
+          <Text style={styles.payButtonText}>
+            {isProcessing ? 'Processing...' : 'Confirm & Pay'}
+          </Text>
+          {!isProcessing && <ArrowRight2 size={scale(20)} color="#FFF" variant="Linear" />}
+        </TouchableOpacity>
+      </View>
+
+      <SportCenterPaymentPinBottomSheet
+        visible={showPinSheet}
+        onClose={() => setShowPinSheet(false)}
+        onComplete={async (pin) => {
+          setShowPinSheet(false);
+          setIsProcessing(true);
+          try {
+            const result = await paymentService.payWithBalance(
+              total,
+              'ORD-' + Math.floor(Math.random() * 100000),
+              {
+                facilityName: facility?.name,
+                courtName: courtName,
+                date: dateString,
+                timeSlot: `${startTime} - ${endTime}`,
+                pin,
+              }
+            );
+
+            if (result.status === 'success') {
+              const bookingId = 'ORD-' + Math.floor(Math.random() * 100000);
+
+              // Persist the booking
+              addBooking({
+                facilityId: params.facilityId,
+                facilityName: facility?.name || 'Facility Name',
+                category: 'Mini Soccer',
+                date: params.date,
+                timeSlot: `${startTime} - ${endTime}`,
+                status: 'upcoming',
+                amount: total,
+                userEmail: user?.email,
+                courtName: courtName,
+              });
+
+              (navigation as any).navigate('SportCenterPaymentSuccess', {
                 bookingData: {
-                  id: 'ORD-' + Math.floor(Math.random() * 100000), // Mock ID
-                  transactionId: 'TRX-' + Math.floor(Math.random() * 1000000),
+                  id: bookingId,
+                  transactionId: result.transactionId,
                   facilityName: facility?.name,
                   courtName: courtName,
                   date: dateString,
@@ -315,14 +363,16 @@ export const SportCenterBookingCheckoutScreen: React.FC = () => {
                   userPhone: whatsapp || '-',
                   amount: total,
                 },
-              },
-            });
-          }}
-        >
-          <Text style={styles.payButtonText}>Confirm & Pay</Text>
-          <ArrowRight2 size={scale(20)} color="#FFF" variant="Linear" />
-        </TouchableOpacity>
-      </View>
+              });
+            }
+          } catch (error) {
+            console.error('Payment failed:', error);
+            // Handle error (show toast/alert)
+          } finally {
+            setIsProcessing(false);
+          }
+        }}
+      />
     </View>
   );
 };
