@@ -4,13 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
@@ -41,15 +35,17 @@ export const SportCenterCheckoutScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { addBooking } = useSportCenterBookings();
 
-  const params = route.params as {
-    facilityId?: string;
-    facilityName?: string;
-    pricePerSlot?: number;
-    selectedDate?: string;
-    selectedCourt?: string;
-    selectedSlots?: string[];
-    totalAmount?: number;
-  } | undefined;
+  const params = route.params as
+    | {
+        facilityId?: string;
+        facilityName?: string;
+        pricePerSlot?: number;
+        selectedDate?: string;
+        selectedCourt?: string;
+        selectedSlots?: string[];
+        totalAmount?: number;
+      }
+    | undefined;
 
   const facilityId = params?.facilityId ?? '';
   const facilityName = params?.facilityName ?? '';
@@ -80,16 +76,16 @@ export const SportCenterCheckoutScreen: React.FC = () => {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [
-          { name: 'Home' as never },
-          { name: 'SportCenterMyBookings' as never },
-        ],
+        routes: [{ name: 'Home' as never }, { name: 'SportCenterMyBookings' as never }],
       })
     );
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       <View style={[styles.header, { paddingHorizontal: paddingH }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -112,7 +108,12 @@ export const SportCenterCheckoutScreen: React.FC = () => {
         enableAutomaticScroll
         extraScrollHeight={20}
       >
-        <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
           <Text style={[styles.facilityName, { color: colors.text }]}>{facilityName}</Text>
           <Text style={[styles.summaryDetail, { color: colors.textSecondary }]}>
             {selectedSlots.length} slot • Rp {totalAmount.toLocaleString('id-ID')}
@@ -120,7 +121,9 @@ export const SportCenterCheckoutScreen: React.FC = () => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={[styles.label, { color: colors.text }]}>{t('sportCenter.namePlaceholder')}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {t('sportCenter.namePlaceholder')}
+          </Text>
           <TextInput
             style={[
               styles.input,
@@ -139,7 +142,9 @@ export const SportCenterCheckoutScreen: React.FC = () => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={[styles.label, { color: colors.text }]}>{t('sportCenter.phonePlaceholder')}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {t('sportCenter.phonePlaceholder')}
+          </Text>
           <TextInput
             style={[
               styles.input,
@@ -158,7 +163,9 @@ export const SportCenterCheckoutScreen: React.FC = () => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={[styles.label, { color: colors.text }]}>{t('sportCenter.voucherPlaceholder')}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {t('sportCenter.voucherPlaceholder')}
+          </Text>
           <TextInput
             style={[
               styles.input,
@@ -176,58 +183,62 @@ export const SportCenterCheckoutScreen: React.FC = () => {
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {t('sportCenter.paymentMethod')}
+          {t('sportCenter.paymentMethod') || 'Metode Pembayaran'}
         </Text>
         <View style={styles.paymentOptions}>
           <TouchableOpacity
             style={[
               styles.paymentOption,
               {
-                backgroundColor: paymentMethod === 'full' ? colors.primary : colors.surface,
+                backgroundColor: paymentMethod === 'full' ? colors.primary + '08' : colors.surface,
                 borderColor: paymentMethod === 'full' ? colors.primary : colors.border,
               },
             ]}
             onPress={() => setPaymentMethod('full')}
             activeOpacity={0.8}
           >
-            <TickCircle
-              size={scale(20)}
-              color={paymentMethod === 'full' ? colors.surface : colors.border}
-              variant={paymentMethod === 'full' ? 'Bold' : 'Linear'}
-            />
-            <Text
-              style={[
-                styles.paymentOptionText,
-                { color: paymentMethod === 'full' ? colors.surface : colors.text },
-              ]}
-            >
-              {t('sportCenter.payFull')} - Rp {totalAmount.toLocaleString('id-ID')}
-            </Text>
+            <View style={styles.paymentOptionContent}>
+              <View style={styles.paymentOptionInfo}>
+                <Text style={[styles.paymentOptionTitle, { color: colors.text }]}>
+                  {t('sportCenter.payFull') || 'Bayar Lunas'}
+                </Text>
+                <Text style={[styles.paymentOptionPrice, { color: colors.primary }]}>
+                  Rp {totalAmount.toLocaleString('id-ID')}
+                </Text>
+              </View>
+              <TickCircle
+                size={scale(24)}
+                color={paymentMethod === 'full' ? colors.primary : colors.border}
+                variant={paymentMethod === 'full' ? 'Bold' : 'Linear'}
+              />
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.paymentOption,
               {
-                backgroundColor: paymentMethod === 'dp' ? colors.primary : colors.surface,
+                backgroundColor: paymentMethod === 'dp' ? colors.primary + '08' : colors.surface,
                 borderColor: paymentMethod === 'dp' ? colors.primary : colors.border,
               },
             ]}
             onPress={() => setPaymentMethod('dp')}
             activeOpacity={0.8}
           >
-            <TickCircle
-              size={scale(20)}
-              color={paymentMethod === 'dp' ? colors.surface : colors.border}
-              variant={paymentMethod === 'dp' ? 'Bold' : 'Linear'}
-            />
-            <Text
-              style={[
-                styles.paymentOptionText,
-                { color: paymentMethod === 'dp' ? colors.surface : colors.text },
-              ]}
-            >
-              {t('sportCenter.payDP')} - Rp {Math.ceil(totalAmount * 0.5).toLocaleString('id-ID')}
-            </Text>
+            <View style={styles.paymentOptionContent}>
+              <View style={styles.paymentOptionInfo}>
+                <Text style={[styles.paymentOptionTitle, { color: colors.text }]}>
+                  {t('sportCenter.payDP') || 'Bayar DP (50%)'}
+                </Text>
+                <Text style={[styles.paymentOptionPrice, { color: colors.primary }]}>
+                  Rp {Math.ceil(totalAmount * 0.5).toLocaleString('id-ID')}
+                </Text>
+              </View>
+              <TickCircle
+                size={scale(24)}
+                color={paymentMethod === 'dp' ? colors.primary : colors.border}
+                variant={paymentMethod === 'dp' ? 'Bold' : 'Linear'}
+              />
+            </View>
           </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
@@ -292,63 +303,80 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     padding: scale(16),
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: moderateVerticalScale(20),
+    borderRadius: 16,
+    borderWidth: 1.5,
+    marginBottom: moderateVerticalScale(24),
+    backgroundColor: '#F8F9FF',
   },
   facilityName: {
     fontFamily: fontSemiBold,
     fontSize: getResponsiveFontSize('medium'),
-    marginBottom: scale(4),
+    marginBottom: scale(6),
   },
   summaryDetail: {
     fontFamily: fontRegular,
     fontSize: getResponsiveFontSize('small'),
+    opacity: 0.8,
   },
   inputContainer: {
-    marginBottom: moderateVerticalScale(16),
+    marginBottom: moderateVerticalScale(20),
   },
   label: {
     fontFamily: fontSemiBold,
     fontSize: getResponsiveFontSize('small'),
-    marginBottom: scale(8),
+    marginBottom: scale(10),
   },
   input: {
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 1.5,
     paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
+    paddingVertical: scale(14),
     fontFamily: fontRegular,
     fontSize: getResponsiveFontSize('medium'),
   },
   sectionTitle: {
     fontFamily: fontSemiBold,
     fontSize: getResponsiveFontSize('medium'),
-    marginBottom: moderateVerticalScale(12),
+    marginBottom: moderateVerticalScale(16),
     marginTop: moderateVerticalScale(8),
   },
   paymentOptions: {
     gap: scale(12),
   },
   paymentOption: {
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(16),
+    borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  paymentOptionContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(14),
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: scale(12),
+    justifyContent: 'space-between',
   },
-  paymentOptionText: {
+  paymentOptionInfo: {
+    flex: 1,
+  },
+  paymentOptionTitle: {
+    fontFamily: fontSemiBold,
+    fontSize: getResponsiveFontSize('medium'),
+    marginBottom: 4,
+  },
+  paymentOptionPrice: {
     fontFamily: fontSemiBold,
     fontSize: getResponsiveFontSize('medium'),
   },
   footer: {
     paddingVertical: moderateVerticalScale(16),
     borderTopWidth: 1,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   bookButton: {
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: moderateVerticalScale(16),
     alignItems: 'center',
     justifyContent: 'center',

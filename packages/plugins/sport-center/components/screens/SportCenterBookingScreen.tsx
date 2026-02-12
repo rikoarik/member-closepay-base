@@ -4,13 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ArrowLeft2 } from 'iconsax-react-nativejs';
@@ -72,12 +66,14 @@ export const SportCenterBookingScreen: React.FC = () => {
   const paddingH = getHorizontalPadding();
   const insets = useSafeAreaInsets();
 
-  const params = route.params as {
-    facilityId?: string;
-    facilityName?: string;
-    pricePerSlot?: number;
-    courts?: { id: string; name: string }[];
-  } | undefined;
+  const params = route.params as
+    | {
+        facilityId?: string;
+        facilityName?: string;
+        pricePerSlot?: number;
+        courts?: { id: string; name: string }[];
+      }
+    | undefined;
 
   const facilityId = params?.facilityId ?? '';
   const facilityName = params?.facilityName ?? '';
@@ -108,7 +104,10 @@ export const SportCenterBookingScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       <View style={[styles.header, { paddingHorizontal: paddingH }]}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -127,7 +126,12 @@ export const SportCenterBookingScreen: React.FC = () => {
         contentContainerStyle={[styles.scrollContent, { paddingHorizontal: paddingH }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
           <Text style={[styles.facilityName, { color: colors.text }]}>{facilityName}</Text>
           <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
             {t('sportCenter.selectTime')}
@@ -135,15 +139,20 @@ export const SportCenterBookingScreen: React.FC = () => {
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {t('sportCenter.selectDate')}
+          {t('sportCenter.selectDate') || 'Pilih Tanggal'}
         </Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.dateScroll}
+          style={styles.dateScrollWrapper}
         >
           {dates.map((dateStr) => {
             const isSelected = selectedDate === dateStr;
+            const d = new Date(dateStr);
+            const dayName = d.toLocaleDateString('id-ID', { weekday: 'short' });
+            const dayNum = d.getDate();
+
             return (
               <TouchableOpacity
                 key={dateStr}
@@ -159,11 +168,16 @@ export const SportCenterBookingScreen: React.FC = () => {
               >
                 <Text
                   style={[
-                    styles.dateChipText,
-                    { color: isSelected ? colors.surface : colors.text },
+                    styles.dateChipDay,
+                    { color: isSelected ? colors.surface + 'CC' : colors.textSecondary },
                   ]}
                 >
-                  {formatDateDisplay(dateStr)}
+                  {dayName}
+                </Text>
+                <Text
+                  style={[styles.dateChipNum, { color: isSelected ? colors.surface : colors.text }]}
+                >
+                  {dayNum}
                 </Text>
               </TouchableOpacity>
             );
@@ -184,7 +198,7 @@ export const SportCenterBookingScreen: React.FC = () => {
                     style={[
                       styles.courtChip,
                       {
-                        backgroundColor: isSelected ? colors.primary : colors.surface,
+                        backgroundColor: isSelected ? colors.primary + '10' : colors.surface,
                         borderColor: isSelected ? colors.primary : colors.border,
                       },
                     ]}
@@ -194,7 +208,7 @@ export const SportCenterBookingScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.courtChipText,
-                        { color: isSelected ? colors.surface : colors.text },
+                        { color: isSelected ? colors.primary : colors.text },
                       ]}
                     >
                       {court.name}
@@ -284,50 +298,63 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     padding: scale(16),
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    marginBottom: moderateVerticalScale(20),
+    marginBottom: moderateVerticalScale(24),
+    backgroundColor: '#f8f9fa',
   },
   facilityName: {
     fontFamily: fontSemiBold,
     fontSize: getResponsiveFontSize('medium'),
-    marginBottom: scale(4),
+    marginBottom: scale(6),
   },
   summaryLabel: {
     fontFamily: fontRegular,
     fontSize: getResponsiveFontSize('small'),
+    opacity: 0.7,
   },
   sectionTitle: {
     fontFamily: fontSemiBold,
     fontSize: getResponsiveFontSize('medium'),
-    marginBottom: moderateVerticalScale(12),
+    marginBottom: moderateVerticalScale(16),
+  },
+  dateScrollWrapper: {
+    marginHorizontal: -getHorizontalPadding(),
+    marginBottom: moderateVerticalScale(24),
   },
   dateScroll: {
-    flexDirection: 'row',
-    gap: scale(8),
-    marginBottom: moderateVerticalScale(20),
+    paddingHorizontal: getHorizontalPadding(),
+    gap: scale(12),
   },
   dateChip: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
-    borderRadius: 12,
-    borderWidth: 1,
+    width: scale(64),
+    height: scale(80),
+    borderRadius: 16,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: scale(4),
   },
-  dateChipText: {
+  dateChipDay: {
+    fontFamily: fontRegular,
+    fontSize: getResponsiveFontSize('xsmall'),
+    textTransform: 'uppercase',
+  },
+  dateChipNum: {
     fontFamily: fontSemiBold,
-    fontSize: getResponsiveFontSize('small'),
+    fontSize: getResponsiveFontSize('large'),
   },
   courtRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: scale(8),
-    marginBottom: moderateVerticalScale(20),
+    gap: scale(10),
+    marginBottom: moderateVerticalScale(24),
   },
   courtChip: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
+    paddingHorizontal: scale(18),
+    paddingVertical: scale(10),
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 1.5,
   },
   courtChipText: {
     fontFamily: fontSemiBold,
@@ -337,7 +364,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: moderateVerticalScale(12),
+    marginBottom: moderateVerticalScale(16),
   },
   summarySlots: {
     fontFamily: fontRegular,
@@ -345,14 +372,19 @@ const styles = StyleSheet.create({
   },
   summaryTotal: {
     fontFamily: fontSemiBold,
-    fontSize: getResponsiveFontSize('large'),
+    fontSize: getResponsiveFontSize('xlarge'),
   },
   footer: {
     paddingVertical: moderateVerticalScale(16),
     borderTopWidth: 1,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   lanjutButton: {
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: moderateVerticalScale(16),
     alignItems: 'center',
     justifyContent: 'center',

@@ -95,5 +95,14 @@ declare module 'iconsax-react-nativejs' {
   export class Car extends Component<IconProps> { }
   export class Buildings2 extends Component<IconProps> { }
   export class Home2 extends Component<IconProps> { }
+  export class DirectUp extends Component<IconProps> { }
+  export class Coffee extends Component<IconProps> { }
+  export class Gps extends Component<IconProps> { }
+  export class Discover extends Component<IconProps> { }
+  export class Money extends Component<IconProps> { }
+  export class Ticket extends Component<IconProps> { }
+  export class Scan extends Component<IconProps> { }
+  export class Share extends Component<IconProps> { }
+  export class Map1 extends Component<IconProps> { }
+  export class Bank extends Component<IconProps> { }
 }
-

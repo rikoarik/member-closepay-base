@@ -42,18 +42,28 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const snapPointsInPixels = snapPoints.map(
-    (p) => (SCREEN_HEIGHT * (100 - p)) / 100
-  );
+  const snapPointsInPixels = useMemo(() => {
+    return snapPoints.map((p) => (SCREEN_HEIGHT * (100 - p)) / 100);
+  }, [snapPoints]);
 
-  const initialPosition =
-    snapPointsInPixels[initialSnapPoint] ?? snapPointsInPixels[0];
+  const initialPosition = useMemo(() => {
+    return snapPointsInPixels[initialSnapPoint] ?? snapPointsInPixels[0];
+  }, [snapPointsInPixels, initialSnapPoint]);
 
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  // Optimize: Interpolate backdrop opacity from translateY instead of separate animated value
+  const backdropOpacity = translateY.interpolate({
+    inputRange: [initialPosition, SCREEN_HEIGHT],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
   /** 🔥 INI KUNCI */
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // Fix: Control Modal visibility locally to allow exit animation
+  const [showModal, setShowModal] = useState(visible);
 
   const startY = useRef(0);
   const currentY = useRef(initialPosition);
@@ -61,33 +71,25 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   /* === OPEN / CLOSE === */
   useEffect(() => {
     if (visible) {
-      Animated.parallel([
-        Animated.spring(translateY, {
-          toValue: initialPosition,
-          useNativeDriver: true,
-          tension: 70,
-          friction: 9,
-        }),
-        Animated.timing(backdropOpacity, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      setShowModal(true);
+      Animated.spring(translateY, {
+        toValue: initialPosition,
+        useNativeDriver: true,
+        tension: 70,
+        friction: 9,
+      }).start();
     } else {
-      Animated.parallel([
-        Animated.spring(translateY, {
-          toValue: SCREEN_HEIGHT,
-          useNativeDriver: true,
-          tension: 70,
-          friction: 9,
-        }),
-        Animated.timing(backdropOpacity, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.spring(translateY, {
+        toValue: SCREEN_HEIGHT,
+        useNativeDriver: true,
+        tension: 70,
+        friction: 9,
+      }).start(({ finished }) => {
+        // Only hide the modal if the animation finished completely (wasn't interrupted by re-opening)
+        if (finished) {
+          setShowModal(false);
+        }
+      });
     }
   }, [visible, initialPosition]);
 
@@ -111,10 +113,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () =>
-          !disableClose && enablePanDownToClose,
-        onMoveShouldSetPanResponder: (_, g) =>
-          Math.abs(g.dy) > 6 && !disableClose,
+        onStartShouldSetPanResponder: () => !disableClose && enablePanDownToClose,
+        onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 6 && !disableClose,
         onPanResponderGrant: () => {
           translateY.stopAnimation((v) => {
             startY.current = v;
@@ -145,11 +145,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     [disableClose, enablePanDownToClose]
   );
 
-  if (!visible) return null;
-
   return (
     <Modal
-      visible
+      visible={showModal}
       transparent
       animationType="none"
       onRequestClose={disableClose ? undefined : onClose}
@@ -157,19 +155,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     >
       <View style={styles.container}>
         {/* BACKDROP */}
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={disableClose ? undefined : onClose}
-        >
-          <Animated.View
-            style={[StyleSheet.absoluteFill, { opacity: backdropOpacity }]}
-          >
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                { backgroundColor: 'rgba(0,0,0,0.5)' },
-              ]}
-            />
+        <Pressable style={StyleSheet.absoluteFill} onPress={disableClose ? undefined : onClose}>
+          <Animated.View style={[StyleSheet.absoluteFill, { opacity: backdropOpacity }]}>
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)' }]} />
           </Animated.View>
         </Pressable>
 
@@ -180,22 +168,14 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
             {
               backgroundColor: colors.surface,
               transform: [{ translateY }],
-              paddingBottom:
-                keyboardHeight +
-                insets.bottom +
-                moderateVerticalScale(16),
+              paddingBottom: keyboardHeight + insets.bottom + moderateVerticalScale(16),
             },
           ]}
           {...panResponder.panHandlers}
         >
           {enablePanDownToClose && !disableClose && (
             <View style={styles.dragHandleContainer}>
-              <View
-                style={[
-                  styles.dragHandle,
-                  { backgroundColor: colors.border },
-                ]}
-              />
+              <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />
             </View>
           )}
 

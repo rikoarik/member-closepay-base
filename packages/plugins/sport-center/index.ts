@@ -8,6 +8,11 @@ export { SportCenterFacilityDetailScreen } from './components/screens';
 export { SportCenterBookingScreen } from './components/screens';
 export { SportCenterCheckoutScreen } from './components/screens';
 export { SportCenterMyBookingsScreen } from './components/screens';
+export { SportCenterSearchScreen } from './components/screens';
+export { SportCenterSearchResultsScreen } from './components/screens';
+export { SportCenterBookingCheckoutScreen } from './components/screens';
+
+export { SportCenterBookingDetailScreen } from './components/screens';
 
 export { useSportCenterData, useSportCenterBookings, getNearbyFacilities } from './hooks';
 export type { SportCenterFacility, SportCenterBooking } from './models';
@@ -26,7 +31,11 @@ export const SportCenterModule = {
     SportCenter: 'SportCenterScreen',
     SportCenterFacilityDetail: 'SportCenterFacilityDetailScreen',
     SportCenterBooking: 'SportCenterBookingScreen',
+    SportCenterBookingDetail: 'SportCenterBookingDetailScreen',
     SportCenterCheckout: 'SportCenterCheckoutScreen',
     SportCenterMyBookings: 'SportCenterMyBookingsScreen',
+    SportCenterSearch: 'SportCenterSearchScreen',
+    SportCenterSearchResults: 'SportCenterSearchResultsScreen',
+    SportCenterBookingCheckout: 'SportCenterBookingCheckoutScreen',
   },
 };

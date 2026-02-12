@@ -1,20 +1,7 @@
-/**
- * SportCenterMyBookingsScreen Component
- * Riwayat booking user
- */
-
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft2 } from 'iconsax-react-nativejs';
+import { Calendar, Clock, Ticket } from 'iconsax-react-nativejs';
 import {
   scale,
   moderateVerticalScale,
@@ -26,25 +13,25 @@ import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useSportCenterBookings } from '../../hooks';
 import type { SportCenterBooking, SportCenterBookingStatus } from '../../models';
+import { useTabBar } from '../navigation/TabBarContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const fontRegular = FontFamily?.monasans?.regular ?? 'System';
 const fontSemiBold = FontFamily?.monasans?.semiBold ?? 'System';
 
-function formatBookingDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  const today = new Date();
-  const isToday = today.toDateString() === d.toDateString();
-  if (isToday) return 'Hari ini';
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  if (d.toDateString() === tomorrow.toDateString()) return 'Besok';
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-}
-
-function getStatusColor(status: SportCenterBookingStatus, colors: { success: string; warning: string; error: string; textSecondary: string }) {
+function getStatusColor(
+  status: SportCenterBookingStatus,
+  colors: {
+    success: string;
+    warning: string;
+    error: string;
+    textSecondary: string;
+    primary: string;
+  }
+) {
   switch (status) {
     case 'upcoming':
-      return colors.warning;
+      return colors.primary;
     case 'completed':
       return colors.success;
     case 'cancelled':
@@ -57,11 +44,11 @@ function getStatusColor(status: SportCenterBookingStatus, colors: { success: str
 function getStatusLabel(status: SportCenterBookingStatus, t: (key: string) => string): string {
   switch (status) {
     case 'upcoming':
-      return t('sportCenter.statusUpcoming') || 'Upcoming';
+      return t('sportCenter.statusUpcoming') || 'Akan Datang';
     case 'completed':
-      return t('sportCenter.statusCompleted') || 'Completed';
+      return t('sportCenter.statusCompleted') || 'Selesai';
     case 'cancelled':
-      return t('sportCenter.statusCancelled') || 'Cancelled';
+      return t('sportCenter.statusCancelled') || 'Dibatalkan';
     default:
       return status;
   }
@@ -73,74 +60,109 @@ export const SportCenterMyBookingsScreen: React.FC = () => {
   const navigation = useNavigation();
   const paddingH = getHorizontalPadding();
   const { recentBookings } = useSportCenterBookings();
+  const { toggleTabBar } = useTabBar();
+  const lastContentOffset = React.useRef(0);
+
+  const handleScroll = (event: any) => {
+    const currentOffset = event.nativeEvent.contentOffset.y;
+    const diff = currentOffset - lastContentOffset.current;
+
+    if (Math.abs(diff) > 3) {
+      if (diff > 0 && currentOffset > 20) {
+        toggleTabBar(false);
+      } else {
+        toggleTabBar(true);
+      }
+    }
+    lastContentOffset.current = currentOffset;
+  };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
-      <View style={[styles.header, { paddingHorizontal: paddingH }]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView edges={['top']}>
+        <View
+          style={[styles.header, { paddingHorizontal: paddingH, borderBottomColor: colors.border }]}
         >
-          <ArrowLeft2 size={scale(24)} color={colors.text} variant="Linear" />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {t('sportCenter.myBookings')}
-        </Text>
-      </View>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            {t('sportCenter.myBookings') || 'Riwayat Booking'}
+          </Text>
+          <Calendar size={scale(24)} color={colors.primary} variant="Bold" />
+        </View>
+      </SafeAreaView>
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingHorizontal: paddingH }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingHorizontal: paddingH, paddingBottom: moderateVerticalScale(100) },
+        ]}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {recentBookings.length === 0 ? (
           <View style={styles.emptyContainer}>
+            <Calendar size={scale(48)} color={colors.textSecondary} variant="Bulk" />
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t('sportCenter.comingSoon')}
+              {t('sportCenter.noBookings') || 'Belum ada booking'}
             </Text>
           </View>
         ) : (
-          recentBookings.map((booking: SportCenterBooking) => (
+          recentBookings.map((booking) => (
             <TouchableOpacity
               key={booking.id}
-              style={[styles.bookingCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              style={[
+                styles.bookingCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
               activeOpacity={0.7}
+              onPress={() => {
+                // @ts-ignore
+                navigation.navigate('SportCenterBookingDetail', { booking });
+              }}
             >
-              {booking.facilityImageUrl ? (
-                <Image
-                  source={{ uri: booking.facilityImageUrl }}
-                  style={styles.cardImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={[styles.cardImagePlaceholder, { backgroundColor: colors.border }]} />
-              )}
-              <View style={styles.cardContent}>
-                <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>
+              <View style={styles.bookingHeader}>
+                <Text style={[styles.bookingFacilityName, { color: colors.text }]}>
                   {booking.facilityName}
                 </Text>
-                <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>
-                  {formatBookingDate(booking.date)} • {booking.timeSlot}
-                </Text>
-                <View style={styles.cardFooter}>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: getStatusColor(booking.status, colors) + '20' },
-                    ]}
+                <View
+                  style={[
+                    styles.statusBadge,
+                    { backgroundColor: getStatusColor(booking.status, colors) + '20' },
+                  ]}
+                >
+                  <Text
+                    style={[styles.statusText, { color: getStatusColor(booking.status, colors) }]}
                   >
-                    <Text
-                      style={[
-                        styles.statusText,
-                        { color: getStatusColor(booking.status, colors) },
-                      ]}
-                    >
-                      {getStatusLabel(booking.status, t)}
-                    </Text>
-                  </View>
-                  <Text style={[styles.amount, { color: colors.primary }]}>
-                    Rp {booking.amount.toLocaleString('id-ID')}
+                    {getStatusLabel(booking.status, t)}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+              <View style={styles.bookingDetails}>
+                <View style={styles.detailRow}>
+                  <Calendar size={scale(16)} color={colors.textSecondary} variant="Linear" />
+                  <Text style={[styles.detailText, { color: colors.textSecondary }]}>
+                    {new Date(booking.date).toLocaleDateString('id-ID', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Clock size={scale(16)} color={colors.textSecondary} variant="Linear" />
+                  <Text style={[styles.detailText, { color: colors.textSecondary }]}>
+                    {booking.timeSlot}
+                  </Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Ticket size={scale(16)} color={colors.textSecondary} variant="Linear" />
+                  <Text style={[styles.detailText, { color: colors.textSecondary }]}>
+                    {booking.courtName || 'Lapangan A'}
                   </Text>
                 </View>
               </View>
@@ -148,7 +170,7 @@ export const SportCenterMyBookingsScreen: React.FC = () => {
           ))
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -160,7 +182,6 @@ const styles = StyleSheet.create({
     paddingVertical: moderateVerticalScale(12),
     gap: scale(12),
   },
-  backButton: { padding: scale(4) },
   headerTitle: {
     fontFamily: fontSemiBold,
     fontSize: getResponsiveFontSize('large'),
@@ -173,60 +194,53 @@ const styles = StyleSheet.create({
   emptyContainer: {
     paddingVertical: moderateVerticalScale(48),
     alignItems: 'center',
+    gap: scale(12),
   },
   emptyText: {
     fontFamily: fontRegular,
     fontSize: getResponsiveFontSize('medium'),
   },
   bookingCard: {
-    flexDirection: 'row',
     padding: scale(12),
     borderRadius: 12,
     borderWidth: 1,
     marginBottom: moderateVerticalScale(12),
   },
-  cardImage: {
-    width: scale(60),
-    height: scale(60),
-    borderRadius: scale(8),
-    marginRight: scale(12),
-  },
-  cardImagePlaceholder: {
-    width: scale(60),
-    height: scale(60),
-    borderRadius: scale(8),
-    marginRight: scale(12),
-  },
-  cardContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  cardTitle: {
-    fontFamily: fontSemiBold,
-    fontSize: getResponsiveFontSize('medium'),
-    marginBottom: scale(4),
-  },
-  cardMeta: {
-    fontFamily: fontRegular,
-    fontSize: getResponsiveFontSize('small'),
-    marginBottom: scale(8),
-  },
-  cardFooter: {
+  bookingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: scale(12),
+  },
+  bookingFacilityName: {
+    fontFamily: fontSemiBold,
+    fontSize: getResponsiveFontSize('medium'),
+    flex: 1,
   },
   statusBadge: {
     paddingHorizontal: scale(8),
-    paddingVertical: scale(2),
-    borderRadius: scale(8),
+    paddingVertical: scale(4),
+    borderRadius: scale(6),
   },
   statusText: {
     fontFamily: fontSemiBold,
-    fontSize: getResponsiveFontSize('xsmall'),
+    fontSize: getResponsiveFontSize('small'),
   },
-  amount: {
-    fontFamily: fontSemiBold,
-    fontSize: getResponsiveFontSize('medium'),
+  divider: {
+    height: 1,
+    width: '100%',
+    marginBottom: scale(12),
+  },
+  bookingDetails: {
+    gap: scale(8),
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(8),
+  },
+  detailText: {
+    fontFamily: fontRegular,
+    fontSize: getResponsiveFontSize('small'),
   },
 });

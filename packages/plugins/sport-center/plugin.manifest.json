@@ -12,17 +12,27 @@
       "SportCenterFacilityDetail": "SportCenterFacilityDetailScreen",
       "SportCenterBooking": "SportCenterBookingScreen",
       "SportCenterCheckout": "SportCenterCheckoutScreen",
-      "SportCenterMyBookings": "SportCenterMyBookingsScreen"
+      "SportCenterMyBookings": "SportCenterMyBookingsScreen",
+      "SportCenterSearch": "SportCenterSearchScreen",
+      "SportCenterSearchResults": "SportCenterSearchResultsScreen",
+      "SportCenterBookingCheckout": "SportCenterBookingCheckoutScreen",
+      "SportCenterExplore": "SportCenterExploreScreen",
+      "SportCenterWishlist": "SportCenterWishlistScreen"
     },
     "tabs": { "sport-center": "SportCenterTab" },
     "widgets": { "sport-center-featured": "SportCenterFeatured" }
   },
   "routes": [
     {"name": "SportCenter", "path": "/sport-center", "component": "SportCenterScreen", "permissions": ["read:sport-center"], "meta": {"title": "Sport Center", "showInMenu": true}},
+    {"name": "SportCenterExplore", "path": "/sport-center/explore", "component": "SportCenterExploreScreen", "permissions": ["read:sport-center"], "meta": {"title": "Explore", "showInMenu": false}},
+    {"name": "SportCenterWishlist", "path": "/sport-center/wishlist", "component": "SportCenterWishlistScreen", "permissions": ["read:sport-center"], "meta": {"title": "Wishlist", "showInMenu": false}},
     {"name": "SportCenterFacilityDetail", "path": "/sport-center/facility-detail", "component": "SportCenterFacilityDetailScreen", "permissions": ["read:sport-center"], "meta": {"title": "Detail Fasilitas", "showInMenu": false}},
     {"name": "SportCenterBooking", "path": "/sport-center/booking", "component": "SportCenterBookingScreen", "permissions": ["write:sport-center"], "meta": {"title": "Booking", "showInMenu": false}},
     {"name": "SportCenterCheckout", "path": "/sport-center/checkout", "component": "SportCenterCheckoutScreen", "permissions": ["write:sport-center"], "meta": {"title": "Checkout", "showInMenu": false}},
-    {"name": "SportCenterMyBookings", "path": "/sport-center/my-bookings", "component": "SportCenterMyBookingsScreen", "permissions": ["read:sport-center"], "meta": {"title": "Booking Saya", "showInMenu": false}}
+    {"name": "SportCenterBookingCheckout", "path": "/sport-center/booking-checkout", "component": "SportCenterBookingCheckoutScreen", "permissions": ["write:sport-center"], "meta": {"title": "Booking Checkout", "showInMenu": false}},
+    {"name": "SportCenterMyBookings", "path": "/sport-center/my-bookings", "component": "SportCenterMyBookingsScreen", "permissions": ["read:sport-center"], "meta": {"title": "Booking Saya", "showInMenu": false}},
+    {"name": "SportCenterSearch", "path": "/sport-center/search", "component": "SportCenterSearchScreen", "permissions": ["read:sport-center"], "meta": {"title": "Cari", "showInMenu": false}},
+    {"name": "SportCenterSearchResults", "path": "/sport-center/search-results", "component": "SportCenterSearchResultsScreen", "permissions": ["read:sport-center"], "meta": {"title": "Hasil Cari", "showInMenu": false}}
   ],
   "permissions": ["read:sport-center", "write:sport-center"]
 }

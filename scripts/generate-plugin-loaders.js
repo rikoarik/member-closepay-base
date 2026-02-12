@@ -149,7 +149,10 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {`
       componentEntries.push(`    ${componentName}: '${componentPath}',`);
     }
     
-    entries.push(`  ${pluginId}: {`);
+    // Wrap plugin ID with quotes if it contains dash
+    const pluginKey = pluginId.includes('-') ? `'${pluginId}'` : pluginId;
+    
+    entries.push(`  ${pluginKey}: {`);
     entries.push(...componentEntries);
     entries.push(`  },`);
   }
@@ -266,6 +269,18 @@ function generateLoaders() {
         // We want the ComponentName values (the actual component names, not export names)
         const screenComponents = Object.values(manifest.exports.screens);
         components = [...components, ...screenComponents];
+      }
+
+      // Also include tabs if they exist
+      if (manifest.exports?.tabs) {
+        const tabComponents = Object.values(manifest.exports.tabs);
+        components = [...components, ...tabComponents];
+      }
+
+      // Also include widgets if they exist
+      if (manifest.exports?.widgets) {
+        const widgetComponents = Object.values(manifest.exports.widgets);
+        components = [...components, ...widgetComponents];
       }
       
       // Remove duplicates

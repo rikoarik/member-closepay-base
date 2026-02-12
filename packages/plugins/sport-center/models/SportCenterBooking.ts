@@ -5,6 +5,7 @@
 export type SportCenterBookingStatus = 'upcoming' | 'completed' | 'cancelled';
 
 export interface SportCenterBooking {
+  userEmail: string | undefined;
   id: string;
   facilityId: string;
   facilityName: string;
@@ -14,5 +15,7 @@ export interface SportCenterBooking {
   timeSlot: string;
   status: SportCenterBookingStatus;
   amount: number;
+  courtName?: string;
+  address?: string;
   createdAt?: string;
 }

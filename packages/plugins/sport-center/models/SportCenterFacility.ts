@@ -4,7 +4,7 @@
 
 export type SportCenterCategory = 'gym' | 'court' | 'pool';
 
-export type SportType = 'futsal' | 'badminton' | 'tenis' | 'gym' | 'pool';
+export type SportType = 'futsal' | 'badminton' | 'tenis' | 'gym' | 'pool' | 'basketball' | 'volleyball' | 'yoga';
 
 export interface SportCenterFacility {
   id: string;

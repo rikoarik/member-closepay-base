@@ -19,10 +19,32 @@ interface TimeSlotSelectorProps {
   multiSelect?: boolean;
 }
 
+const TIME_GROUPS = [
+  { label: 'Pagi', start: 6, end: 11 },
+  { label: 'Siang', start: 11, end: 15 },
+  { label: 'Sore', start: 15, end: 18 },
+  { label: 'Malam', start: 18, end: 24 },
+];
+
 const SLOT_TIMES = [
-  '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
-  '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
-  '18:00', '19:00', '20:00',
+  '06:00',
+  '07:00',
+  '08:00',
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '13:00',
+  '14:00',
+  '15:00',
+  '16:00',
+  '17:00',
+  '18:00',
+  '19:00',
+  '20:00',
+  '21:00',
+  '22:00',
+  '23:00',
 ];
 
 export const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
@@ -42,9 +64,7 @@ export const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
     return map;
   }, [slots]);
 
-  const timesToShow = slots.length > 0
-    ? slots.map((s) => s.time)
-    : SLOT_TIMES;
+  const timesToShow = slots.length > 0 ? slots.map((s) => s.time) : SLOT_TIMES;
 
   const isSlotSelected = (time: string) => {
     if (multiSelect) return selectedSlots.includes(time);
@@ -64,50 +84,80 @@ export const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
     }
   };
 
+  const groupedSlots = React.useMemo(() => {
+    const groups: { [key: string]: string[] } = {
+      Pagi: [],
+      Siang: [],
+      Sore: [],
+      Malam: [],
+    };
+
+    timesToShow.forEach((time) => {
+      const hour = parseInt(time.split(':')[0], 10);
+      const group = TIME_GROUPS.find((g) => hour >= g.start && hour < g.end);
+      if (group) {
+        groups[group.label].push(time);
+      }
+    });
+
+    return groups;
+  }, [timesToShow]);
+
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: colors.text }]}>
-        {t('sportCenter.selectTime')}
-      </Text>
-      <View style={styles.grid}>
-        {timesToShow.map((time) => {
-          const slot = slotMap.get(time);
-          const available = slot ? slot.available : true;
-          const isSelected = isSlotSelected(time);
+      {Object.entries(groupedSlots).map(([groupName, times]) => {
+        if (times.length === 0) return null;
+        return (
+          <View key={groupName} style={styles.groupContainer}>
+            <Text style={[styles.groupTitle, { color: colors.textSecondary }]}>{groupName}</Text>
+            <View style={styles.grid}>
+              {times.map((time) => {
+                const slot = slotMap.get(time);
+                const available = slot ? slot.available : true;
+                const isSelected = isSlotSelected(time);
 
-          return (
-            <TouchableOpacity
-              key={time}
-              style={[
-                styles.slot,
-                {
-                  backgroundColor: isSelected
-                    ? colors.primary
-                    : available
-                      ? colors.surface
-                      : colors.surfaceSecondary || colors.border,
-                  borderColor: isSelected ? colors.primary : colors.border,
-                  opacity: available ? 1 : 0.6,
-                },
-              ]}
-              onPress={() => available && handleSlotPress(time)}
-              disabled={!available}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.slotText,
-                  {
-                    color: isSelected ? colors.surface : colors.text,
-                  },
-                ]}
-              >
-                {time}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+                return (
+                  <TouchableOpacity
+                    key={time}
+                    style={[
+                      styles.slot,
+                      {
+                        backgroundColor: isSelected
+                          ? colors.primary
+                          : available
+                          ? colors.surface
+                          : colors.surfaceSecondary || colors.border,
+                        borderColor: isSelected ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => available && handleSlotPress(time)}
+                    disabled={!available}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[
+                        styles.slotText,
+                        {
+                          color: isSelected
+                            ? colors.surface
+                            : available
+                            ? colors.text
+                            : colors.textSecondary,
+                          fontFamily: isSelected
+                            ? FontFamily.monasans.bold
+                            : FontFamily.monasans.medium,
+                        },
+                      ]}
+                    >
+                      {time}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        );
+      })}
     </View>
   );
 };
@@ -116,26 +166,31 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: moderateVerticalScale(16),
   },
-  title: {
-    fontSize: getResponsiveFontSize('medium'),
+  groupContainer: {
+    marginBottom: moderateVerticalScale(16),
+  },
+  groupTitle: {
+    fontSize: getResponsiveFontSize('small'),
     fontFamily: FontFamily.monasans.semiBold,
     marginBottom: moderateVerticalScale(8),
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: scale(8),
+    gap: scale(10),
   },
   slot: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(12),
-    borderRadius: scale(12),
+    paddingHorizontal: scale(14),
+    paddingVertical: scale(10),
+    borderRadius: scale(10),
     borderWidth: 1,
-    minWidth: scale(70),
+    minWidth: scale(75),
     alignItems: 'center',
+    justifyContent: 'center',
   },
   slotText: {
     fontSize: getResponsiveFontSize('medium'),
-    fontFamily: FontFamily.monasans.medium,
   },
 });

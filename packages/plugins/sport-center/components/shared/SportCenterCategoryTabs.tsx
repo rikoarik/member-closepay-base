@@ -55,6 +55,11 @@ export const SportCenterCategoryTabs: React.FC<SportCenterCategoryTabsProps> = (
                 {
                   backgroundColor: isActive ? colors.primary : colors.surface,
                   borderColor: isActive ? colors.primary : colors.border,
+                  elevation: isActive ? 4 : 0,
+                  shadowColor: colors.primary,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: isActive ? 0.3 : 0,
+                  shadowRadius: 8,
                 },
               ]}
               onPress={() => onSelectCategory(tab.id)}
@@ -63,14 +68,9 @@ export const SportCenterCategoryTabs: React.FC<SportCenterCategoryTabsProps> = (
               <IconComponent
                 size={scale(18)}
                 color={isActive ? colors.surface : colors.text}
-                variant="Linear"
+                variant={isActive ? 'Bold' : 'Linear'}
               />
-              <Text
-                style={[
-                  styles.tabText,
-                  { color: isActive ? colors.surface : colors.text },
-                ]}
-              >
+              <Text style={[styles.tabText, { color: isActive ? colors.surface : colors.text }]}>
                 {t(tab.labelKey)}
               </Text>
             </TouchableOpacity>
@@ -92,14 +92,14 @@ const styles = StyleSheet.create({
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: scale(14),
-    paddingVertical: scale(8),
-    borderRadius: scale(20),
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(10),
+    borderRadius: 100,
     borderWidth: 1,
-    gap: scale(6),
+    gap: scale(8),
   },
   tabText: {
-    fontSize: scale(13),
-    fontFamily: FontFamily.monasans.semiBold,
+    fontSize: scale(14),
+    fontFamily: FontFamily.monasans.bold,
   },
 });

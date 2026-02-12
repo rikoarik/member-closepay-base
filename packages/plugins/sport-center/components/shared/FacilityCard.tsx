@@ -26,64 +26,39 @@ export const FacilityCard: React.FC<FacilityCardProps> = ({ facility, onPress })
       onPress={() => onPress(facility)}
       activeOpacity={0.7}
     >
-      <Image
-        source={{ uri: facility.imageUrl }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      <View style={styles.imageWrapper}>
+        <Image source={{ uri: facility.imageUrl }} style={styles.image} resizeMode="cover" />
+      </View>
       <View style={styles.content}>
-        <View style={styles.nameRow}>
-          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-            {facility.name}
+        <View style={styles.metaRow}>
+          <Text style={[styles.categoryLabel, { color: colors.textSecondary }]}>
+            {(facility.sportType
+              ? t(`sportCenter.${facility.sportType}`)
+              : facility.category
+            ).toUpperCase()}
           </Text>
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor: facility.isOpen ? colors.success + '20' : colors.error + '20',
-              },
-            ]}
-          >
-            <Text
-              style={[styles.statusText, { color: facility.isOpen ? colors.success : colors.error }]}
-            >
-              {facility.isOpen
-                ? t('marketplace.storeOpen') || t('sportCenter.open')
-                : t('marketplace.storeClosed') || t('sportCenter.closed')}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.row}>
-          <Location size={scale(14)} color={colors.textSecondary} variant="Linear" />
-          <Text style={[styles.location, { color: colors.textSecondary }]}>
-            {facility.distance}
+          <View style={styles.dotSeparator} />
+          <Text style={[styles.locationLabel, { color: colors.textSecondary }]}>
+            {facility.distance || 'Kebayoran'}
           </Text>
         </View>
 
-        <View style={styles.footer}>
-          <View style={styles.ratingContainer}>
-            <Star1 size={scale(14)} color={colors.warning} variant="Bold" />
-            <Text style={[styles.rating, { color: colors.textSecondary }]}>
+        <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+          {facility.name}
+        </Text>
+
+        <View style={styles.footerRow}>
+          <Text style={[styles.price, { color: colors.primary }]}>
+            Rp {facility.pricePerSlot?.toLocaleString('id-ID') || '200.000'}
+          </Text>
+          <View style={styles.ratingRowSmall}>
+            <Star1 size={scale(12)} color="#F59E0B" variant="Bold" />
+            <Text style={[styles.ratingSmall, { color: colors.text }]}>
               {facility.rating.toFixed(1)}
             </Text>
           </View>
-          {facility.pricePerSlot && (
-            <Text style={[styles.price, { color: colors.primary }]}>
-              Rp {facility.pricePerSlot.toLocaleString('id-ID')}/slot
-            </Text>
-          )}
         </View>
       </View>
-
-      <TouchableOpacity
-        style={[styles.visitButton, { borderColor: colors.primary }]}
-        onPress={() => onPress(facility)}
-      >
-        <Text style={[styles.visitText, { color: colors.primary }]}>
-          {t('sportCenter.book')}
-        </Text>
-      </TouchableOpacity>
     </TouchableOpacity>
   );
 };
@@ -91,78 +66,72 @@ export const FacilityCard: React.FC<FacilityCardProps> = ({ facility, onPress })
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
     padding: scale(12),
-    borderRadius: scale(12),
+    borderRadius: 20,
     borderWidth: 1,
     marginBottom: moderateVerticalScale(12),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  imageWrapper: {
+    marginRight: scale(16),
   },
   image: {
-    width: scale(60),
-    height: scale(60),
-    borderRadius: scale(30),
-    marginRight: scale(12),
+    width: scale(96),
+    height: scale(96),
+    borderRadius: 12,
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+    marginBottom: 4,
+  },
+  categoryLabel: {
+    fontSize: scale(10),
+    fontFamily: FontFamily.monasans.bold,
+    letterSpacing: 0.5,
+  },
+  dotSeparator: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#CBD5E1',
+  },
+  locationLabel: {
+    fontSize: scale(10),
+    fontFamily: FontFamily.monasans.medium,
   },
   name: {
-    fontSize: getResponsiveFontSize('medium'),
+    fontSize: scale(14),
     fontFamily: FontFamily.monasans.bold,
-    flex: 1,
+    lineHeight: 20,
   },
-  nameRow: {
+  footerRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: scale(4),
-    gap: scale(8),
-  },
-  statusBadge: {
-    paddingHorizontal: scale(8),
-    paddingVertical: scale(2),
-    borderRadius: scale(8),
-  },
-  statusText: {
-    fontSize: getResponsiveFontSize('xsmall'),
-    fontFamily: FontFamily.monasans.medium,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: scale(4),
-    gap: scale(4),
-  },
-  location: {
-    fontSize: getResponsiveFontSize('small'),
-    fontFamily: FontFamily.monasans.regular,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(12),
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(4),
-  },
-  rating: {
-    fontSize: getResponsiveFontSize('small'),
-    fontFamily: FontFamily.monasans.medium,
+    marginTop: 8,
   },
   price: {
-    fontSize: getResponsiveFontSize('small'),
-    fontFamily: FontFamily.monasans.semiBold,
+    fontSize: scale(14),
+    fontFamily: FontFamily.monasans.bold,
   },
-  visitButton: {
-    paddingHorizontal: scale(16),
-    paddingVertical: moderateVerticalScale(6),
-    borderRadius: scale(16),
-    borderWidth: 1,
+  ratingRowSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
-  visitText: {
-    fontSize: getResponsiveFontSize('small'),
-    fontFamily: FontFamily.monasans.medium,
+  ratingSmall: {
+    fontSize: scale(10),
+    fontFamily: FontFamily.monasans.bold,
   },
 });
