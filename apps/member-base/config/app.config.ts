@@ -34,6 +34,7 @@ export const appConfig: AppConfig = {
     'marketplace',
     'marketplace-fnb',
     'sport-center',
+    'invoice',
   ],
 
   // ============================================================================
@@ -411,6 +412,7 @@ export const appConfig: AppConfig = {
     { id: 'fnb-recent-orders', visible: true, order: 14 },
     { id: 'marketplace-featured', visible: true, order: 15 },
     { id: 'sport-center-featured', visible: true, order: 16 },
+    { id: 'invoice-featured', visible: true, order: 17 },
   ],
 
   // Akses Cepat (Quick Access) - hanya untuk member balance-management
@@ -422,6 +424,7 @@ export const appConfig: AppConfig = {
     { id: 'marketplace', route: 'Marketplace', labelKey: 'home.marketplace', icon: 'marketplace', order: 5 },
     { id: 'fnb', route: 'FnB', labelKey: 'home.fnb', icon: 'fnb', order: 6 },
     { id: 'sportcenter', route: 'SportCenter', labelKey: 'home.sportCenter', icon: 'sportcenter', order: 7 },
+    { id: 'invoice', route: 'Invoice', labelKey: 'home.invoice', icon: 'invoice', order: 8 },
   ],
 
   // ============================================================================

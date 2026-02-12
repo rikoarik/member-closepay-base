@@ -1,0 +1,30 @@
+{
+  "id": "invoice",
+  "name": "Invoice",
+  "version": "1.0.0",
+  "description": "Invoice and billing management - create, send, and pay invoices",
+  "type": "segment-plugin",
+  "author": "Closepay Team",
+  "dependencies": ["balance", "payment"],
+  "exports": {
+    "screens": {
+      "Invoice": "InvoiceScreen",
+      "InvoiceList": "InvoiceListScreen",
+      "InvoiceDetail": "InvoiceDetailScreen",
+      "InvoiceCreate": "InvoiceCreateScreen",
+      "InvoicePayment": "InvoicePaymentScreen",
+      "InvoicePaymentSuccess": "InvoicePaymentSuccessScreen"
+    },
+    "tabs": { "invoice": "InvoiceTab" },
+    "widgets": { "invoice-featured": "InvoiceFeatured" }
+  },
+  "routes": [
+    {"name": "Invoice", "path": "/invoice", "component": "InvoiceScreen", "permissions": ["read:invoice"], "meta": {"title": "Invoice", "showInMenu": true}},
+    {"name": "InvoiceList", "path": "/invoice/list", "component": "InvoiceListScreen", "permissions": ["read:invoice"], "meta": {"title": "Daftar Tagihan", "showInMenu": false}},
+    {"name": "InvoiceDetail", "path": "/invoice/detail", "component": "InvoiceDetailScreen", "permissions": ["read:invoice"], "meta": {"title": "Detail Tagihan", "showInMenu": false}},
+    {"name": "InvoiceCreate", "path": "/invoice/create", "component": "InvoiceCreateScreen", "permissions": ["write:invoice"], "meta": {"title": "Buat Tagihan Baru", "showInMenu": false}},
+    {"name": "InvoicePayment", "path": "/invoice/payment", "component": "InvoicePaymentScreen", "permissions": ["read:invoice"], "meta": {"title": "Pembayaran Tagihan", "showInMenu": false}},
+    {"name": "InvoicePaymentSuccess", "path": "/invoice/payment/success", "component": "InvoicePaymentSuccessScreen", "permissions": ["read:invoice"], "meta": {"title": "Pembayaran Berhasil", "showInMenu": false}}
+  ],
+  "permissions": ["read:invoice", "write:invoice"]
+}

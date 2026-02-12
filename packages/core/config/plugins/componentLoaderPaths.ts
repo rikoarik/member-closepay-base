@@ -42,6 +42,16 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     CardTopupTab: '../../../plugins/card-transaction/components/tabs/CardTopupTab',
     CardSummary: '../../../plugins/card-transaction/components/widgets/CardSummary',
   },
+  invoice: {
+    InvoiceScreen: '../../../plugins/invoice/components/screens/InvoiceScreen',
+    InvoiceListScreen: '../../../plugins/invoice/components/screens/InvoiceListScreen',
+    InvoiceDetailScreen: '../../../plugins/invoice/components/screens/InvoiceDetailScreen',
+    InvoiceCreateScreen: '../../../plugins/invoice/components/screens/InvoiceCreateScreen',
+    InvoicePaymentScreen: '../../../plugins/invoice/components/screens/InvoicePaymentScreen',
+    InvoicePaymentSuccessScreen: '../../../plugins/invoice/components/screens/InvoicePaymentSuccessScreen',
+    InvoiceTab: '../../../plugins/invoice/components/tabs/InvoiceTab',
+    InvoiceFeatured: '../../../plugins/invoice/components/widgets/InvoiceFeatured',
+  },
   marketplace: {
     ProductCard: '../../../plugins/marketplace/components/shared/ProductCard',
     ProductCardSkeleton: '../../../plugins/marketplace/components/shared/ProductCardSkeleton',

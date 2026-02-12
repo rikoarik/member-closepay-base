@@ -60,67 +60,54 @@ const PreviewQuickAccessButtons = memo<{
   }>;
   textColor: string;
   buttonWidth: number;
-}>(({ buttons, textColor, buttonWidth }) => {
-  const gap = scale(12);
-  const itemsPerRow = 4;
+}>(
+  ({ buttons, textColor, buttonWidth }) => {
+    const gap = scale(12);
+    const itemsPerRow = 4;
 
-  const getButtonStyle = useCallback((index: number) => {
-    const rowIndex = Math.floor(index / itemsPerRow);
-    const positionInRow = index % itemsPerRow;
-    const isLastInRow = positionInRow === itemsPerRow - 1;
-    const totalRows = Math.ceil(buttons.length / itemsPerRow);
-    const isLastRow = rowIndex === totalRows - 1;
+    const getButtonStyle = useCallback(
+      (index: number) => {
+        const rowIndex = Math.floor(index / itemsPerRow);
+        const positionInRow = index % itemsPerRow;
+        const isLastInRow = positionInRow === itemsPerRow - 1;
+        const totalRows = Math.ceil(buttons.length / itemsPerRow);
+        const isLastRow = rowIndex === totalRows - 1;
 
-    return {
-      width: buttonWidth,
-      marginRight: isLastInRow ? 0 : gap,
-      marginBottom: isLastRow ? 0 : moderateVerticalScale(12),
-    };
-  }, [buttonWidth, gap, buttons.length, itemsPerRow]);
+        return {
+          width: buttonWidth,
+          marginRight: isLastInRow ? 0 : gap,
+          marginBottom: isLastRow ? 0 : moderateVerticalScale(12),
+        };
+      },
+      [buttonWidth, gap, buttons.length, itemsPerRow]
+    );
 
-  return (
-    <View style={styles.previewQuickAccessRow}>
-      {buttons.map((button, index) => (
-        <View
-          key={button.id}
-          style={[
-            styles.previewQuickAccessButton,
-            getButtonStyle(index),
-          ]}
-        >
-          <View
-            style={[
-              styles.previewQuickAccessIcon,
-              { backgroundColor: button.iconBgColor },
-            ]}
-          >
-            {button.icon}
+    return (
+      <View style={styles.previewQuickAccessRow}>
+        {buttons.map((button, index) => (
+          <View key={button.id} style={[styles.previewQuickAccessButton, getButtonStyle(index)]}>
+            <View style={[styles.previewQuickAccessIcon, { backgroundColor: button.iconBgColor }]}>
+              {button.icon}
+            </View>
+            <Text style={[styles.previewQuickAccessLabel, { color: textColor }]} numberOfLines={2}>
+              {button.label}
+            </Text>
           </View>
-          <Text
-            style={[
-              styles.previewQuickAccessLabel,
-              { color: textColor },
-            ]}
-            numberOfLines={2}
-          >
-            {button.label}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-}, (prevProps, nextProps) => {
-  if (
-    prevProps.buttons.length !== nextProps.buttons.length ||
-    prevProps.textColor !== nextProps.textColor ||
-    prevProps.buttonWidth !== nextProps.buttonWidth
-  ) {
-    return false;
+        ))}
+      </View>
+    );
+  },
+  (prevProps, nextProps) => {
+    if (
+      prevProps.buttons.length !== nextProps.buttons.length ||
+      prevProps.textColor !== nextProps.textColor ||
+      prevProps.buttonWidth !== nextProps.buttonWidth
+    ) {
+      return false;
+    }
+    return prevProps.buttons.every((btn, index) => btn.id === nextProps.buttons[index].id);
   }
-  return prevProps.buttons.every(
-    (btn, index) => btn.id === nextProps.buttons[index].id
-  );
-});
+);
 
 PreviewQuickAccessButtons.displayName = 'PreviewQuickAccessButtons';
 
@@ -147,91 +134,89 @@ const PreviewContent = memo<{
   menuContainerStyle: any;
   menuTitleText: string;
   menuTitleStyle: any;
-}>(({
-  previewButtons,
-  headerContainerStyle,
-  titleStyle,
-  previewTitleText,
-  scrollContentStyle,
-  cardContainerStyle,
-  topIndicatorStyle,
-  placeholderSmallStyle,
-  placeholderLargeStyle,
-  onBack,
-  backButtonStyle,
-  backIconColor,
-  textColor,
-  buttonWidth,
-  menuContainerStyle,
-  menuTitleText,
-  menuTitleStyle,
-}) => {
-  return (
-    <>
-      <View style={headerContainerStyle}>
-
-        <Text style={titleStyle}>
-          {previewTitleText}
-        </Text>
-      </View>
-      <ScrollView
-        style={styles.previewScrollView}
-        contentContainerStyle={scrollContentStyle}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={cardContainerStyle}>
-          <View style={topIndicatorStyle} />
-
-          <View style={placeholderSmallStyle} />
-          <View style={placeholderLargeStyle} />
-
-          <View style={[styles.previewQuickAccess, menuContainerStyle]}>
-            <Text style={menuTitleStyle}>
-              {menuTitleText}
-            </Text>
-            <PreviewQuickAccessButtons
-              buttons={previewButtons}
-              textColor={textColor}
-              buttonWidth={buttonWidth}
-            />
-          </View>
+}>(
+  ({
+    previewButtons,
+    headerContainerStyle,
+    titleStyle,
+    previewTitleText,
+    scrollContentStyle,
+    cardContainerStyle,
+    topIndicatorStyle,
+    placeholderSmallStyle,
+    placeholderLargeStyle,
+    onBack,
+    backButtonStyle,
+    backIconColor,
+    textColor,
+    buttonWidth,
+    menuContainerStyle,
+    menuTitleText,
+    menuTitleStyle,
+  }) => {
+    return (
+      <>
+        <View style={headerContainerStyle}>
+          <Text style={titleStyle}>{previewTitleText}</Text>
         </View>
-      </ScrollView>
-    </>
-  );
-}, (prevProps, nextProps) => {
-  if (prevProps.previewButtons.length !== nextProps.previewButtons.length) {
-    return false;
-  }
+        <ScrollView
+          style={styles.previewScrollView}
+          contentContainerStyle={scrollContentStyle}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={cardContainerStyle}>
+            <View style={topIndicatorStyle} />
 
-  for (let i = 0; i < prevProps.previewButtons.length; i++) {
-    if (prevProps.previewButtons[i].id !== nextProps.previewButtons[i].id) {
+            <View style={placeholderSmallStyle} />
+            <View style={placeholderLargeStyle} />
+
+            <View style={[styles.previewQuickAccess, menuContainerStyle]}>
+              <Text style={menuTitleStyle}>{menuTitleText}</Text>
+              <PreviewQuickAccessButtons
+                buttons={previewButtons}
+                textColor={textColor}
+                buttonWidth={buttonWidth}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </>
+    );
+  },
+  (prevProps, nextProps) => {
+    if (prevProps.previewButtons.length !== nextProps.previewButtons.length) {
       return false;
     }
-  }
 
-  if (
-    prevProps.previewTitleText !== nextProps.previewTitleText ||
-    prevProps.headerContainerStyle !== nextProps.headerContainerStyle ||
-    prevProps.titleStyle !== nextProps.titleStyle ||
-    prevProps.scrollContentStyle !== nextProps.scrollContentStyle ||
-    prevProps.cardContainerStyle !== nextProps.cardContainerStyle ||
-    prevProps.topIndicatorStyle !== nextProps.topIndicatorStyle ||
-    prevProps.placeholderSmallStyle !== nextProps.placeholderSmallStyle ||
-    prevProps.placeholderLargeStyle !== nextProps.placeholderLargeStyle ||
-    prevProps.backButtonStyle !== nextProps.backButtonStyle ||
-    prevProps.backIconColor !== nextProps.backIconColor ||
-    prevProps.textColor !== nextProps.textColor ||
-    prevProps.buttonWidth !== nextProps.buttonWidth ||
-    prevProps.menuContainerStyle !== nextProps.menuContainerStyle ||
-    prevProps.menuTitleText !== nextProps.menuTitleText ||
-    prevProps.menuTitleStyle !== nextProps.menuTitleStyle
-  ) {
-    return false; // Re-render if any style changed
-  }
+    for (let i = 0; i < prevProps.previewButtons.length; i++) {
+      if (prevProps.previewButtons[i].id !== nextProps.previewButtons[i].id) {
+        return false;
+      }
+    }
 
-  return true; // Don't re-render - props are the same
-});
+    if (
+      prevProps.previewTitleText !== nextProps.previewTitleText ||
+      prevProps.headerContainerStyle !== nextProps.headerContainerStyle ||
+      prevProps.titleStyle !== nextProps.titleStyle ||
+      prevProps.scrollContentStyle !== nextProps.scrollContentStyle ||
+      prevProps.cardContainerStyle !== nextProps.cardContainerStyle ||
+      prevProps.topIndicatorStyle !== nextProps.topIndicatorStyle ||
+      prevProps.placeholderSmallStyle !== nextProps.placeholderSmallStyle ||
+      prevProps.placeholderLargeStyle !== nextProps.placeholderLargeStyle ||
+      prevProps.backButtonStyle !== nextProps.backButtonStyle ||
+      prevProps.backIconColor !== nextProps.backIconColor ||
+      prevProps.textColor !== nextProps.textColor ||
+      prevProps.buttonWidth !== nextProps.buttonWidth ||
+      prevProps.menuContainerStyle !== nextProps.menuContainerStyle ||
+      prevProps.menuTitleText !== nextProps.menuTitleText ||
+      prevProps.menuTitleStyle !== nextProps.menuTitleStyle
+    ) {
+      return false; // Re-render if any style changed
+    }
+
+    return true; // Don't re-render - props are the same
+  }
+);
 
 PreviewContent.displayName = 'PreviewContent';
 
@@ -263,9 +248,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
   }, []);
 
   const handleToggle = (id: string) => {
-    setMenuItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, enabled: !i.enabled } : i))
-    );
+    setMenuItems((prev) => prev.map((i) => (i.id === id ? { ...i, enabled: !i.enabled } : i)));
   };
 
   const handleSave = async () => {
@@ -283,166 +266,215 @@ export const QuickMenuSettingsScreen: React.FC = () => {
 
   const iconCacheRef = React.useRef<Map<string, React.ReactNode>>(new Map());
 
-  const getPreviewMenuIcon = useCallback((iconName?: string) => {
-    const cacheKey = `preview-${iconName || 'default'}-${colors.info}-${colors.warning}-${colors.success}-${colors.error}`;
+  const getPreviewMenuIcon = useCallback(
+    (iconName?: string) => {
+      const cacheKey = `preview-${iconName || 'default'}-${colors.info}-${colors.warning}-${
+        colors.success
+      }-${colors.error}`;
 
-    if (iconCacheRef.current.has(cacheKey)) {
-      return iconCacheRef.current.get(cacheKey)!;
-    }
+      if (iconCacheRef.current.has(cacheKey)) {
+        return iconCacheRef.current.get(cacheKey)!;
+      }
 
-    const iconSize = getIconSize('medium');
-    let icon: React.ReactNode;
+      const iconSize = getIconSize('medium');
+      let icon: React.ReactNode;
 
-    switch (iconName) {
-      case 'payIPL':
-        icon = <ArrowDown2 size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'emergency':
-        icon = <Call size={iconSize} color={colors.warning} variant="Bold" />;
-        break;
-      case 'guest':
-        icon = <People size={iconSize} color={colors.success} variant="Bold" />;
-        break;
-      case 'ppob':
-        icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'transfer':
-        icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
-        break;
-      case 'payment':
-        icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'bill':
-        icon = <Game size={iconSize} color={colors.error} variant="Bold" />;
-        break;
-      case 'topup':
-        icon = <ArrowUp2 size={iconSize} color={colors.success} variant="Bold" />;
-        break;
-      case 'donation':
-        icon = <People size={iconSize} color={colors.warning} variant="Bold" />;
-        break;
-      case 'marketplace':
-        icon = <Shop size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'withdraw':
-        icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
-        break;
-      case 'fnb':
-        icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
-        break;
-      case 'sportcenter':
-        icon = <Game size={iconSize} color={colors.success} variant="Bold" />;
-        break;
-      default:
-        icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
-    }
+      switch (iconName) {
+        case 'payIPL':
+          icon = <ArrowDown2 size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'emergency':
+          icon = <Call size={iconSize} color={colors.warning} variant="Bold" />;
+          break;
+        case 'guest':
+          icon = <People size={iconSize} color={colors.success} variant="Bold" />;
+          break;
+        case 'ppob':
+          icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'transfer':
+          icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        case 'payment':
+          icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'bill':
+          icon = <Game size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        case 'topup':
+          icon = <ArrowUp2 size={iconSize} color={colors.success} variant="Bold" />;
+          break;
+        case 'donation':
+          icon = <People size={iconSize} color={colors.warning} variant="Bold" />;
+          break;
+        case 'marketplace':
+          icon = <Shop size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'withdraw':
+          icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        case 'fnb':
+          icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
+          break;
+        case 'sportcenter':
+          icon = <Game size={iconSize} color={colors.success} variant="Bold" />;
+          break;
+        case 'invoice':
+          icon = <DocumentText size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        default:
+          icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
+      }
 
-    iconCacheRef.current.set(cacheKey, icon);
-    return icon;
-  }, [colors.info, colors.warning, colors.success, colors.error]);
+      iconCacheRef.current.set(cacheKey, icon);
+      return icon;
+    },
+    [colors.info, colors.warning, colors.success, colors.error]
+  );
 
-  const getMenuIcon = useCallback((iconName?: string) => {
-    const cacheKey = `${iconName || 'default'}-${colors.info}-${colors.warning}-${colors.success}-${colors.error}`;
+  const getMenuIcon = useCallback(
+    (iconName?: string) => {
+      const cacheKey = `${iconName || 'default'}-${colors.info}-${colors.warning}-${
+        colors.success
+      }-${colors.error}`;
 
-    if (iconCacheRef.current.has(cacheKey)) {
-      return iconCacheRef.current.get(cacheKey)!;
-    }
+      if (iconCacheRef.current.has(cacheKey)) {
+        return iconCacheRef.current.get(cacheKey)!;
+      }
 
-    const iconSize = getIconSize('large');
-    let icon: React.ReactNode;
+      const iconSize = getIconSize('large');
+      let icon: React.ReactNode;
 
-    switch (iconName) {
-      case 'payIPL':
-        icon = <ArrowDown2 size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'emergency':
-        icon = <Call size={iconSize} color={colors.warning} variant="Bold" />;
-        break;
-      case 'guest':
-        icon = <People size={iconSize} color={colors.success} variant="Bold" />;
-        break;
-      case 'ppob':
-        icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'transfer':
-        icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
-        break;
-      case 'payment':
-        icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'bill':
-        icon = <Game size={iconSize} color={colors.error} variant="Bold" />;
-        break;
-      case 'topup':
-        icon = <ArrowUp2 size={iconSize} color={colors.success} variant="Bold" />;
-        break;
-      case 'donation':
-        icon = <People size={iconSize} color={colors.warning} variant="Bold" />;
-        break;
-      case 'marketplace':
-        icon = <Shop size={iconSize} color={colors.info} variant="Bold" />;
-        break;
-      case 'withdraw':
-        icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
-        break;
-      case 'fnb':
-        icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
-        break;
-      case 'sportcenter':
-        icon = <Game size={iconSize} color={colors.success} variant="Bold" />;
-        break;
-      default:
-        icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
-    }
+      switch (iconName) {
+        case 'payIPL':
+          icon = <ArrowDown2 size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'emergency':
+          icon = <Call size={iconSize} color={colors.warning} variant="Bold" />;
+          break;
+        case 'guest':
+          icon = <People size={iconSize} color={colors.success} variant="Bold" />;
+          break;
+        case 'ppob':
+          icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'transfer':
+          icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        case 'payment':
+          icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'bill':
+          icon = <Game size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        case 'topup':
+          icon = <ArrowUp2 size={iconSize} color={colors.success} variant="Bold" />;
+          break;
+        case 'donation':
+          icon = <People size={iconSize} color={colors.warning} variant="Bold" />;
+          break;
+        case 'marketplace':
+          icon = <Shop size={iconSize} color={colors.info} variant="Bold" />;
+          break;
+        case 'withdraw':
+          icon = <ArrowDown2 size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        case 'fnb':
+          icon = <Shop size={iconSize} color={colors.warning} variant="Bold" />;
+          break;
+        case 'sportcenter':
+          icon = <Game size={iconSize} color={colors.success} variant="Bold" />;
+          break;
+        case 'invoice':
+          icon = <DocumentText size={iconSize} color={colors.error} variant="Bold" />;
+          break;
+        default:
+          icon = <Game size={iconSize} color={colors.info} variant="Bold" />;
+      }
 
-    iconCacheRef.current.set(cacheKey, icon);
-    return icon;
-  }, [colors.info, colors.warning, colors.success, colors.error]);
+      iconCacheRef.current.set(cacheKey, icon);
+      return icon;
+    },
+    [colors.info, colors.warning, colors.success, colors.error]
+  );
 
-  const getDefaultBgColor = useCallback((iconName?: string): string => {
-    switch (iconName) {
-      case 'payIPL': return colors.infoLight;
-      case 'emergency': return colors.warningLight;
-      case 'guest': return colors.successLight;
-      case 'ppob': return colors.infoLight;
-      case 'transfer': return colors.errorLight;
-      case 'payment': return colors.infoLight;
-      case 'bill': return colors.errorLight;
-      case 'topup': return colors.successLight;
-      case 'donation': return colors.warningLight;
-      case 'marketplace': return colors.infoLight;
-      case 'withdraw': return colors.errorLight;
-      case 'fnb': return colors.warningLight;
-      case 'sportcenter': return colors.successLight;
-      default: return colors.borderLight || colors.surfaceSecondary || colors.surface;
-    }
-  }, [colors.infoLight, colors.warningLight, colors.successLight, colors.errorLight, colors.borderLight, colors.surfaceSecondary, colors.surface]);
+  const getDefaultBgColor = useCallback(
+    (iconName?: string): string => {
+      switch (iconName) {
+        case 'payIPL':
+          return colors.infoLight;
+        case 'emergency':
+          return colors.warningLight;
+        case 'guest':
+          return colors.successLight;
+        case 'ppob':
+          return colors.infoLight;
+        case 'transfer':
+          return colors.errorLight;
+        case 'payment':
+          return colors.infoLight;
+        case 'bill':
+          return colors.errorLight;
+        case 'topup':
+          return colors.successLight;
+        case 'donation':
+          return colors.warningLight;
+        case 'marketplace':
+          return colors.infoLight;
+        case 'withdraw':
+          return colors.errorLight;
+        case 'fnb':
+          return colors.warningLight;
+        case 'sportcenter':
+          return colors.successLight;
+        case 'invoice':
+          return colors.errorLight;
+        default:
+          return colors.borderLight || colors.surfaceSecondary || colors.surface;
+      }
+    },
+    [
+      colors.infoLight,
+      colors.warningLight,
+      colors.successLight,
+      colors.errorLight,
+      colors.borderLight,
+      colors.surfaceSecondary,
+      colors.surface,
+    ]
+  );
 
   const menuItemsKey = useMemo(
-    () => menuItems
-      .filter(item => item.enabled)
-      .map(item => `${item.id}:${item.label}:${item.icon || ''}`)
-      .sort()
-      .join('|'),
+    () =>
+      menuItems
+        .filter((item) => item.enabled)
+        .map((item) => `${item.id}:${item.label}:${item.icon || ''}`)
+        .sort()
+        .join('|'),
     [menuItems]
   );
 
   const emptyButtonsArray = useMemo(() => [], []);
 
-  const previousPreviewButtonsRef = React.useRef<Array<{
-    id: string;
-    label: string;
-    icon: React.ReactNode;
-    iconBgColor: string;
-  }>>([]);
+  const previousPreviewButtonsRef = React.useRef<
+    Array<{
+      id: string;
+      label: string;
+      icon: React.ReactNode;
+      iconBgColor: string;
+    }>
+  >([]);
   const previousMenuItemsKeyRef = React.useRef<string>('');
 
   const previewButtons = useMemo(() => {
-    if (menuItemsKey === previousMenuItemsKeyRef.current && previousPreviewButtonsRef.current.length > 0) {
+    if (
+      menuItemsKey === previousMenuItemsKeyRef.current &&
+      previousPreviewButtonsRef.current.length > 0
+    ) {
       return previousPreviewButtonsRef.current;
     }
 
-    const enabledItems = menuItems.filter(item => item.enabled);
+    const enabledItems = menuItems.filter((item) => item.enabled);
 
     if (enabledItems.length === 0) {
       previousMenuItemsKeyRef.current = menuItemsKey;
@@ -464,7 +496,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
   }, [menuItemsKey, menuItems, getPreviewMenuIcon, getDefaultBgColor, emptyButtonsArray]);
 
   const hasEnabledItems = useMemo(() => {
-    return menuItems.some(item => item.enabled);
+    return menuItems.some((item) => item.enabled);
   }, [menuItems]);
 
   useEffect(() => {
@@ -501,10 +533,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
   );
 
   const scrollContentStyle = useMemo(
-    () => [
-      styles.previewContent,
-      { paddingHorizontal: getHorizontalPadding() },
-    ],
+    () => [styles.previewContent, { paddingHorizontal: getHorizontalPadding() }],
     []
   );
 
@@ -553,10 +582,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
     [colors.surface]
   );
 
-  const previewTitleText = useMemo(
-    () => `${t('common.preview')} ${t('home.homepage')}`,
-    [t]
-  );
+  const previewTitleText = useMemo(() => `${t('common.preview')} ${t('home.homepage')}`, [t]);
 
   const backButtonStyle = useMemo(
     () => [
@@ -584,10 +610,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
     [colors.surface]
   );
 
-  const menuTitleText = useMemo(
-    () => t('home.quickAccess'),
-    [t]
-  );
+  const menuTitleText = useMemo(() => t('home.quickAccess'), [t]);
 
   const menuTitleStyle = useMemo(
     () => [
@@ -607,7 +630,7 @@ export const QuickMenuSettingsScreen: React.FC = () => {
     const horizontalPadding = getHorizontalPadding();
     const cardPadding = scale(40);
     const totalGap = gap * (itemsPerRow - 1);
-    const availableWidth = screenWidth - (horizontalPadding * 2) - (cardPadding * 2);
+    const availableWidth = screenWidth - horizontalPadding * 2 - cardPadding * 2;
     const calculatedWidth = (availableWidth - totalGap) / itemsPerRow;
     const minWidth = scale(60);
     const maxWidth = scale(100);
@@ -630,7 +653,9 @@ export const QuickMenuSettingsScreen: React.FC = () => {
         contentContainerStyle={[
           styles.scrollContent,
           { paddingHorizontal: getHorizontalPadding() },
-          (!isLoading && (menuItems.length === 0 || (!hasEnabledItems && menuItems.length > 0))) && styles.scrollContentCentered,
+          !isLoading &&
+            (menuItems.length === 0 || (!hasEnabledItems && menuItems.length > 0)) &&
+            styles.scrollContentCentered,
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -939,7 +964,6 @@ const styles = StyleSheet.create({
   previewCardContainer: {
     borderRadius: scale(16),
     padding: scale(20),
-
   },
   previewTopIndicator: {
     width: scale(100),
@@ -990,4 +1014,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

@@ -105,4 +105,8 @@ declare module 'iconsax-react-nativejs' {
   export class Share extends Component<IconProps> { }
   export class Map1 extends Component<IconProps> { }
   export class Bank extends Component<IconProps> { }
+  export class Receipt1 extends Component<IconProps> { }
+  export class SearchNormal1 extends Component<IconProps> { }
+  export class Printer extends Component<IconProps> { }
+  export class ShoppingBag extends Component<IconProps> { }
 }

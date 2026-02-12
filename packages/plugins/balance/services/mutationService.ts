@@ -3,7 +3,8 @@
  * Service untuk operasi mutasi (internal use, biasanya dipanggil dari payment service)
  */
 
-import { BalanceMutation, TransactionType } from '../models/BalanceMutation';
+import { BalanceMutation } from '../models/BalanceMutation';
+import { TransactionType } from '../models/TransactionType';
 
 export interface MutationService {
   createMutation(
@@ -23,9 +24,17 @@ class MutationServiceImpl implements MutationService {
     description: string,
     referenceId?: string
   ): Promise<BalanceMutation> {
-    // TODO: Implement API call to create mutation
-    // This should be called from payment service, not directly from UI
-    throw new Error('Not implemented');
+    // MOCK: Return dummy mutation
+    return {
+      id: `mut_${Date.now()}`,
+      accountId,
+      type,
+      amount,
+      balance: 1000000 - amount, // Simplified balance tracking
+      description,
+      referenceId,
+      createdAt: new Date(),
+    };
   }
 }
 

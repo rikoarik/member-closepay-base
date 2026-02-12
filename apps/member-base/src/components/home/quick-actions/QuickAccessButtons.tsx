@@ -5,7 +5,16 @@
  */
 import React, { useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { ArrowDown2, Call, People, Game, ArrowUp2, Shop, TruckFast } from 'iconsax-react-nativejs';
+import {
+  ArrowDown2,
+  Call,
+  People,
+  Game,
+  ArrowUp2,
+  Shop,
+  TruckFast,
+  DocumentText,
+} from 'iconsax-react-nativejs';
 import {
   scale,
   moderateVerticalScale,
@@ -96,6 +105,8 @@ const getMenuIcon = (iconColor: string, iconName?: string, itemId?: string): Rea
       return <TruckFast size={size} color={iconColor} variant="Bold" />;
     case 'sportcenter':
       return <Game size={size} color={iconColor} variant="Bold" />;
+    case 'invoice':
+      return <DocumentText size={size} color={iconColor} variant="Bold" />;
     default:
       return <Game size={size} color={iconColor} variant="Bold" />;
   }
@@ -130,6 +141,8 @@ const getDefaultBgColor = (colors: ThemeColors, iconName?: string): string => {
       return colors.warningLight;
     case 'sportcenter':
       return colors.successLight;
+    case 'invoice':
+      return colors.errorLight;
     default:
       return colors.surfaceSecondary || colors.surface;
   }

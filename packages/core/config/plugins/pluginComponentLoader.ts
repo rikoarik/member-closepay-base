@@ -53,6 +53,16 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     CardTopupTab: () => import('../../../plugins/card-transaction/components/tabs/CardTopupTab'),
     CardSummary: () => import('../../../plugins/card-transaction/components/widgets/CardSummary'),
   },
+  invoice: {
+    InvoiceScreen: () => import('../../../plugins/invoice/components/screens/InvoiceScreen'),
+    InvoiceListScreen: () => import('../../../plugins/invoice/components/screens/InvoiceListScreen'),
+    InvoiceDetailScreen: () => import('../../../plugins/invoice/components/screens/InvoiceDetailScreen'),
+    InvoiceCreateScreen: () => import('../../../plugins/invoice/components/screens/InvoiceCreateScreen'),
+    InvoicePaymentScreen: () => import('../../../plugins/invoice/components/screens/InvoicePaymentScreen'),
+    InvoicePaymentSuccessScreen: () => import('../../../plugins/invoice/components/screens/InvoicePaymentSuccessScreen'),
+    InvoiceTab: () => import('../../../plugins/invoice/components/tabs/InvoiceTab'),
+    InvoiceFeatured: () => import('../../../plugins/invoice/components/widgets/InvoiceFeatured'),
+  },
   marketplace: {
     ProductCard: () => import('../../../plugins/marketplace/components/shared/ProductCard'),
     ProductCardSkeleton: () => import('../../../plugins/marketplace/components/shared/ProductCardSkeleton'),

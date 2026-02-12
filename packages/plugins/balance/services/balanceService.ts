@@ -14,18 +14,32 @@ export interface BalanceService {
 
 class BalanceServiceImpl implements BalanceService {
   async getBalance(): Promise<BalanceAccount> {
-    // TODO: Implement API call to get balance
-    throw new Error('Not implemented');
+    // MOCK: Return dummy balance
+    return {
+      id: 'acc_123',
+      companyId: 'comp_1',
+      balance: 1000000,
+      currency: 'IDR',
+      updatedAt: new Date(),
+    };
   }
 
   async getMutations(filters?: MutationFilters): Promise<BalanceMutation[]> {
-    // TODO: Implement API call to get mutations with filters
-    throw new Error('Not implemented');
+    // MOCK: Return empty list
+    return [];
   }
 
   async getBalanceHistory(startDate: Date, endDate: Date): Promise<BalanceHistory> {
-    // TODO: Implement API call to get balance history
-    throw new Error('Not implemented');
+    // MOCK: Return dummy history
+    return {
+      startDate,
+      endDate,
+      startingBalance: 1000000,
+      endingBalance: 1000000,
+      mutations: [],
+      totalIn: 0,
+      totalOut: 0,
+    };
   }
 }
 
