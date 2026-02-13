@@ -943,6 +943,7 @@ export const en = {
     processing: 'Processing',
     success: 'Success',
     distributionReportInfo: 'Funds are being distributed to beneficiaries. Distribution report will be available within 1x24 hours.',
+    confirmPayment: 'Confirm Payment',
   },
 };
 

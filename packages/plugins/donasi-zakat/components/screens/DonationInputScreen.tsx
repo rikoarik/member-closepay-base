@@ -9,151 +9,184 @@ import {
   Image,
   Switch,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft2, ArrowRight2, Wallet, ArrowDown2 } from 'iconsax-react-nativejs';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import {
+  ArrowLeft2,
+  ArrowRight2,
+  Wallet,
+  ArrowDown2,
+  Heart,
+  EyeSlash,
+} from 'iconsax-react-nativejs';
 import {
   scale,
   moderateScale,
   moderateVerticalScale,
   getHorizontalPadding,
   FontFamily,
+  ScreenHeader,
 } from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
+
+const formatIDR = (amount: number) => {
+  return new Intl.NumberFormat('id-ID').format(amount);
+};
 
 export const DonationInputScreen = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const route = useRoute<any>();
   const insets = useSafeAreaInsets();
   const horizontalPadding = getHorizontalPadding();
 
-  const [amount, setAmount] = useState('500.000');
+  const initialAmount = route.params?.amount || '100.000';
+  const type = route.params?.type;
+
+  const campaign = route.params?.campaign || {
+    title:
+      type === 'fitrah'
+        ? t('donasiZakat.zakatFitrah')
+        : type === 'sedekah'
+        ? t('donasiZakat.sedekah')
+        : type === 'wakaf'
+        ? t('donasiZakat.wakaf')
+        : 'Pembangunan Masjid Al-Ikhlas',
+    org: type ? 'Closepay Foundation' : 'Yayasan Amanah Berbagi',
+    image:
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuCrGsA3HjbsfgXhGvBKMo5ZoZal1gnDXX-hT42Tx9M2MhCol2o2XUzmnsvrvUHnf0nRxYAzSuwyKyI3YtPP6Bt8-eyeO5jZ39qzknrCZLdgDl7wwNYKRn_ABNwrt5sblqj5ok7IA_Ak-F4hyAtZuM5pPQFVBkiJQp1Haymip9np0fOGhA25GR7xpgW1x_ALg2U4FBnWc0Z-5Z6cvKg7oZfKRR2JsBCfYbGU5_gugXSCwbaXlIPbMQpQI4Bd5aGrcpS4so9Gukae2L0',
+  };
+
+  const [amount, setAmount] = useState(initialAmount);
+  const [message, setMessage] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+
+  const handleAmountChange = (value: string) => {
+    const numeric = value.replace(/[^0-9]/g, '');
+    if (numeric === '') {
+      setAmount('0');
+      return;
+    }
+    setAmount(formatIDR(parseInt(numeric, 10)));
+  };
 
   const quickAmounts = ['50.000', '100.000', '500.000', '1.000.000'];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + scale(12) }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <ArrowLeft2 size={scale(24)} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          {t('donasiZakat.inputDonation')}
-        </Text>
-        <View style={styles.placeholder} />
-      </View>
+      <ScreenHeader title={type ? campaign.title : t('donasiZakat.inputDonation')} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Banner */}
-        <View style={styles.banner}>
-          <View style={[styles.bannerBg, { backgroundColor: colors.primary + '10' }]} />
-          <Image
-            source={{
-              uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTQYrSk64KT9-nVDKy9yr0gNl-qvoMZdmM831eIc36Xojwcf4dZ2qwZ5PnGtzgq6SLFSDm58D7sKZWVucQeAaexh0fAFFEByG67pZIg4_yP0yqzsRUQfzlXS-E9pgMmr3qld6AuNxdq8NpIZzEFdMwFvEyx2eX8rcY3XwpVfHc_EIu4rPiZcchfySC-vFcFyJXAGohYtCTIxVlhjkXyHUossd8JQa7_sNfOZYB8kCo9OKJ3JIuS2kx3ockx2ow90tDOS202URlI_E',
-            }}
-            style={styles.bannerPattern}
-          />
-          <View style={styles.bannerContent}>
-            <Text style={[styles.bannerLabel, { color: colors.primary }]}>
-              {t('donasiZakat.zakatMaal').toUpperCase()}
+        {/* Campaign Preview Card */}
+        <View
+          style={[
+            styles.campaignCard,
+            { backgroundColor: colors.primary + '08', borderColor: colors.primary + '10' },
+          ]}
+        >
+          <Image source={{ uri: campaign.image }} style={styles.campaignImage} />
+          <View style={styles.campaignText}>
+            <Text style={[styles.campaignLabel, { color: colors.primary }]}>
+              {type ? t('donasiZakat.totalDonation').toUpperCase() : 'DONASI UNTUK'}
             </Text>
-            <Text style={[styles.bannerText, { color: colors.textSecondary }]}>
-              {t('donasiZakat.cleanseWealthDesc')}
+            <Text style={[styles.campaignTitle, { color: colors.text }]} numberOfLines={1}>
+              {campaign.title}
+            </Text>
+            <Text style={[styles.campaignOrg, { color: colors.textSecondary }]}>
+              {campaign.org}
             </Text>
           </View>
         </View>
 
         {/* Amount Input */}
-        <View style={styles.inputSection}>
-          <Text style={[styles.inputLabel, { color: colors.textTertiary }]}>
-            {t('donasiZakat.enterAmount')}
-          </Text>
+        <View style={styles.amountContainer}>
+          <Text style={[styles.amountLabel, { color: colors.textTertiary }]}>NOMINAL DONASI</Text>
           <View style={styles.amountInputRow}>
             <Text style={[styles.currencyPrefix, { color: colors.textTertiary }]}>Rp</Text>
             <TextInput
-              style={[styles.amountInput, { color: colors.primary }]}
+              style={[styles.amountInput, { color: colors.text }]}
               value={amount}
-              onChangeText={setAmount}
+              onChangeText={handleAmountChange}
               keyboardType="numeric"
               placeholder="0"
               placeholderTextColor={colors.textTertiary}
             />
           </View>
-          <View style={[styles.inputDivider, { backgroundColor: colors.borderLight }]} />
-        </View>
-
-        {/* Quick Chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipsContainer}
-        >
-          {quickAmounts.map((q) => (
-            <TouchableOpacity
-              key={q}
-              style={[
-                styles.chip,
-                amount === q
-                  ? { backgroundColor: colors.primary, borderColor: colors.primary }
-                  : { borderColor: colors.borderLight, backgroundColor: colors.surface },
-              ]}
-              onPress={() => setAmount(q)}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  amount === q ? styles.activeChipText : { color: colors.textSecondary },
-                ]}
-              >
-                Rp {q}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* Niat Selector */}
-        <View style={[styles.section, { paddingHorizontal: horizontalPadding }]}>
-          <Text style={[styles.label, { color: colors.text }]}>{t('donasiZakat.niatZakat')}</Text>
-          <TouchableOpacity
-            style={[
-              styles.selector,
-              { backgroundColor: colors.borderLight + '30', borderColor: colors.borderLight },
-            ]}
-          >
-            <Text style={[styles.selectorText, { color: colors.text }]}>
-              {t('donasiZakat.niatZakatMaal')}
-            </Text>
-            <ArrowDown2 size={scale(20)} color={colors.textTertiary} />
-          </TouchableOpacity>
-
-          <View
-            style={[
-              styles.niatCard,
-              { backgroundColor: colors.primary + '05', borderColor: colors.primary + '10' },
-            ]}
-          >
-            <Text style={[styles.niatArabic, { color: colors.text }]}>
-              نَوَيْتُ أَنْ أُخْرِجَ زَكَاةَ مَالِي فَرْضًا لِلَّهِ تَعَالَى
-            </Text>
-            <Text style={[styles.niatTranslation, { color: colors.textSecondary }]}>
-              {t('donasiZakat.niatTranslation')}
-            </Text>
+          <View style={[styles.progressIndicator, { backgroundColor: colors.primary + '20' }]}>
+            <View style={[styles.progressBar, { backgroundColor: colors.primary, width: '66%' }]} />
           </View>
         </View>
 
+        {/* Predefined Amount Chips Grid */}
+        <View style={[styles.chipsGrid, { paddingHorizontal: horizontalPadding }]}>
+          {quickAmounts.concat(['Lainnya']).map((q) => (
+            <TouchableOpacity
+              key={q}
+              style={[
+                styles.gridChip,
+                amount === q
+                  ? { backgroundColor: colors.surface, borderColor: colors.primary }
+                  : { borderColor: 'transparent', backgroundColor: colors.primary + '08' },
+              ]}
+              onPress={() => q !== 'Lainnya' && setAmount(q)}
+            >
+              <Text
+                style={[
+                  styles.gridChipText,
+                  amount === q ? { color: colors.primary } : { color: colors.textSecondary },
+                ]}
+              >
+                {q === 'Lainnya' ? q : `Rp${q.replace('.000', 'rb')}`}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Message Area */}
+        <View style={[styles.messageSection, { paddingHorizontal: horizontalPadding }]}>
+          <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+            Pesan / Doa Baik (Opsional)
+          </Text>
+          <TextInput
+            style={[
+              styles.messageInput,
+              { backgroundColor: colors.surfaceSecondary, color: colors.text },
+            ]}
+            placeholder="Semoga bermanfaat dan menjadi berkah bagi sesama..."
+            placeholderTextColor={colors.textTertiary}
+            multiline
+            numberOfLines={3}
+            value={message}
+            onChangeText={setMessage}
+          />
+        </View>
+
         {/* Anonymous Toggle */}
-        <View style={[styles.toggleRow, { paddingHorizontal: horizontalPadding }]}>
-          <View>
-            <Text style={[styles.toggleLabel, { color: colors.text }]}>
-              {t('donasiZakat.hideName')}
-            </Text>
-            <Text style={[styles.toggleDesc, { color: colors.textTertiary }]}>
-              {t('donasiZakat.donateAsAnonymous')}
-            </Text>
+        <View
+          style={[
+            styles.toggleCard,
+            {
+              marginHorizontal: horizontalPadding,
+              backgroundColor: colors.surfaceSecondary + '50',
+              borderColor: colors.borderLight,
+            },
+          ]}
+        >
+          <View style={styles.toggleLeft}>
+            <View style={[styles.toggleIconWrap, { backgroundColor: colors.primary + '10' }]}>
+              <EyeSlash size={scale(20)} color={colors.primary} />
+            </View>
+            <View>
+              <Text style={[styles.toggleTitle, { color: colors.text }]}>
+                Donasi sebagai anonim
+              </Text>
+              <Text style={[styles.toggleSub, { color: colors.textTertiary }]}>
+                Nama Anda tidak akan ditampilkan
+              </Text>
+            </View>
           </View>
           <Switch
             trackColor={{ false: colors.borderLight, true: colors.primary }}
@@ -163,29 +196,6 @@ export const DonationInputScreen = () => {
             value={isAnonymous}
           />
         </View>
-
-        {/* Payment Method Preview */}
-        <TouchableOpacity
-          style={[
-            styles.paymentPreview,
-            { marginHorizontal: horizontalPadding, borderColor: colors.borderLight },
-          ]}
-        >
-          <View style={styles.paymentLeft}>
-            <View style={[styles.paymentIconWrap, { backgroundColor: colors.infoLight }]}>
-              <Wallet size={scale(20)} color={colors.info} />
-            </View>
-            <View>
-              <Text style={[styles.paymentTitle, { color: colors.text }]}>
-                {t('donasiZakat.paymentMethod')}
-              </Text>
-              <Text style={[styles.paymentSub, { color: colors.textSecondary }]}>
-                {t('donasiZakat.selectInNextStep')}
-              </Text>
-            </View>
-          </View>
-          <ArrowRight2 size={scale(20)} color={colors.textTertiary} />
-        </TouchableOpacity>
       </ScrollView>
 
       {/* Footer */}
@@ -207,11 +217,11 @@ export const DonationInputScreen = () => {
             { backgroundColor: colors.primary, shadowColor: colors.primary },
           ]}
         >
-          <Text style={styles.submitBtnText}>{t('donasiZakat.continuePayment')}</Text>
-          <ArrowRight2 size={scale(18)} color="#FFF" variant="Bold" />
+          <Text style={styles.submitBtnText}>Kirim Donasi</Text>
+          <Heart size={scale(18)} color="#FFF" variant="Bold" />
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -240,54 +250,59 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: moderateVerticalScale(120),
+    paddingBottom: moderateVerticalScale(140),
   },
-  banner: {
-    height: scale(120),
-    marginVertical: scale(24),
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  bannerBg: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  bannerPattern: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.1,
-    resizeMode: 'cover',
-  },
-  bannerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: scale(24),
-  },
-  bannerLabel: {
-    fontSize: scale(14),
-    fontFamily: FontFamily.monasans.bold,
-    letterSpacing: 1.5,
-    marginBottom: scale(4),
-  },
-  bannerText: {
-    fontSize: scale(14),
-    maxWidth: '80%',
-    lineHeight: scale(20),
-    fontFamily: FontFamily.monasans.medium,
-  },
-  inputSection: {
+  campaignCard: {
+    marginHorizontal: scale(20),
+    marginTop: scale(16),
+    marginBottom: scale(32),
+    padding: scale(12),
+    borderRadius: scale(16),
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: scale(24),
+    gap: scale(16),
+    borderWidth: 1,
   },
-  inputLabel: {
-    fontSize: scale(14),
+  campaignImage: {
+    width: scale(64),
+    height: scale(64),
+    borderRadius: scale(10),
+  },
+  campaignText: {
+    flex: 1,
+  },
+  campaignLabel: {
+    fontSize: scale(10),
+    fontFamily: FontFamily.monasans.bold,
+    letterSpacing: 1,
+    marginBottom: scale(2),
+  },
+  campaignTitle: {
+    fontSize: scale(15),
+    fontFamily: FontFamily.monasans.bold,
+    lineHeight: scale(20),
+  },
+  campaignOrg: {
+    fontSize: scale(13),
     fontFamily: FontFamily.monasans.medium,
-    marginBottom: scale(8),
+  },
+  amountContainer: {
+    alignItems: 'center',
+    marginBottom: scale(40),
+  },
+  amountLabel: {
+    fontSize: scale(11),
+    fontFamily: FontFamily.monasans.bold,
+    letterSpacing: 2,
+    marginBottom: scale(12),
   },
   amountInputRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   currencyPrefix: {
-    fontSize: scale(32),
+    fontSize: scale(24),
     fontFamily: FontFamily.monasans.bold,
     marginRight: scale(8),
   },
@@ -295,111 +310,80 @@ const styles = StyleSheet.create({
     fontSize: scale(48),
     fontFamily: FontFamily.monasans.bold,
     padding: 0,
-    minWidth: scale(100),
     textAlign: 'center',
   },
-  inputDivider: {
-    height: 2,
-    width: '100%',
+  progressIndicator: {
+    height: scale(4),
+    width: scale(96),
+    borderRadius: scale(2),
     marginTop: scale(16),
-    borderRadius: 1,
+    overflow: 'hidden',
   },
-  chipsContainer: {
-    paddingHorizontal: scale(24),
-    paddingVertical: scale(16),
-    gap: scale(10),
+  progressBar: {
+    height: '100%',
+    borderRadius: scale(2),
   },
-  chip: {
-    paddingHorizontal: scale(20),
-    paddingVertical: scale(10),
-    borderRadius: scale(20),
-    borderWidth: 1,
+  chipsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: scale(12),
+    marginBottom: scale(40),
   },
-  chipText: {
-    fontSize: scale(14),
-    fontFamily: FontFamily.monasans.semiBold,
+  gridChip: {
+    width: '30.5%',
+    paddingVertical: scale(14),
+    borderRadius: scale(12),
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  activeChipText: {
-    color: '#FFF',
-  },
-  section: {
-    marginTop: scale(24),
-  },
-  label: {
+  gridChipText: {
     fontSize: scale(14),
     fontFamily: FontFamily.monasans.bold,
-    marginBottom: scale(12),
   },
-  selector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  messageSection: {
+    marginBottom: scale(24),
+  },
+  sectionLabel: {
+    fontSize: scale(14),
+    fontFamily: FontFamily.monasans.bold,
+    marginBottom: scale(8),
+    marginLeft: scale(4),
+  },
+  messageInput: {
+    borderRadius: scale(16),
     padding: scale(16),
-    borderRadius: scale(12),
-    borderWidth: 1,
-  },
-  selectorText: {
     fontSize: scale(14),
     fontFamily: FontFamily.monasans.medium,
+    height: scale(100),
+    textAlignVertical: 'top',
   },
-  niatCard: {
-    marginTop: scale(12),
-    padding: scale(16),
-    borderRadius: scale(12),
-    borderWidth: 1,
-  },
-  niatArabic: {
-    fontSize: scale(20),
-    textAlign: 'right',
-    marginBottom: scale(8),
-    lineHeight: scale(36),
-  },
-  niatTranslation: {
-    fontSize: scale(12),
-    fontStyle: 'italic',
-    fontFamily: FontFamily.monasans.regular,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: scale(32),
-  },
-  toggleLabel: {
-    fontSize: scale(14),
-    fontFamily: FontFamily.monasans.bold,
-  },
-  toggleDesc: {
-    fontSize: scale(12),
-    marginTop: scale(2),
-  },
-  paymentPreview: {
-    marginTop: scale(24),
+  toggleCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: scale(16),
-    borderRadius: scale(12),
+    borderRadius: scale(16),
     borderWidth: 1,
   },
-  paymentLeft: {
+  toggleLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(12),
   },
-  paymentIconWrap: {
+  toggleIconWrap: {
     width: scale(40),
     height: scale(40),
     borderRadius: scale(20),
     justifyContent: 'center',
     alignItems: 'center',
   },
-  paymentTitle: {
-    fontSize: scale(14),
+  toggleTitle: {
+    fontSize: scale(15),
     fontFamily: FontFamily.monasans.bold,
   },
-  paymentSub: {
-    fontSize: scale(11),
+  toggleSub: {
+    fontSize: scale(12),
   },
   footer: {
     position: 'absolute',
@@ -430,7 +414,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: scale(8),
+    gap: scale(10),
     elevation: 4,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,

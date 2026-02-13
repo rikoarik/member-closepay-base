@@ -16,7 +16,10 @@
       "CampaignDetail": "CampaignDetailScreen",
       "DonationInput": "DonationInputScreen",
       "DonationHistory": "DonationHistoryScreen",
-      "ZakatCalculator": "ZakatCalculatorScreen"
+      "ZakatCalculator": "ZakatCalculatorScreen",
+      "ZakatInput": "ZakatInputScreen",
+      "DonationList": "DonationListScreen",
+      "DonorList": "DonorListScreen"
     },
     "hooks": [],
     "tabs": {
@@ -85,10 +88,107 @@
         "title": "Kalkulator Zakat",
         "showInMenu": false
       }
+    },
+    {
+      "name": "ZakatInput",
+      "path": "/donasi-zakat/zakat-input",
+      "component": "ZakatInputScreen",
+      "permissions": [
+        "donasi-zakat:donate"
+      ],
+      "meta": {
+        "title": "Bayar Zakat",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "DonationList",
+      "path": "/donasi-zakat/list",
+      "component": "DonationListScreen",
+      "permissions": [
+        "donasi-zakat:view"
+      ],
+      "meta": {
+        "title": "Semua Program",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "DonorList",
+      "path": "/donasi-zakat/donors/:campaignId",
+      "component": "DonorListScreen",
+      "permissions": [
+        "donasi-zakat:view"
+      ],
+      "meta": {
+        "title": "Daftar Donatur",
+        "showInMenu": false
+      }
     }
   ],
   "permissions": [
     "donasi-zakat:view",
     "donasi-zakat:donate"
-  ]
+  ],
+  "config": {
+    "categories": [
+      {
+        "id": "zakat-maal",
+        "labelKey": "donasiZakat.zakatMaal",
+        "icon": "wallet",
+        "route": "ZakatCalculator",
+        "color": "primary"
+      },
+      {
+        "id": "zakat-fitrah",
+        "labelKey": "donasiZakat.zakatFitrah",
+        "icon": "refresh",
+        "route": "DonationInput",
+        "params": {
+          "type": "fitrah"
+        },
+        "color": "primary"
+      },
+      {
+        "id": "sedekah",
+        "labelKey": "donasiZakat.sedekah",
+        "icon": "heart",
+        "route": "DonationInput",
+        "params": {
+          "type": "sedekah"
+        },
+        "color": "primary"
+      },
+      {
+        "id": "wakaf",
+        "labelKey": "donasiZakat.wakaf",
+        "icon": "card",
+        "route": "DonationInput",
+        "params": {
+          "type": "wakaf"
+        },
+        "color": "primary"
+      }
+    ],
+    "zakatTypes": [
+      {
+        "id": "maal",
+        "labelKey": "donasiZakat.zakatMaal",
+        "summaryKey": "donasiZakat.zakatMaalSummary",
+        "icon": "wallet"
+      },
+      {
+        "id": "profesi",
+        "labelKey": "donasiZakat.zakatProfesi",
+        "summaryKey": "donasiZakat.zakatProfesiSummary",
+        "icon": "archive"
+      },
+      {
+        "id": "emas",
+        "labelKey": "donasiZakat.zakatEmasPerak",
+        "summaryKey": "donasiZakat.zakatEmasPerakSummary",
+        "icon": "money"
+      }
+    ]
+  }
 }

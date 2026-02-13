@@ -21,29 +21,78 @@ import {
   Filter,
   Add,
 } from 'iconsax-react-nativejs';
-import { scale, moderateVerticalScale, getHorizontalPadding, FontFamily, ScreenHeader } from '@core/config';
+import {
+  scale,
+  moderateVerticalScale,
+  getHorizontalPadding,
+  FontFamily,
+  ScreenHeader,
+  PluginRegistry,
+  useConfig,
+} from '@core/config';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 
 const { width } = Dimensions.get('window');
+
+const getCategoryIcon = (iconName: string) => {
+  switch (iconName?.toLowerCase()) {
+    case 'wallet':
+      return Wallet;
+    case 'refresh':
+      return Refresh;
+    case 'heart':
+      return Heart;
+    case 'card':
+      return Card;
+    default:
+      return Wallet;
+  }
+};
+
+interface RawCategory {
+  id: string;
+  labelKey: string;
+  icon: string;
+  color: string;
+  route?: string;
+  params?: any;
+}
+
+interface Category {
+  id: string;
+  labelKey: string;
+  icon: string;
+  color: string;
+  route?: string;
+  params?: any;
+  name: string;
+  Icon: any; // This will be a React component
+}
 
 export const DonationHubScreen = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const horizontalPadding = getHorizontalPadding();
+  const { config } = useConfig();
+  const manifest = PluginRegistry.getPlugin('donasi-zakat');
 
-  const categories = [
-    { id: 'zakat-maal', name: t('donasiZakat.zakatMaal'), icon: Wallet, color: colors.primary },
-    {
-      id: 'zakat-fitrah',
-      name: t('donasiZakat.zakatFitrah'),
-      icon: Refresh,
-      color: colors.primary,
-    },
-    { id: 'sedekah', name: t('donasiZakat.sedekah'), icon: Heart, color: colors.primary },
-  ];
+  const categories = React.useMemo(() => {
+    // Default categories from manifest
+    const defaultCats = manifest?.config?.categories || [];
+
+    // Check for global config overrides (e.g. from Admin Config)
+    const pluginOverride = (config?.plugins as any)?.['donasi-zakat'];
+    const activeCats = pluginOverride?.categories || defaultCats;
+
+    return activeCats.map((cat: RawCategory) => ({
+      ...cat,
+      name: t(cat.labelKey),
+      Icon: getCategoryIcon(cat.icon),
+      color: cat.color === 'primary' ? colors.primary : colors.success,
+    }));
+  }, [config, colors, t, manifest]);
 
   const ongoingCampaigns = [
     {
@@ -88,7 +137,7 @@ export const DonationHubScreen = () => {
           <Text style={[styles.sectionSubtitle, { color: colors.primary }]}>
             {t('donasiZakat.urgent')}
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('DonationList')}>
             <Text style={[styles.viewAll, { color: colors.textTertiary }]}>
               {t('common.viewAll')}
             </Text>
@@ -143,10 +192,18 @@ export const DonationHubScreen = () => {
 
         {/* Categories */}
         <View style={styles.categoryGrid}>
-          {categories.map((cat) => (
-            <TouchableOpacity key={cat.id} style={styles.categoryItem}>
+          {categories.map((cat: Category) => (
+            <TouchableOpacity
+              key={cat.id}
+              style={styles.categoryItem}
+              onPress={() => {
+                if (cat.route) {
+                  (navigation as any).navigate(cat.route, cat.params || {});
+                }
+              }}
+            >
               <View style={[styles.categoryIconContainer, { backgroundColor: cat.color + '15' }]}>
-                <cat.icon size={scale(32)} color={cat.color} variant="Bold" />
+                <cat.Icon size={scale(32)} color={cat.color} variant="Bold" />
               </View>
               <Text style={[styles.categoryName, { color: colors.textSecondary }]}>{cat.name}</Text>
             </TouchableOpacity>
@@ -191,6 +248,7 @@ export const DonationHubScreen = () => {
           </Text>
           <TouchableOpacity
             style={[styles.filterButton, { backgroundColor: colors.surfaceSecondary }]}
+            onPress={() => (navigation as any).navigate('DonationList')}
           >
             <Filter size={scale(20)} color={colors.textSecondary} />
           </TouchableOpacity>
@@ -256,19 +314,15 @@ export const DonationHubScreen = () => {
           ))}
         </View>
 
-        <TouchableOpacity style={[styles.viewMorePrograms, { borderColor: colors.primary + '33' }]}>
+        <TouchableOpacity
+          style={[styles.viewMorePrograms, { borderColor: colors.primary + '33' }]}
+          onPress={() => (navigation as any).navigate('DonationList')}
+        >
           <Text style={[styles.viewMoreText, { color: colors.primary }]}>
             {t('donasiZakat.viewMorePrograms')}
           </Text>
         </TouchableOpacity>
       </ScrollView>
-
-      {/* FAB */}
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.success, shadowColor: colors.success }]}
-      >
-        <Add size={scale(32)} color={colors.text} variant="Outline" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };

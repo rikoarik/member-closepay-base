@@ -246,7 +246,14 @@ export const CampaignDetailScreen = () => {
               <Text style={[styles.sectionTitle, { color: colors.text }]}>
                 {t('donasiZakat.donors', { count: '1,240' })}
               </Text>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  (navigation as any).navigate('DonorList', {
+                    campaignId: '123',
+                    campaignTitle: 'Bantu Renovasi Sekolah Dasar di Pelosok Desa',
+                  })
+                }
+              >
                 <Text style={[styles.viewAllText, { color: colors.primary }]}>
                   {t('common.viewAll')}
                 </Text>
@@ -343,7 +350,16 @@ export const CampaignDetailScreen = () => {
             styles.donateButton,
             { backgroundColor: colors.primary, shadowColor: colors.primary },
           ]}
-          onPress={() => (navigation as any).navigate('DonationInput')}
+          onPress={() =>
+            (navigation as any).navigate('DonationInput', {
+              campaign: {
+                title: 'Bantu Renovasi Sekolah Dasar di Pelosok Desa',
+                org: 'Yayasan Peduli Anak',
+                image:
+                  'https://lh3.googleusercontent.com/aida-public/AB6AXuBtCMaehoV4nUbULbWSsWCUXik_e9WvyXZM9w0tgvX-rvs6k5nwln87JIHwEYO1Z1RHMs8ilw_H2UZdwDOFGu-ecb8JP8m3ibdP64BiOmDdMdmVQyyW1KSHHRx3-JKyj5jbVnDRVzfx-iDsGyCCi-7-uFzOvfFgxlenNRL1om4Ttztc3w4mgJ5w048pPO1Wzy4Cl29ePLxX7Cnc8Afp3RraDPA2Hyu5OVbb8HMVtxMGqpJE8cuQT2Ydp7Hto2W3vL5Wr9PNxuFZ96A',
+              },
+            })
+          }
         >
           <Text style={styles.donateButtonText}>{t('donasiZakat.donateNow')}</Text>
           <Heart size={scale(20)} color="#FFF" variant="Bold" />

@@ -48,6 +48,9 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     DonationInputScreen: '../../../plugins/donasi-zakat/components/screens/DonationInputScreen',
     DonationHistoryScreen: '../../../plugins/donasi-zakat/components/screens/DonationHistoryScreen',
     ZakatCalculatorScreen: '../../../plugins/donasi-zakat/components/screens/ZakatCalculatorScreen',
+    ZakatInputScreen: '../../../plugins/donasi-zakat/components/screens/ZakatInputScreen',
+    DonationListScreen: '../../../plugins/donasi-zakat/components/screens/DonationListScreen',
+    DonorListScreen: '../../../plugins/donasi-zakat/components/screens/DonorListScreen',
   },
   invoice: {
     InvoiceScreen: '../../../plugins/invoice/components/screens/InvoiceScreen',
