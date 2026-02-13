@@ -1,0 +1,94 @@
+{
+  "id": "donasi-zakat",
+  "name": "Donasi & Zakat",
+  "version": "1.0.0",
+  "description": "Donation and Zakat hub for member app",
+  "type": "segment-plugin",
+  "author": "Closepay Team",
+  "dependencies": [
+    "payment",
+    "balance"
+  ],
+  "exports": {
+    "components": [],
+    "screens": {
+      "DonationHub": "DonationHubScreen",
+      "CampaignDetail": "CampaignDetailScreen",
+      "DonationInput": "DonationInputScreen",
+      "DonationHistory": "DonationHistoryScreen",
+      "ZakatCalculator": "ZakatCalculatorScreen"
+    },
+    "hooks": [],
+    "tabs": {
+      "donasi-zakat": "DonationHubScreen"
+    },
+    "widgets": {}
+  },
+  "routes": [
+    {
+      "name": "DonationHub",
+      "path": "/donasi-zakat",
+      "component": "DonationHubScreen",
+      "permissions": [
+        "donasi-zakat:view"
+      ],
+      "meta": {
+        "title": "Donasi & Zakat",
+        "showInMenu": true,
+        "icon": "heart"
+      }
+    },
+    {
+      "name": "CampaignDetail",
+      "path": "/donasi-zakat/campaign/:id",
+      "component": "CampaignDetailScreen",
+      "permissions": [
+        "donasi-zakat:view"
+      ],
+      "meta": {
+        "title": "Detail Kampanye",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "DonationInput",
+      "path": "/donasi-zakat/input",
+      "component": "DonationInputScreen",
+      "permissions": [
+        "donasi-zakat:donate"
+      ],
+      "meta": {
+        "title": "Input Donasi",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "DonationHistory",
+      "path": "/donasi-zakat/history",
+      "component": "DonationHistoryScreen",
+      "permissions": [
+        "donasi-zakat:view"
+      ],
+      "meta": {
+        "title": "Riwayat Kebaikan",
+        "showInMenu": false
+      }
+    },
+    {
+      "name": "ZakatCalculator",
+      "path": "/donasi-zakat/calculator",
+      "component": "ZakatCalculatorScreen",
+      "permissions": [
+        "donasi-zakat:view"
+      ],
+      "meta": {
+        "title": "Kalkulator Zakat",
+        "showInMenu": false
+      }
+    }
+  ],
+  "permissions": [
+    "donasi-zakat:view",
+    "donasi-zakat:donate"
+  ]
+}

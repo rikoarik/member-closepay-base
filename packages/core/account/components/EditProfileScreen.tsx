@@ -106,10 +106,7 @@ export const EditProfileScreen: React.FC = () => {
           setTimeout(() => {
             const inputIndex = ['email', 'name', 'phone', 'address'].indexOf(focusedInput);
             const scrollOffset = inputIndex * moderateVerticalScale(100); // Approximate offset per input
-            scrollViewRef.current?.scrollTo({
-              y: scrollOffset,
-              animated: true,
-            });
+            scrollViewRef.current?.scrollToPosition(0, scrollOffset, true);
           }, 100);
         }
       }
@@ -181,26 +178,28 @@ export const EditProfileScreen: React.FC = () => {
         maxWidth: 1024,
         maxHeight: 1024,
         quality: 0.8,
-      }).then((result: any) => {
-        if (result && result.uri) {
-          const imageUri = result.uri.startsWith('file://')
-            ? result.uri
-            : `file://${result.uri}`;
-          setProfileImage(imageUri);
-        }
-      }).catch((error: any) => {
-        console.error('Error selecting image from gallery:', error);
+      })
+        .then((result: any) => {
+          if (result && result.uri) {
+            const imageUri = result.uri.startsWith('file://') ? result.uri : `file://${result.uri}`;
+            setProfileImage(imageUri);
+          }
+        })
+        .catch((error: any) => {
+          console.error('Error selecting image from gallery:', error);
 
-        if (error.code === 'CANCELLED') {
-          return;
-        }
+          if (error.code === 'CANCELLED') {
+            return;
+          }
 
-        Alert.alert(
-          t('common.error') || 'Error',
-          error.message || t('profile.imagePickerError') || 'Terjadi kesalahan saat memilih foto.',
-          [{ text: t('common.ok') || 'OK' }]
-        );
-      });
+          Alert.alert(
+            t('common.error') || 'Error',
+            error.message ||
+              t('profile.imagePickerError') ||
+              'Terjadi kesalahan saat memilih foto.',
+            [{ text: t('common.ok') || 'OK' }]
+          );
+        });
     } else {
       // iOS: Use basic image picker without crop for now
       const { launchImageLibrary } = require('react-native-image-picker');
@@ -221,7 +220,9 @@ export const EditProfileScreen: React.FC = () => {
         if (response.errorMessage) {
           Alert.alert(
             t('common.error') || 'Error',
-            response.errorMessage || t('profile.imagePickerError') || 'Terjadi kesalahan saat memilih foto.',
+            response.errorMessage ||
+              t('profile.imagePickerError') ||
+              'Terjadi kesalahan saat memilih foto.',
             [{ text: t('common.ok') || 'OK' }]
           );
           return;
@@ -247,7 +248,8 @@ export const EditProfileScreen: React.FC = () => {
       if (permissionResult.status !== 'granted') {
         Alert.alert(
           t('profile.cameraPermissionRequired') || 'Izin Kamera Diperlukan',
-          t('profile.cameraPermissionMessage') || 'Aplikasi memerlukan izin kamera untuk mengambil foto. Silakan aktifkan izin kamera di pengaturan.',
+          t('profile.cameraPermissionMessage') ||
+            'Aplikasi memerlukan izin kamera untuk mengambil foto. Silakan aktifkan izin kamera di pengaturan.',
           [
             { text: t('common.cancel') || 'Batal', style: 'cancel' },
             {
@@ -286,9 +288,7 @@ export const EditProfileScreen: React.FC = () => {
         });
 
         if (result && result.uri) {
-          const imageUri = result.uri.startsWith('file://')
-            ? result.uri
-            : `file://${result.uri}`;
+          const imageUri = result.uri.startsWith('file://') ? result.uri : `file://${result.uri}`;
           setProfileImage(imageUri);
         }
       } else {
@@ -311,7 +311,9 @@ export const EditProfileScreen: React.FC = () => {
           if (response.errorMessage) {
             Alert.alert(
               t('common.error') || 'Error',
-              response.errorMessage || t('profile.cameraError') || 'Terjadi kesalahan saat mengambil foto.',
+              response.errorMessage ||
+                t('profile.cameraError') ||
+                'Terjadi kesalahan saat mengambil foto.',
               [{ text: t('common.ok') || 'OK' }]
             );
             return;
@@ -433,258 +435,251 @@ export const EditProfileScreen: React.FC = () => {
           enableAutomaticScroll={true}
           extraScrollHeight={20}
         >
-            {/* Profile Photo Section */}
-            <View style={styles.profilePhotoSection}>
-              <View style={styles.profilePhotoContainer}>
-                {profileImage ? (
-                  <Image
-                    source={{ uri: profileImage }}
-                    style={[
-                      styles.profilePhoto,
-                      { borderColor: colors.surface },
-                    ]}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View
-                    style={[
-                      styles.profilePhotoPlaceholder,
-                      {
-                        backgroundColor: colors.primaryLight,
-                        borderColor: colors.surface,
-                      },
-                    ]}
-                  >
-                    {name ? (
-                      <Text
-                        style={[
-                          styles.profilePhotoInitial,
-                          {
-                            color: colors.primary,
-                            fontSize: getResponsiveFontSize('xlarge'),
-                          },
-                        ]}
-                      >
-                        {name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </Text>
-                    ) : (
-                      <Profile
-                        size={scale(60)}
-                        color={colors.primary}
-                        variant="Bold"
-                      />
-                    )}
-                  </View>
-                )}
-              </View>
-              <TouchableOpacity
-                style={styles.changePhotoButton}
-                onPress={handleChangePhoto}
-                activeOpacity={0.7}
-              >
-                <GalleryEdit size={getIconSize('small')} color={colors.primary} />
-
-                <Text
+          {/* Profile Photo Section */}
+          <View style={styles.profilePhotoSection}>
+            <View style={styles.profilePhotoContainer}>
+              {profileImage ? (
+                <Image
+                  source={{ uri: profileImage }}
+                  style={[styles.profilePhoto, { borderColor: colors.surface }]}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View
                   style={[
-                    styles.changePhotoText,
+                    styles.profilePhotoPlaceholder,
                     {
-                      color: colors.primary,
-                      fontSize: getResponsiveFontSize('medium'),
+                      backgroundColor: colors.primaryLight,
+                      borderColor: colors.surface,
                     },
                   ]}
                 >
-                  {profileImage
-                    ? t('profile.changePhoto') || 'Ganti Foto'
-                    : t('profile.addPhoto') || 'Tambah Foto'}
-                </Text>
-              </TouchableOpacity>
+                  {name ? (
+                    <Text
+                      style={[
+                        styles.profilePhotoInitial,
+                        {
+                          color: colors.primary,
+                          fontSize: getResponsiveFontSize('xlarge'),
+                        },
+                      ]}
+                    >
+                      {name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </Text>
+                  ) : (
+                    <Profile size={scale(60)} color={colors.primary} variant="Bold" />
+                  )}
+                </View>
+              )}
             </View>
+            <TouchableOpacity
+              style={styles.changePhotoButton}
+              onPress={handleChangePhoto}
+              activeOpacity={0.7}
+            >
+              <GalleryEdit size={getIconSize('small')} color={colors.primary} />
 
-            {/* Email Input */}
-            <View style={styles.inputContainer}>
               <Text
                 style={[
-                  styles.label,
+                  styles.changePhotoText,
                   {
-                    color: colors.text,
+                    color: colors.primary,
                     fontSize: getResponsiveFontSize('medium'),
                   },
                 ]}
               >
-                {t('auth.email')}
+                {profileImage
+                  ? t('profile.changePhoto') || 'Ganti Foto'
+                  : t('profile.addPhoto') || 'Tambah Foto'}
               </Text>
-              <TextInput
-                ref={emailInputRef}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: emailError ? colors.error : colors.border,
-                    color: colors.text,
-                    fontSize: getResponsiveFontSize('medium'),
-                  },
-                ]}
-                placeholder={t('auth.enterEmail')}
-                placeholderTextColor={colors.textTertiary}
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  if (emailError) setEmailError('');
-                }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isSaving}
-                returnKeyType="next"
-                onSubmitEditing={() => nameInputRef.current?.focus()}
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-                  }, 100);
-                }}
-              />
-              {emailError ? (
-                <Text style={[styles.errorText, { color: colors.error }]}>{emailError}</Text>
-              ) : null}
-            </View>
+            </TouchableOpacity>
+          </View>
 
-            {/* Name Input */}
-            <View style={styles.inputContainer}>
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    color: colors.text,
-                    fontSize: getResponsiveFontSize('medium'),
-                  },
-                ]}
-              >
-                {t('profile.name')}
-              </Text>
-              <TextInput
-                ref={nameInputRef}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: nameError ? colors.error : colors.border,
-                    color: colors.text,
-                    fontSize: getResponsiveFontSize('medium'),
-                  },
-                ]}
-                placeholder={t('profile.enterName')}
-                placeholderTextColor={colors.textTertiary}
-                value={name}
-                onChangeText={(text) => {
-                  setName(text);
-                  if (nameError) setNameError('');
-                }}
-                autoCapitalize="words"
-                editable={!isSaving}
-                returnKeyType="next"
-                onSubmitEditing={() => phoneInputRef.current?.focus()}
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollTo({ y: moderateVerticalScale(100), animated: true });
-                  }, 100);
-                }}
-              />
-              {nameError ? (
-                <Text style={[styles.errorText, { color: colors.error }]}>{nameError}</Text>
-              ) : null}
-            </View>
+          {/* Email Input */}
+          <View style={styles.inputContainer}>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+            >
+              {t('auth.email')}
+            </Text>
+            <TextInput
+              ref={emailInputRef}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors.inputBackground,
+                  borderColor: emailError ? colors.error : colors.border,
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+              placeholder={t('auth.enterEmail')}
+              placeholderTextColor={colors.textTertiary}
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (emailError) setEmailError('');
+              }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isSaving}
+              returnKeyType="next"
+              onSubmitEditing={() => nameInputRef.current?.focus()}
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToPosition(0, 0, true);
+                }, 100);
+              }}
+            />
+            {emailError ? (
+              <Text style={[styles.errorText, { color: colors.error }]}>{emailError}</Text>
+            ) : null}
+          </View>
 
-            {/* Phone Input */}
-            <View style={styles.inputContainer}>
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    color: colors.text,
-                    fontSize: getResponsiveFontSize('medium'),
-                  },
-                ]}
-              >
-                {t('profile.phoneNumber')}
-              </Text>
-              <TextInput
-                ref={phoneInputRef}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: phoneError ? colors.error : colors.border,
-                    color: colors.text,
-                    fontSize: getResponsiveFontSize('medium'),
-                  },
-                ]}
-                placeholder={t('profile.enterPhoneNumber')}
-                placeholderTextColor={colors.textTertiary}
-                value={phone}
-                onChangeText={(text) => {
-                  setPhone(text);
-                  if (phoneError) setPhoneError('');
-                }}
-                keyboardType="phone-pad"
-                editable={!isSaving}
-                returnKeyType="next"
-                onSubmitEditing={() => addressInputRef.current?.focus()}
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollTo({ y: moderateVerticalScale(200), animated: true });
-                  }, 100);
-                }}
-              />
-              {phoneError ? (
-                <Text style={[styles.errorText, { color: colors.error }]}>{phoneError}</Text>
-              ) : null}
-            </View>
+          {/* Name Input */}
+          <View style={styles.inputContainer}>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+            >
+              {t('profile.name')}
+            </Text>
+            <TextInput
+              ref={nameInputRef}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors.inputBackground,
+                  borderColor: nameError ? colors.error : colors.border,
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+              placeholder={t('profile.enterName')}
+              placeholderTextColor={colors.textTertiary}
+              value={name}
+              onChangeText={(text) => {
+                setName(text);
+                if (nameError) setNameError('');
+              }}
+              autoCapitalize="words"
+              editable={!isSaving}
+              returnKeyType="next"
+              onSubmitEditing={() => phoneInputRef.current?.focus()}
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToPosition(0, moderateVerticalScale(100), true);
+                }, 100);
+              }}
+            />
+            {nameError ? (
+              <Text style={[styles.errorText, { color: colors.error }]}>{nameError}</Text>
+            ) : null}
+          </View>
 
-            {/* Address Input */}
-            <View style={styles.inputContainer}>
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    color: colors.text,
-                    fontSize: getResponsiveFontSize('medium'),
-                  },
-                ]}
-              >
-                {t('profile.address')}
-              </Text>
-              <TextInput
-                ref={addressInputRef}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: colors.border,
-                    color: colors.text,
-                    fontSize: getResponsiveFontSize('medium'),
-                  },
-                ]}
-                placeholder={t('profile.enterAddress')}
-                placeholderTextColor={colors.textTertiary}
-                value={address}
-                onChangeText={setAddress}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-                editable={!isSaving}
-                returnKeyType="done"
-                onFocus={() => {
-                  setTimeout(() => {
-                    scrollViewRef.current?.scrollTo({ y: moderateVerticalScale(300), animated: true });
-                  }, 100);
-                }}
-              />
-            </View>
+          {/* Phone Input */}
+          <View style={styles.inputContainer}>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+            >
+              {t('profile.phoneNumber')}
+            </Text>
+            <TextInput
+              ref={phoneInputRef}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors.inputBackground,
+                  borderColor: phoneError ? colors.error : colors.border,
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+              placeholder={t('profile.enterPhoneNumber')}
+              placeholderTextColor={colors.textTertiary}
+              value={phone}
+              onChangeText={(text) => {
+                setPhone(text);
+                if (phoneError) setPhoneError('');
+              }}
+              keyboardType="phone-pad"
+              editable={!isSaving}
+              returnKeyType="next"
+              onSubmitEditing={() => addressInputRef.current?.focus()}
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToPosition(0, moderateVerticalScale(200), true);
+                }, 100);
+              }}
+            />
+            {phoneError ? (
+              <Text style={[styles.errorText, { color: colors.error }]}>{phoneError}</Text>
+            ) : null}
+          </View>
+
+          {/* Address Input */}
+          <View style={styles.inputContainer}>
+            <Text
+              style={[
+                styles.label,
+                {
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+            >
+              {t('profile.address')}
+            </Text>
+            <TextInput
+              ref={addressInputRef}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.border,
+                  color: colors.text,
+                  fontSize: getResponsiveFontSize('medium'),
+                },
+              ]}
+              placeholder={t('profile.enterAddress')}
+              placeholderTextColor={colors.textTertiary}
+              value={address}
+              onChangeText={setAddress}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+              editable={!isSaving}
+              returnKeyType="done"
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToPosition(0, moderateVerticalScale(300), true);
+                }, 100);
+              }}
+            />
+          </View>
         </KeyboardAwareScrollView>
       </View>
 
@@ -692,7 +687,7 @@ export const EditProfileScreen: React.FC = () => {
       <BottomSheet
         visible={showPhotoPicker}
         onClose={() => setShowPhotoPicker(false)}
-        snapPoints={[3500]}
+        snapPoints={[100]}
       >
         <View style={[styles.bottomSheetContent, { paddingHorizontal: getHorizontalPadding() }]}>
           {/* Camera Option */}
@@ -709,10 +704,7 @@ export const EditProfileScreen: React.FC = () => {
           >
             <View style={styles.bottomSheetOptionLeft}>
               <View
-                style={[
-                  styles.bottomSheetIconContainer,
-                  { backgroundColor: colors.primaryLight },
-                ]}
+                style={[styles.bottomSheetIconContainer, { backgroundColor: colors.primaryLight }]}
               >
                 <Camera size={getIconSize('medium')} color={colors.primary} />
               </View>
@@ -744,10 +736,7 @@ export const EditProfileScreen: React.FC = () => {
           >
             <View style={styles.bottomSheetOptionLeft}>
               <View
-                style={[
-                  styles.bottomSheetIconContainer,
-                  { backgroundColor: colors.primaryLight },
-                ]}
+                style={[styles.bottomSheetIconContainer, { backgroundColor: colors.primaryLight }]}
               >
                 <Gallery size={getIconSize('medium')} color={colors.primary} />
               </View>
@@ -786,7 +775,9 @@ export const EditProfileScreen: React.FC = () => {
                     { backgroundColor: colors.errorLight || colors.error + '20' },
                   ]}
                 >
-                  <Text style={[styles.bottomSheetIconEmoji, { fontSize: getIconSize('medium') }]}>🗑️</Text>
+                  <Text style={[styles.bottomSheetIconEmoji, { fontSize: getIconSize('medium') }]}>
+                    🗑️
+                  </Text>
                 </View>
                 <Text
                   style={[
@@ -1006,4 +997,3 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.monasans.semiBold,
   },
 });
-

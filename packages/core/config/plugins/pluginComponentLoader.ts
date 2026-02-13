@@ -53,6 +53,13 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     CardTopupTab: () => import('../../../plugins/card-transaction/components/tabs/CardTopupTab'),
     CardSummary: () => import('../../../plugins/card-transaction/components/widgets/CardSummary'),
   },
+  'donasi-zakat': {
+    DonationHubScreen: () => import('../../../plugins/donasi-zakat/components/screens/DonationHubScreen'),
+    CampaignDetailScreen: () => import('../../../plugins/donasi-zakat/components/screens/CampaignDetailScreen'),
+    DonationInputScreen: () => import('../../../plugins/donasi-zakat/components/screens/DonationInputScreen'),
+    DonationHistoryScreen: () => import('../../../plugins/donasi-zakat/components/screens/DonationHistoryScreen'),
+    ZakatCalculatorScreen: () => import('../../../plugins/donasi-zakat/components/screens/ZakatCalculatorScreen'),
+  },
   invoice: {
     InvoiceScreen: () => import('../../../plugins/invoice/components/screens/InvoiceScreen'),
     InvoiceListScreen: () => import('../../../plugins/invoice/components/screens/InvoiceListScreen'),

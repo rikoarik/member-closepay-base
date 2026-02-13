@@ -42,6 +42,13 @@ export const COMPONENT_LOADER_PATHS: Record<string, Record<string, string>> = {
     CardTopupTab: '../../../plugins/card-transaction/components/tabs/CardTopupTab',
     CardSummary: '../../../plugins/card-transaction/components/widgets/CardSummary',
   },
+  'donasi-zakat': {
+    DonationHubScreen: '../../../plugins/donasi-zakat/components/screens/DonationHubScreen',
+    CampaignDetailScreen: '../../../plugins/donasi-zakat/components/screens/CampaignDetailScreen',
+    DonationInputScreen: '../../../plugins/donasi-zakat/components/screens/DonationInputScreen',
+    DonationHistoryScreen: '../../../plugins/donasi-zakat/components/screens/DonationHistoryScreen',
+    ZakatCalculatorScreen: '../../../plugins/donasi-zakat/components/screens/ZakatCalculatorScreen',
+  },
   invoice: {
     InvoiceScreen: '../../../plugins/invoice/components/screens/InvoiceScreen',
     InvoiceListScreen: '../../../plugins/invoice/components/screens/InvoiceListScreen',

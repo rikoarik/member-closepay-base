@@ -35,6 +35,7 @@ export const appConfig: AppConfig = {
     'marketplace-fnb',
     'sport-center',
     'invoice',
+    'donasi-zakat',
   ],
 
   // ============================================================================
@@ -425,6 +426,7 @@ export const appConfig: AppConfig = {
     { id: 'fnb', route: 'FnB', labelKey: 'home.fnb', icon: 'fnb', order: 6 },
     { id: 'sportcenter', route: 'SportCenter', labelKey: 'home.sportCenter', icon: 'sportcenter', order: 7 },
     { id: 'invoice', route: 'Invoice', labelKey: 'home.invoice', icon: 'invoice', order: 8 },
+    { id: 'donasizakat', route: 'DonationHub', labelKey: 'home.donasiZakat', icon: 'heart', order: 9 },
   ],
 
   // ============================================================================

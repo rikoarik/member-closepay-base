@@ -36,6 +36,7 @@ export const MANIFEST_LOADERS: Record<string, () => Promise<{ default: PluginMan
   'marketplace-fnb': () => import('../../../plugins/marketplace-fnb/plugin.manifest.json').then(m => m as { default: PluginManifest }),
   'sport-center': () => import('../../../plugins/sport-center/plugin.manifest.json').then(m => m as { default: PluginManifest }),
   invoice: () => import('../../../plugins/invoice/plugin.manifest.json').then(m => m as { default: PluginManifest }),
+  'donasi-zakat': () => import('../../../plugins/donasi-zakat/plugin.manifest.json').then(m => m as { default: PluginManifest }),
 };
 
 /**

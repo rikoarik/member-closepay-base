@@ -22,7 +22,7 @@ import { SportCenterSearchScreen } from './SportCenterSearchScreen';
 import { SportCenterSearchResultsScreen } from './SportCenterSearchResultsScreen';
 import { SportCenterBookingCheckoutScreen } from './SportCenterBookingCheckoutScreen';
 import { SportCenterPaymentSuccessScreen } from './SportCenterPaymentSuccessScreen';
-import { PaymentSelectionScreen } from '@core/payment';
+import { PaymentSelectionScreen } from '@plugins/payment';
 
 import { SportCenterTabBar } from '../navigation/SportCenterTabBar';
 import { TabBarProvider } from '../navigation/TabBarContext';
