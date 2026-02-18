@@ -54,8 +54,8 @@ class SecurityEventEmitter extends NativeEventEmitter {
     if (!SecurityNativeModule) {
       if (__DEV__ && !hasWarnedNativeModuleUnavailable) {
         hasWarnedNativeModuleUnavailable = true;
-        console.warn(
-          '[SecurityEventEmitter] Native module not available (expected in simulator or when FreeRASP is not linked)'
+        console.info(
+          '[SecurityEventEmitter] Native module not available (expected in simulator or when FreeRASP is not linked) - functionality disabled'
         );
       }
       return false;

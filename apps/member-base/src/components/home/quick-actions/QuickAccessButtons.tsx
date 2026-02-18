@@ -14,6 +14,9 @@ import {
   Shop,
   TruckFast,
   DocumentText,
+  Heart,
+  Coffee,
+  Activity,
 } from 'iconsax-react-nativejs';
 import {
   scale,
@@ -31,7 +34,20 @@ import {
 import { useTheme, type ThemeColors } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { IconTopUpVA, IconTransferMember, IconKartuVirtual, IconTransferBank } from './icons';
+import {
+  IconTopUpVA,
+  IconTransferMember,
+  IconKartuVirtual,
+  IconTransferBank,
+  IconMobile,
+  IconWallet,
+  IconBill,
+  IconTransfer,
+  IconMore,
+  IconDonation,
+  IconFnB,
+  IconSport,
+} from './icons';
 
 interface QuickAccessButton {
   id: string;
@@ -77,75 +93,50 @@ const getMenuIcon = (iconColor: string, iconName?: string, itemId?: string): Rea
   const assetIcon = itemId ? getQuickAccessAssetIcon(itemId, iconColor) : null;
   if (assetIcon) return assetIcon;
 
+  // Iconsax uses size as number in some versions, string in others. CAST TO ANY if needed to suppress TS errors safely.
   const size = getIconSize('large');
+  const variant = 'Bulk';
+  // HMR Trigger: Donation Icon Updated v2 (Hand Heart)
+
   switch (iconName) {
     case 'payIPL':
-      return <ArrowDown2 size={size} color={iconColor} variant="Bold" />;
+      return <Shop size={size} color={iconColor} variant={variant} />;
     case 'emergency':
-      return <Call size={size} color={iconColor} variant="Bold" />;
+      return <Call size={size} color={iconColor} variant={variant} />;
     case 'guest':
-      return <People size={size} color={iconColor} variant="Bold" />;
+      return <People size={size} color={iconColor} variant={variant} />;
     case 'ppob':
-      return <Game size={size} color={iconColor} variant="Bold" />;
+      return <IconMobile width={size} height={size} color={iconColor} />;
     case 'transfer':
-      return <ArrowDown2 size={size} color={iconColor} variant="Bold" />;
+      return <IconTransfer width={size} height={size} color={iconColor} />;
     case 'payment':
-      return <Game size={size} color={iconColor} variant="Bold" />;
+      return <IconWallet width={size} height={size} color={iconColor} />;
     case 'bill':
-      return <Game size={size} color={iconColor} variant="Bold" />;
+      return <IconBill width={size} height={size} color={iconColor} />;
     case 'topup':
-      return <ArrowUp2 size={size} color={iconColor} variant="Bold" />;
+      return <IconWallet width={size} height={size} color={iconColor} />;
     case 'withdraw':
-      return <ArrowUp2 size={size} color={iconColor} variant="Bold" />;
+      return <IconTransfer width={size} height={size} color={iconColor} />;
     case 'donation':
-      return <People size={size} color={iconColor} variant="Bold" />;
+    case 'heart':
+      return <IconDonation width={size} height={size} color={iconColor} />;
     case 'marketplace':
-      return <Shop size={size} color={iconColor} variant="Bold" />;
+      return <Shop size={size} color={iconColor} variant={variant} />;
     case 'fnb':
-      return <TruckFast size={size} color={iconColor} variant="Bold" />;
+      return <IconFnB width={size} height={size} color={iconColor} />;
     case 'sportcenter':
-      return <Game size={size} color={iconColor} variant="Bold" />;
+      return <IconSport width={size} height={size} color={iconColor} />;
     case 'invoice':
-      return <DocumentText size={size} color={iconColor} variant="Bold" />;
+      return <DocumentText size={size} color={iconColor} variant={variant} />;
     default:
-      return <Game size={size} color={iconColor} variant="Bold" />;
+      return <IconMore width={size} height={size} color={iconColor} />;
   }
 };
 
 // Default background colors untuk setiap menu
 const getDefaultBgColor = (colors: ThemeColors, iconName?: string): string => {
-  switch (iconName) {
-    case 'payIPL':
-      return colors.infoLight;
-    case 'emergency':
-      return colors.warningLight;
-    case 'guest':
-      return colors.successLight;
-    case 'ppob':
-      return colors.primaryLight;
-    case 'transfer':
-      return colors.errorLight;
-    case 'payment':
-      return colors.infoLight;
-    case 'bill':
-      return colors.primaryLight;
-    case 'topup':
-      return colors.successLight;
-    case 'withdraw':
-      return colors.infoLight;
-    case 'donation':
-      return colors.warningLight;
-    case 'marketplace':
-      return colors.infoLight;
-    case 'fnb':
-      return colors.warningLight;
-    case 'sportcenter':
-      return colors.successLight;
-    case 'invoice':
-      return colors.errorLight;
-    default:
-      return colors.surfaceSecondary || colors.surface;
-  }
+  // UNIFIED BACKGROUND: Always return surface color (White) with shadow in container
+  return colors.surface;
 };
 
 // Default fallback buttons - empty array
@@ -375,10 +366,11 @@ const styles = StyleSheet.create({
   aksesCepatIcon: {
     width: scale(56),
     height: scale(56),
-    borderRadius: scale(28),
+    borderRadius: scale(16),
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: moderateVerticalScale(8),
+    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
   },
   aksesCepatLabel: {
     fontSize: getResponsiveFontSize('small'),

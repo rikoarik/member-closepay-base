@@ -330,12 +330,12 @@ const styles = StyleSheet.create({
     marginBottom: moderateVerticalScale(16),
   },
   menuItemTitle: {
-    fontSize: getResponsiveFontSize('medium'),
+    fontSize: getResponsiveFontSize('large'),
     fontFamily: FontFamily.monasans.bold,
     marginBottom: moderateVerticalScale(8),
   },
   menuItem: {
-    marginTop: moderateVerticalScale(16),
+   
     marginBottom: moderateVerticalScale(16),
     paddingVertical: moderateVerticalScale(16),
   },
