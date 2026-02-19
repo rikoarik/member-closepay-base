@@ -21,6 +21,7 @@
             "TransferMemberScreen",
             "TransferMemberSuccessScreen",
             "TapKartuSummaryScreen",
+            "VirtualCardTopUpAmountScreen",
             "QrScreen",
             "EditQuickAmountScreen",
             "PinInput",
@@ -46,6 +47,7 @@
             "TransferMember": "TransferMemberScreen",
             "TransferMemberSuccess": "TransferMemberSuccessScreen",
             "TapKartuSummary": "TapKartuSummaryScreen",
+            "VirtualCardTopUpAmount": "VirtualCardTopUpAmountScreen",
             "Qr": "QrScreen",
             "EditQuickAmount": "EditQuickAmountScreen"
         },
@@ -196,6 +198,18 @@
             ],
             "meta": {
                 "title": "Tap Kartu Summary",
+                "showInMenu": false
+            }
+        },
+        {
+            "name": "VirtualCardTopUpAmount",
+            "path": "/payment/virtual-card-topup",
+            "component": "VirtualCardTopUpAmountScreen",
+            "permissions": [
+                "payment:topup"
+            ],
+            "meta": {
+                "title": "Top Up Kartu Virtual",
                 "showInMenu": false
             }
         },

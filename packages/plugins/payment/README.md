@@ -2,6 +2,11 @@
 
 Plugin untuk mengelola berbagai operasi pembayaran dengan dukungan multiple payment methods dan gateway.
 
+## Design reference
+
+- **Stitch** (jika ada): Desain referensi untuk alur Top Up dan VA di **`/stitch-screens/4646509502246199082/`** (Top Up Method Selection, Payment Instructions).
+- **Instruksi Pembayaran VA**: Acuan tampilan, tab (Mobile / ATM / Bank Lain), dan langkah per kanal ada di **`packages/plugins/payment/docs/VA_INSTRUCTION_REFERENCE.md`**. Gunakan untuk menyelaraskan `VirtualAccountScreen` (tab Mobile, ATM, Bank Lain + steps).
+
 ## 📁 Struktur Folder
 
 ```

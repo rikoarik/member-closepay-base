@@ -120,6 +120,7 @@ const STATIC_COMPONENT_LOADERS: Record<string, Record<string, () => Promise<any>
     TransferMemberScreen: () => import('../../../plugins/payment/components/transfer-member/TransferMemberScreen'),
     TransferMemberSuccessScreen: () => import('../../../plugins/payment/components/transfer-member/TransferMemberSuccessScreen'),
     TapKartuSummaryScreen: () => import('../../../plugins/payment/components/topup/TapKartuSummaryScreen'),
+    VirtualCardTopUpAmountScreen: () => import('../../../plugins/payment/components/topup/VirtualCardTopUpAmountScreen'),
     QrScreen: () => import('../../../plugins/payment/components/qr/QrScreen'),
     EditQuickAmountScreen: () => import('../../../plugins/payment/components/qr/EditQuickAmountScreen'),
     PinInput: () => import('../../../plugins/payment/components/shared/PinInput'),

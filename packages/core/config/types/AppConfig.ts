@@ -53,9 +53,9 @@ export interface AppConfig {
   showQrButton?: boolean; // Show/hide QR scan button on home screen
 
   /**
-   * Quick Access (Akses Cepat) menu items for home screen.
-   * When set, only these items are shown; order preserved.
-   * Used e.g. for member balance-management: topupva, transfermember, kartu virtual, transferbank.
+   * Akses Cepat (Quick Access) – tombol di Beranda.
+   * Hanya item di array ini yang tampil; urutan ikut `order`.
+   * Untuk sembunyikan: hapus item dari array. Untuk tambah: tambah object { id, route, labelKey, icon, order }.
    */
   quickAccessMenu?: QuickAccessMenuItemConfig[];
 
@@ -70,6 +70,13 @@ export interface AppConfig {
     fixedTopCount?: number;
     editableSlotCount?: number;
   };
+
+  /**
+   * Tampilkan item "Atur menu" (Quick Menu Settings) di menu Profil / Pengaturan.
+   * Jika false, item ini tidak muncul di daftar menu setting.
+   * Default: true (tetap tampil).
+   */
+  showQuickMenuSettingsInProfile?: boolean;
 
   /**
    * Beranda (Home) widgets configuration.
@@ -145,7 +152,14 @@ export interface QrButtonConfig {
   size?: number; // Button size in dp
 }
 
-/** Single item for Akses Cepat: id (unique), route (screen name), labelKey (i18n key) */
+/**
+ * Satu item Akses Cepat (tombol di Beranda).
+ * - id: unik (e.g. 'topupva', 'marketplace')
+ * - route: nama screen di navigator (e.g. 'TopUp', 'Marketplace')
+ * - labelKey: key i18n untuk label (e.g. 'home.topUpVA')
+ * - icon: nama icon (e.g. 'topup', 'fnb')
+ * - order: urutan tampil (1, 2, 3, ...)
+ */
 export interface QuickAccessMenuItemConfig {
   id: string;
   route: string;

@@ -28,11 +28,17 @@ import {
 } from '@core/config';
 
 interface RouteParams {
-  tabType: 'id-member' | 'excel' | 'top-kartu';
+  tabType: 'id-member' | 'excel' | 'top-kartu' | 'virtual-card';
   balanceTarget: string;
   balanceTargetName: string;
   amount: number;
   memberId?: string;
+  memberName?: string;
+  cardId?: string;
+  cardNumber?: string;
+  cardHolderName?: string;
+  adminFee?: number;
+  totalAmount?: number;
 }
 
 export const TopUpMemberSummaryScreen = () => {
@@ -43,19 +49,34 @@ export const TopUpMemberSummaryScreen = () => {
   const insets = useSafeAreaInsets();
   const params = route.params as RouteParams;
 
-  const { tabType, balanceTargetName, amount, memberId } = params || {
-    tabType: 'id-member',
+  const {
+    tabType,
+    balanceTargetName,
+    amount,
+    memberId,
+    memberName: paramMemberName,
+    cardNumber,
+    cardHolderName,
+    adminFee: paramAdminFee,
+    totalAmount: paramTotalAmount,
+  } = params || {
+    tabType: 'id-member' as const,
     balanceTarget: '',
     balanceTargetName: t('topUp.balanceTargetDefault'),
     amount: 0,
     memberId: '',
+    memberName: undefined,
+    cardNumber: undefined,
+    cardHolderName: undefined,
+    adminFee: undefined,
+    totalAmount: undefined,
   };
 
-  // Mock data - akan diganti dengan data dari API
-  const memberName = 'Riko S';
+  const isVirtualCard = tabType === 'virtual-card';
+  const memberName = isVirtualCard ? (cardHolderName ?? paramMemberName ?? '') : (paramMemberName ?? 'Riko S');
   const displayMemberId = memberId || '1123123';
-  const adminFee = Math.round(amount * 0.1); // 10% admin fee
-  const totalAmount = amount - adminFee;
+  const adminFee = isVirtualCard ? (paramAdminFee ?? 0) : Math.round(amount * 0.1);
+  const totalAmount = isVirtualCard ? (paramTotalAmount ?? amount + adminFee) : amount - adminFee;
 
   const formatCurrency = (value: number): string => {
     return value.toLocaleString('id-ID');
@@ -73,13 +94,18 @@ export const TopUpMemberSummaryScreen = () => {
   };
 
   const handleNext = () => {
-    // @ts-ignore - navigation type akan di-setup nanti
-    navigation.navigate('TopUpMemberPin', {
+    (navigation as any).navigate('TopUpMemberPin', {
       ...params,
       memberName,
       adminFee,
       totalAmount,
     });
+  };
+
+  const maskCardNumber = (num: string) => {
+    const cleaned = num.replace(/\s/g, '');
+    if (cleaned.length < 8) return num;
+    return cleaned.slice(-4).padStart(cleaned.length, '•');
   };
 
   return (
@@ -128,22 +154,37 @@ export const TopUpMemberSummaryScreen = () => {
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
               {t('topUp.transactionType')}
             </Text>
-            <Text style={[styles.detailValue, { color: colors.text }]}>{t('home.topUp')}</Text>
+            <Text style={[styles.detailValue, { color: colors.text }]}>
+              {isVirtualCard ? t('home.topUpCard') : t('home.topUp')}
+            </Text>
           </View>
+
+          {isVirtualCard && cardNumber ? (
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                {t('topUp.cardNumber')}
+              </Text>
+              <Text style={[styles.detailValue, { color: colors.text }]}>
+                {maskCardNumber(cardNumber)}
+              </Text>
+            </View>
+          ) : null}
 
           <View style={styles.detailRow}>
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
-              {t('profile.name')}
+              {isVirtualCard ? t('topUp.cardHolder') : t('profile.name')}
             </Text>
             <Text style={[styles.detailValue, { color: colors.text }]}>{memberName}</Text>
           </View>
 
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
-              {t('topUp.memberId')}
-            </Text>
-            <Text style={[styles.detailValue, { color: colors.text }]}>{displayMemberId}</Text>
-          </View>
+          {!isVirtualCard ? (
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                {t('topUp.memberId')}
+              </Text>
+              <Text style={[styles.detailValue, { color: colors.text }]}>{displayMemberId}</Text>
+            </View>
+          ) : null}
 
           <View style={styles.detailRow}>
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
@@ -181,7 +222,7 @@ export const TopUpMemberSummaryScreen = () => {
           {
             backgroundColor: colors.background,
             borderTopColor: colors.border,
-            paddingBottom: insets.bottom + moderateVerticalScale(16),
+            paddingBottom: insets.bottom,
           },
         ]}
       >

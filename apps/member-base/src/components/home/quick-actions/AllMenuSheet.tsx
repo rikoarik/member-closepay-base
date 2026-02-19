@@ -18,7 +18,7 @@ import { useTheme, type ThemeColors } from '@core/theme';
 import { useTranslation } from '@core/i18n';
 import {
   BottomSheet,
-  getAllMenuItems,
+  getEnabledMenuItems,
   getIconSize,
   getHorizontalPadding,
   getResponsiveFontSize,
@@ -150,8 +150,9 @@ export const AllMenuSheet: React.FC<AllMenuSheetProps> = ({ visible, onClose }) 
   useEffect(() => {
     if (visible) {
       setLoading(true);
-      getAllMenuItems()
-        .then((list) => setItems(list))
+      getEnabledMenuItems()
+        .then((list) => list.filter((item) => item.id !== 'all-menu'))
+        .then(setItems)
         .finally(() => setLoading(false));
     }
   }, [visible]);

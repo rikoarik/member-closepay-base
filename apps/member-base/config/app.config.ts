@@ -33,7 +33,6 @@ export const appConfig: AppConfig = {
     'card-transaction',
     'marketplace',
     'marketplace-fnb',
-    'sport-center',
     'invoice',
     'donasi-zakat',
   ],
@@ -43,7 +42,7 @@ export const appConfig: AppConfig = {
   // ============================================================================
   
   // Home screen variant
-  homeVariant: 'dashboard', // Options: 'dashboard' | 'simple' | 'member' | 'custom'
+  homeVariant: 'member', // Options: 'dashboard' | 'simple' | 'member' | 'custom'
 
   // Home tabs configuration (for member variant)
   // Tabs akan ditampilkan di home screen dengan urutan sesuai order
@@ -373,6 +372,7 @@ export const appConfig: AppConfig = {
   ],
 
   // Menu configuration (bottom navigation / drawer menu)
+  // Atur isi menu: tambah/hapus item, atau set visible: false untuk menyembunyikan
   menuConfig: [
     {
       id: 'home',
@@ -387,7 +387,7 @@ export const appConfig: AppConfig = {
       label: 'Sport Center',
       icon: 'sportcenter',
       route: 'SportCenter',
-      visible: true,
+      visible: false, // false = tidak muncul di menu
       order: 3,
     },
   ],
@@ -412,28 +412,47 @@ export const appConfig: AppConfig = {
     { id: 'voucher-available', visible: true, order: 13 },
     { id: 'fnb-recent-orders', visible: true, order: 14 },
     { id: 'marketplace-featured', visible: true, order: 15 },
-    { id: 'sport-center-featured', visible: true, order: 16 },
+    { id: 'sport-center-featured', visible: false, order: 16 }, // false = widget Sport Center tidak tampil di Beranda
     { id: 'invoice-featured', visible: true, order: 17 },
   ],
 
-  // Akses Cepat (Quick Access) - hanya untuk member balance-management
+  // ============================================================================
+  // AKSES CEPAT (Quick Access) – tombol di Beranda
+  // ============================================================================
+  // Atur isi: tambah/hapus object di bawah. Urutan ikut field `order`.
+  // Referensi item yang bisa dipakai (route harus terdaftar di navigator + enabledModules):
+  //
+  // | id            | route          | labelKey              | icon        |
+  // |---------------|----------------|------------------------|-------------|
+  // | topupva       | TopUp          | home.topUpVA           | topup      |
+  // | transfermember| TransferMember | home.transferMember    | guest      |
+  // | kartuvirtual  | VirtualCard    | home.kartuVirtual      | payment    |
+  // | transferbank  | Withdraw       | home.transferBank      | withdraw   |
+  // | marketplace   | Marketplace    | home.marketplace       | marketplace|
+  // | fnb           | FnB            | home.fnb               | fnb        |
+  // | invoice       | Invoice        | home.invoice           | invoice    |
+  // | donasizakat   | DonationHub    | home.donasiZakat        | heart      |
+  // | sportcenter   | SportCenter    | home.sportCenter (tambah di i18n) | sportcenter |
+  //
   quickAccessMenu: [
-    { id: 'topupva', route: 'VirtualAccount', labelKey: 'home.topUpVA', icon: 'topup', order: 1 },
+    { id: 'topupva', route: 'TopUp', labelKey: 'home.topUpVA', icon: 'topup', order: 1 },
     { id: 'transfermember', route: 'TransferMember', labelKey: 'home.transferMember', icon: 'guest', order: 2 },
     { id: 'kartuvirtual', route: 'VirtualCard', labelKey: 'home.kartuVirtual', icon: 'payment', order: 3 },
     { id: 'transferbank', route: 'Withdraw', labelKey: 'home.transferBank', icon: 'withdraw', order: 4 },
     { id: 'marketplace', route: 'Marketplace', labelKey: 'home.marketplace', icon: 'marketplace', order: 5 },
     { id: 'fnb', route: 'FnB', labelKey: 'home.fnb', icon: 'fnb', order: 6 },
-    { id: 'sportcenter', route: 'SportCenter', labelKey: 'home.sportCenter', icon: 'sportcenter', order: 7 },
-    { id: 'invoice', route: 'Invoice', labelKey: 'home.invoice', icon: 'invoice', order: 8 },
-    { id: 'donasizakat', route: 'DonationHub', labelKey: 'home.donasiZakat', icon: 'heart', order: 9 },
+    { id: 'invoice', route: 'Invoice', labelKey: 'home.invoice', icon: 'invoice', order: 7 },
+    { id: 'donasizakat', route: 'DonationHub', labelKey: 'home.donasiZakat', icon: 'heart', order: 8 },
   ],
 
   // Atur fitur pilihan: drag-to-reorder (enableDrag), fixed top slots (fixedTopCount)
   quickMenu: {
     enableDrag: true,
-    fixedTopCount: 3,
+    fixedTopCount: 4,
   },
+
+  /** Sembunyikan "Atur menu" (Quick Menu Settings) dari menu Profil */
+  showQuickMenuSettingsInProfile: false,
 
   // ============================================================================
   // BRANDING

@@ -378,6 +378,8 @@ export const VirtualCardDetailScreen: React.FC = () => {
       setAccumulationModalVisible(true);
     } else if (menu === 'cardIdentity') {
       setIdentityModalVisible(true);
+    } else if (menu === 'topup' && card) {
+      (navigation as any).navigate('VirtualCardTopUpAmount', { card });
     } else {
       console.log('Menu pressed:', menu);
     }
@@ -533,8 +535,13 @@ export const VirtualCardDetailScreen: React.FC = () => {
             onPress={() => handleMenuPress('topup')}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconContainer, { backgroundColor: 'rgba(52, 199, 89, 0.1)' }]}>
-              <MoneyRecive size={scale(24)} color="#34C759" variant="Bold" />
+            <View
+              style={[
+                styles.menuIconContainer,
+                { backgroundColor: colors.successLight ?? 'rgba(52, 199, 89, 0.1)' },
+              ]}
+            >
+              <MoneyRecive size={scale(24)} color={colors.success} variant="Bold" />
             </View>
             <Text style={[styles.menuButtonText, { color: colors.text }]}>
               {t('home.topUpCard')}

@@ -16,6 +16,7 @@ import {
 
 interface CustomToastProps extends BaseToastProps {
   type: 'success' | 'info' | 'warning' | 'error';
+  onHide?: () => void;
 }
 
 const CustomToast = ({ text1, text2, type, onHide }: CustomToastProps) => {

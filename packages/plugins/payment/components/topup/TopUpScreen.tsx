@@ -1,6 +1,7 @@
 /**
  * Top Up Screen
- * Screen untuk input nominal dan pilih metode pembayaran
+ * Pemilihan metode Top Up VA (balance card + daftar bank/kanal).
+ * Setelah user pilih bank/ATM/M Banking → navigate ke VirtualAccount.
  */
 
 import React, { useState } from 'react';
@@ -10,15 +11,12 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
 import { useTranslation } from '@core/i18n';
-import {
-  ArrowLeft2,
-} from 'iconsax-react-nativejs';
+import { ArrowLeft2, ArrowDown2, Card, Wallet, Buildings2 } from 'iconsax-react-nativejs';
 import {
   scale,
   moderateScale,
@@ -29,83 +27,88 @@ import {
   getIconSize,
   FontFamily,
 } from '@core/config';
+import { useBalance } from '@core/config/plugins/contracts';
 
-interface PaymentMethod {
+interface BankItem {
   id: string;
   name: string;
-  bank: string;
-  logo?: string;
+  shortName: string;
+  color: string;
 }
 
-const PAYMENT_METHODS: PaymentMethod[] = [
-  { id: 'bsi1', name: 'Bank Syariah Indonesia', bank: 'BSI' },
-  { id: 'bsi2', name: 'Bank Syariah Indonesia', bank: 'BSI' },
-  { id: 'bsi3', name: 'Bank Syariah Indonesia', bank: 'BSI' },
+const BANKS: BankItem[] = [
+  { id: 'bca', name: 'Bank Central Asia', shortName: 'BCA', color: '#0066AE' },
+  { id: 'bca2', name: 'Bank Central Asia', shortName: 'BCA', color: '#0066AE' },
+  { id: 'bca3', name: 'Bank Central Asia', shortName: 'BCA', color: '#0066AE' },
+  { id: 'bni', name: 'Bank Negara Indonesia', shortName: 'BNI', color: '#F26522' },
+  { id: 'bri', name: 'Bank Rakyat Indonesia', shortName: 'BRI', color: '#003A70' },
+  { id: 'bri2', name: 'Bank Rakyat Indonesia', shortName: 'BRI', color: '#003A70' },
 ];
 
 export const TopUpScreen = () => {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
-  const [amount, setAmount] = useState('200000');
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { balance } = useBalance();
+  const [expandedBankId, setExpandedBankId] = useState<string | null>(null);
 
-  const formatCurrency = (value: string): string => {
-    // Remove non-numeric characters
-    const numericValue = value.replace(/\D/g, '');
-    if (!numericValue) return '';
-    
-    // Format with thousand separators
-    return parseInt(numericValue, 10).toLocaleString('id-ID');
+  const toggleExpand = (id: string) => {
+    setExpandedBankId((prev) => (prev === id ? null : id));
   };
 
-  const handleAmountChange = (text: string) => {
-    const formatted = formatCurrency(text);
-    setAmount(formatted.replace(/\./g, ''));
+  type Channel = 'atm' | 'mbanking' | 'bankLain';
+  const handleSelectMethod = (bankId: string, channel: Channel) => {
+    goToVirtualAccount(bankId, channel);
   };
 
-  const handleNext = async () => {
-    if (!selectedMethod || !amount || isProcessing) return;
-
-    const numericAmount = parseInt(amount.replace(/\D/g, ''), 10);
-    if (numericAmount <= 0) return;
-
-    setIsProcessing(true);
-
-    try {
-      // Simulate topup validation process
-      await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-
-      // @ts-ignore - navigation type akan di-setup nanti
-      navigation.navigate('VirtualAccount', {
-        amount: numericAmount,
-        paymentMethod: selectedMethod,
-      });
-    } catch (error) {
-      // Handle error - could show error message
-      console.error('Topup validation failed:', error);
-    } finally {
-      setIsProcessing(false);
-    }
+  const goToVirtualAccount = (bankId: string, channel: Channel) => {
+    // @ts-ignore - navigation type akan di-setup nanti
+    navigation.navigate('VirtualAccount', { bankId, channel });
   };
 
-  const numericAmount = parseInt(amount.replace(/\D/g, ''), 10) || 0;
-  const displayAmount = numericAmount > 0 ? formatCurrency(amount) : '';
+  const renderChannelList = (currentBankId: string) => (
+    <View style={[styles.channelList, { borderTopColor: colors.border }]}>
+      <TouchableOpacity
+        style={[styles.channelRow, { borderBottomColor: colors.border }]}
+        onPress={() => handleSelectMethod(currentBankId, 'atm')}
+        activeOpacity={0.7}
+      >
+        <Card size={getIconSize('medium')} color={colors.success} variant="Bold" />
+        <Text style={[styles.channelLabel, { color: colors.text }]}>
+          {t('virtualAccount.channelATM')}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.channelRow, { borderBottomColor: colors.border }]}
+        onPress={() => handleSelectMethod(currentBankId, 'mbanking')}
+        activeOpacity={0.7}
+      >
+        <Wallet size={getIconSize('medium')} color={colors.success} variant="Bold" />
+        <Text style={[styles.channelLabel, { color: colors.text }]}>
+          {t('virtualAccount.channelMBanking')}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.channelRow}
+        onPress={() => handleSelectMethod(currentBankId, 'bankLain')}
+        activeOpacity={0.7}
+      >
+        <Buildings2 size={getIconSize('medium')} color={colors.success} variant="Bold" />
+        <Text style={[styles.channelLabel, { color: colors.text }]}>
+          {t('virtualAccount.channelBankLain')}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
-      <View style={[
-        styles.header,
-        {
-          backgroundColor: colors.background,
-        }
-      ]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}>
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
           <ArrowLeft2 size={getIconSize('medium')} color={colors.text} variant="Outline" />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
@@ -117,121 +120,47 @@ export const TopUpScreen = () => {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}>
-        
-        {/* Nominal Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: colors.text }]}>
-            {t('topUp.amount')}
-          </Text>
-          
-          <View style={[
-            styles.amountContainer,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            }
-          ]}>
-            <Text style={[styles.currencyPrefix, { color: colors.text }]}>Rp</Text>
-            <TextInput
-              style={[styles.amountInput, { color: colors.text }]}
-              value={displayAmount}
-              onChangeText={handleAmountChange}
-              placeholder="0"
-              placeholderTextColor={colors.textSecondary}
-              keyboardType="numeric"
-              selectTextOnFocus
-            />
-          </View>
-        </View>
+        contentContainerStyle={styles.scrollContent}
+      >
+       
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {t('virtualAccount.topUpWithVAThrough')}
+        </Text>
 
-        {/* Payment Method Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionLabel, { color: colors.text }]}>
-            {t('topUp.paymentMethod')}
-          </Text>
-
-          <View style={styles.paymentMethods}>
-            {PAYMENT_METHODS.map((method) => (
-              <TouchableOpacity
-                key={method.id}
-                style={[
-                  styles.paymentMethodItem,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: selectedMethod === method.id ? colors.primary : colors.border,
-                  }
-                ]}
-                onPress={() => setSelectedMethod(method.id)}>
-                <View style={styles.paymentMethodContent}>
-                  {/* Bank Logo Placeholder */}
-                  <View style={[
-                    styles.bankLogo,
-                    { backgroundColor: colors.surfaceSecondary || '#F3F4F6' }
-                  ]}>
-                    <Text style={[styles.bankLogoText, { color: colors.textSecondary }]}>
-                      {method.bank}
-                    </Text>
-                  </View>
-                  
-                  <View style={styles.paymentMethodInfo}>
-                    <Text style={[styles.paymentMethodName, { color: colors.text }]}>
-                      {method.name}
-                    </Text>
-                  </View>
-                  
-                  <View style={[
-                    styles.radioButton,
-                    {
-                      borderColor: selectedMethod === method.id ? colors.primary : colors.border,
-                      backgroundColor: selectedMethod === method.id ? colors.primary : 'transparent',
-                    }
-                  ]}>
-                    {selectedMethod === method.id && (
-                      <View style={[styles.radioButtonInner, { backgroundColor: '#FFFFFF' }]} />
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
-
-      {/* Footer */}
-      <View style={[
-        styles.footer,
-        {
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
-          paddingBottom: insets.bottom + moderateVerticalScale(16),
-        }
-      ]}>
-        <View style={styles.footerContent}>
-          <View>
-            <Text style={[styles.footerLabel, { color: colors.textSecondary }]}>
-              {t('topUp.total')}
-            </Text>
-            <Text style={[styles.footerAmount, { color: colors.text }]}>
-              Rp {displayAmount || '0'}
-            </Text>
-          </View>
-          
-          <TouchableOpacity
+        {/* Semua bank: klik row = expand/collapse seperti yang paling atas */}
+        {BANKS.map((bank) => (
+          <View
+            key={bank.id}
             style={[
-              styles.nextButton,
+              styles.bankCard,
               {
-                backgroundColor: numericAmount > 0 && selectedMethod && !isProcessing ? colors.primary : colors.border,
-              }
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
             ]}
-            onPress={handleNext}
-            disabled={!numericAmount || !selectedMethod || isProcessing}>
-            <Text style={[styles.nextButtonText, { color: '#FFFFFF' }]}>
-              {isProcessing ? 'Memproses...' : t('common.next')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          >
+            <TouchableOpacity
+              style={styles.bankRow}
+              onPress={() => toggleExpand(bank.id)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.bankRowLeft}>
+                <View style={[styles.bankLogo, { backgroundColor: bank.color }]}>
+                  <Text style={styles.bankLogoText}>{bank.shortName}</Text>
+                </View>
+                <Text style={[styles.bankName, { color: colors.text }]}>
+                  {bank.name}
+                </Text>
+              </View>
+              <View style={[styles.chevronWrap, { transform: [{ rotate: expandedBankId === bank.id ? '180deg' : '0deg' }] }]}>
+                <ArrowDown2 size={CHEVRON_SIZE} color={colors.textSecondary} variant="Outline" />
+              </View>
+            </TouchableOpacity>
+
+            {expandedBankId === bank.id && renderChannelList(bank.id)}
+          </View>
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -240,6 +169,7 @@ export default TopUpScreen;
 
 const minTouchTarget = getMinTouchTarget();
 const horizontalPadding = getHorizontalPadding();
+const CHEVRON_SIZE = getIconSize('medium');
 
 const styles = StyleSheet.create({
   container: {
@@ -257,13 +187,12 @@ const styles = StyleSheet.create({
     minWidth: minTouchTarget,
     minHeight: minTouchTarget,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   headerTitle: {
-    fontSize: moderateScale(18),
-    fontFamily: FontFamily.monasans.bold,
+    fontSize: getResponsiveFontSize('large'),
+    fontFamily: FontFamily.monasans.semiBold,
     flex: 1,
-    textAlign: 'center',
   },
   headerRight: {
     width: minTouchTarget,
@@ -272,111 +201,86 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: moderateVerticalScale(24),
-  },
-  section: {
     paddingHorizontal: horizontalPadding,
-    marginTop: moderateVerticalScale(24),
+    paddingBottom: moderateVerticalScale(32),
   },
-  sectionLabel: {
-    fontSize: getResponsiveFontSize('medium'),
-    fontFamily: FontFamily.monasans.semiBold,
-    marginBottom: moderateVerticalScale(12),
-  },
-  amountContainer: {
-    flexDirection: 'row',
+  balanceCard: {
+    borderRadius: scale(16),
+    padding: scale(20),
+    marginTop: moderateVerticalScale(16),
+    marginBottom: moderateVerticalScale(16),
     alignItems: 'center',
-    paddingHorizontal: scale(16),
-    paddingVertical: moderateVerticalScale(16),
+  },
+  balanceLabel: {
+    fontSize: moderateScale(14),
+    fontFamily: FontFamily.monasans.medium,
+    marginBottom: moderateVerticalScale(4),
+    opacity: 0.95,
+  },
+  balanceAmount: {
+    fontSize: moderateScale(28),
+    fontFamily: FontFamily.monasans.bold,
+  },
+  sectionTitle: {
+    fontSize: moderateScale(18),
+    fontFamily: FontFamily.monasans.semiBold,
+    marginBottom: moderateVerticalScale(16),
+    paddingLeft: scale(4),
+  },
+  bankCard: {
     borderRadius: scale(12),
     borderWidth: 1,
+    marginBottom: moderateVerticalScale(12),
+    overflow: 'hidden',
   },
-  currencyPrefix: {
-    fontSize: moderateScale(24),
-    fontFamily: FontFamily.monasans.bold,
-    marginRight: scale(8),
-  },
-  amountInput: {
-    flex: 1,
-    fontSize: moderateScale(24),
-    fontFamily: FontFamily.monasans.bold,
-    padding: 0,
-  },
-  paymentMethods: {
-    gap: scale(12),
-  },
-  paymentMethodItem: {
-    borderRadius: scale(12),
-    borderWidth: 2,
+  bankRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: scale(16),
     minHeight: minTouchTarget,
   },
-  paymentMethodContent: {
+  bankRowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   bankLogo: {
     width: scale(48),
-    height: scale(48),
-    borderRadius: scale(8),
+    height: scale(32),
+    borderRadius: scale(6),
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: scale(12),
+    marginRight: scale(16),
   },
   bankLogoText: {
-    fontSize: getResponsiveFontSize('small'),
+    fontSize: moderateScale(12),
     fontFamily: FontFamily.monasans.bold,
+    color: '#FFFFFF',
   },
-  paymentMethodInfo: {
+  bankName: {
+    fontSize: getResponsiveFontSize('medium'),
+    fontFamily: FontFamily.monasans.medium,
     flex: 1,
   },
-  paymentMethodName: {
-    fontSize: getResponsiveFontSize('large'),
-    fontFamily: FontFamily.monasans.semiBold,
-  },
-  radioButton: {
-    width: scale(24),
-    height: scale(24),
-    borderRadius: scale(12),
-    borderWidth: 2,
+  chevronWrap: {
     justifyContent: 'center',
     alignItems: 'center',
+    minWidth: minTouchTarget,
   },
-  radioButtonInner: {
-    width: scale(12),
-    height: scale(12),
-    borderRadius: scale(6),
-  },
-  footer: {
+  channelList: {
     borderTopWidth: 1,
-    paddingHorizontal: horizontalPadding,
-    paddingTop: moderateVerticalScale(16),
   },
-  footerContent: {
+  channelRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(16),
+    borderBottomWidth: 1,
   },
-  footerLabel: {
-    fontSize: getResponsiveFontSize('small'),
-    fontFamily: FontFamily.monasans.regular,
-    marginBottom: moderateVerticalScale(4),
-  },
-  footerAmount: {
-    fontSize: moderateScale(20),
-    fontFamily: FontFamily.monasans.bold,
-  },
-  nextButton: {
-    paddingHorizontal: scale(24),
-    paddingVertical: moderateVerticalScale(14),
-    borderRadius: scale(12),
-    minHeight: minTouchTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    fontSize: getResponsiveFontSize('medium'),
-    fontFamily: FontFamily.monasans.semiBold,
+  channelLabel: {
+    fontSize: moderateScale(14),
+    fontFamily: FontFamily.monasans.medium,
+    marginLeft: scale(16),
   },
 });
-

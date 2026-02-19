@@ -28,7 +28,7 @@ import {
 } from '@core/config';
 
 interface RouteParams {
-  tabType: 'id-member' | 'excel' | 'top-kartu';
+  tabType: 'id-member' | 'excel' | 'top-kartu' | 'virtual-card';
   balanceTarget: string;
   balanceTargetName: string;
   amount: number;
@@ -39,6 +39,8 @@ interface RouteParams {
   pin?: string;
   isExcelFlow?: boolean;
   email?: string;
+  cardNumber?: string;
+  cardHolderName?: string;
 }
 
 export const TopUpMemberSuccessScreen = () => {
@@ -59,8 +61,10 @@ export const TopUpMemberSuccessScreen = () => {
     totalAmount,
     isExcelFlow,
     email,
+    cardNumber,
+    cardHolderName,
   } = params || {
-    tabType: 'id-member',
+    tabType: 'id-member' as const,
     balanceTarget: '',
     balanceTargetName: t('topUp.balanceTargetDefault'),
     amount: 0,
@@ -70,8 +74,11 @@ export const TopUpMemberSuccessScreen = () => {
     totalAmount: 0,
     isExcelFlow: false,
     email: '',
+    cardNumber: undefined,
+    cardHolderName: undefined,
   };
 
+  const isVirtualCard = tabType === 'virtual-card';
   const displayMemberId = memberId || '1123123';
 
   const formatCurrency = (value: number): string => {
@@ -127,14 +134,14 @@ export const TopUpMemberSuccessScreen = () => {
       >
         {/* Success Icon */}
         <View style={styles.iconContainer}>
-          <View style={[styles.successIcon, { backgroundColor: '#10B981' }]}>
-            <TickCircle size={scale(40)} color="#FFFFFF" variant="Bold" />
+          <View style={[styles.successIcon, { backgroundColor: colors.success }]}>
+            <TickCircle size={scale(40)} color={colors.surface} variant="Bold" />
           </View>
         </View>
 
         {/* Success Message */}
         <Text style={[styles.successMessage, { color: colors.text }]}>
-          {t('topUp.transactionSuccess')}
+          {isVirtualCard ? t('topUp.virtualCardTopUpSuccess') : t('topUp.transactionSuccess')}
         </Text>
 
         {/* Excel Flow - Email Notification */}
@@ -176,22 +183,37 @@ export const TopUpMemberSuccessScreen = () => {
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
               {t('topUp.transactionType')}
             </Text>
-            <Text style={[styles.detailValue, { color: colors.text }]}>{t('home.topUp')}</Text>
+            <Text style={[styles.detailValue, { color: colors.text }]}>
+              {isVirtualCard ? t('home.topUpCard') : t('home.topUp')}
+            </Text>
           </View>
+
+          {isVirtualCard && cardNumber ? (
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                {t('topUp.cardNumber')}
+              </Text>
+              <Text style={[styles.detailValue, { color: colors.text }]}>
+                {cardNumber.replace(/\s/g, '').slice(-4).padStart(cardNumber.replace(/\s/g, '').length, '•')}
+              </Text>
+            </View>
+          ) : null}
 
           <View style={styles.detailRow}>
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
-              {t('profile.name')}
+              {isVirtualCard ? t('topUp.cardHolder') : t('profile.name')}
             </Text>
             <Text style={[styles.detailValue, { color: colors.text }]}>{memberName}</Text>
           </View>
 
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
-              {t('topUp.memberId')}
-            </Text>
-            <Text style={[styles.detailValue, { color: colors.text }]}>{displayMemberId}</Text>
-          </View>
+          {!isVirtualCard ? (
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
+                {t('topUp.memberId')}
+              </Text>
+              <Text style={[styles.detailValue, { color: colors.text }]}>{displayMemberId}</Text>
+            </View>
+          ) : null}
 
           <View style={styles.detailRow}>
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
@@ -239,7 +261,7 @@ export const TopUpMemberSuccessScreen = () => {
           {
             backgroundColor: colors.background,
             borderTopColor: colors.border,
-            paddingBottom: insets.bottom + moderateVerticalScale(16),
+            paddingBottom: insets.bottom,
           },
         ]}
       >

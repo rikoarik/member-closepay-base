@@ -26,7 +26,7 @@ import {
 import { PinInput } from '../shared/PinInput';
 
 interface RouteParams {
-  tabType: 'id-member' | 'excel' | 'top-kartu';
+  tabType: 'id-member' | 'excel' | 'top-kartu' | 'virtual-card';
   balanceTarget: string;
   balanceTargetName: string;
   amount: number;
@@ -34,6 +34,8 @@ interface RouteParams {
   memberName: string;
   adminFee: number;
   totalAmount: number;
+  cardNumber?: string;
+  cardHolderName?: string;
 }
 
 const PIN_LENGTH = 6;
@@ -50,11 +52,9 @@ export const TopUpMemberPinScreen = () => {
     // TODO: Validate PIN with backend
     console.log('PIN submitted:', pin);
 
-    // Navigate to success screen
-    // @ts-ignore - navigation type akan di-setup nanti
-    navigation.navigate('TopUpMemberSuccess', {
+    (navigation as any).navigate('TopUpMemberSuccess', {
       ...params,
-      pin: pin,
+      pin,
     });
   };
 

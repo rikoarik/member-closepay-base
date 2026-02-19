@@ -37,6 +37,7 @@ import {
   getResponsiveFontSize,
   getIconSize,
   FontFamily,
+  configService,
 } from '@core/config';
 import { ScreenHeader } from '../../config/components/ui/ScreenHeader';
 import { ArrowLeft2, LanguageSquare } from 'iconsax-react-nativejs';
@@ -56,44 +57,51 @@ const ProfileScreenComponent: React.FC = () => {
   const logout = useAuthStore((state: any) => state.logout);
   const { user } = useAuth();
 
+  const showQuickMenuInProfile = configService.getConfig()?.showQuickMenuSettingsInProfile !== false;
+
   const menuItems: MenuItem[] = useMemo(
-    () => [
-      {
-        id: 'edit-profile',
-        label: t('profile.editProfile'),
-        icon: <Profile size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-        onPress: () => {
-          // @ts-ignore - navigation type akan di-setup nanti
-          navigation.navigate('EditProfile');
+    () => {
+      const items: MenuItem[] = [
+        {
+          id: 'edit-profile',
+          label: t('profile.editProfile'),
+          icon: <Profile size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+          onPress: () => {
+            // @ts-ignore - navigation type akan di-setup nanti
+            navigation.navigate('EditProfile');
+          },
         },
-      },
-      {
-        id: 'language',
-        label: t('profile.language'),
-        icon: <LanguageSquare size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-        onPress: () => {
-          // @ts-ignore - navigation type akan di-setup nanti
-          navigation.navigate('LanguageSelection');
+        {
+          id: 'language',
+          label: t('profile.language'),
+          icon: <LanguageSquare size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+          onPress: () => {
+            // @ts-ignore - navigation type akan di-setup nanti
+            navigation.navigate('LanguageSelection');
+          },
         },
-      },
-      {
-        id: 'quick-menu',
-        label: t('profile.quickMenu'),
-        icon: <Menu size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-        onPress: () => {
-          // @ts-ignore - navigation type akan di-setup nanti
-          navigation.navigate('QuickMenuSettings');
+        ...(showQuickMenuInProfile
+          ? [
+              {
+                id: 'quick-menu',
+                label: t('profile.quickMenu'),
+                icon: <Menu size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+                onPress: () => {
+                  // @ts-ignore - navigation type akan di-setup nanti
+                  navigation.navigate('QuickMenuSettings');
+                },
+              },
+            ]
+          : []),
+        {
+          id: 'home-tabs',
+          label: t('profile.homeTabs'),
+          icon: <Element3 size={getIconSize('medium')} color={colors.text} variant="Outline" />,
+          onPress: () => {
+            // @ts-ignore - navigation type akan di-setup nanti
+            navigation.navigate('HomeTabSettings');
+          },
         },
-      },
-      {
-        id: 'home-tabs',
-        label: t('profile.homeTabs'),
-        icon: <Element3 size={getIconSize('medium')} color={colors.text} variant="Outline" />,
-        onPress: () => {
-          // @ts-ignore - navigation type akan di-setup nanti
-          navigation.navigate('HomeTabSettings');
-        },
-      },
       {
         id: 'theme',
         label: t('profile.theme'),
@@ -131,8 +139,10 @@ const ProfileScreenComponent: React.FC = () => {
           logout();
         },
       },
-    ],
-    [t, colors.text, colors.error, navigation, logout]
+    ];
+      return items;
+    },
+    [t, colors.text, colors.error, navigation, logout, showQuickMenuInProfile]
   );
 
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);

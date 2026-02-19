@@ -58,6 +58,7 @@ import {
   loadQuickMenuSettings,
   saveQuickMenuSettings,
   getAllMenuItems,
+  getPluginMenuItems,
 } from '../../services/quickMenuService';
 import type { QuickMenuItem } from '../../services/quickMenuService';
 import { configService } from '../../services/configService';
@@ -352,7 +353,12 @@ export const QuickMenuSettingsScreen: React.FC = () => {
     const loadSettings = async () => {
       try {
         const allItems = await getAllMenuItems();
-        setMenuItems(allItems);
+        const allowedIds = new Set(getPluginMenuItems().map((p) => p.id));
+        const filtered = allItems.filter((item) => allowedIds.has(item.id));
+        setMenuItems(filtered);
+        if (filtered.length !== allItems.length) {
+          saveQuickMenuSettings(filtered).catch((e) => console.error('Quick menu purge failed', e));
+        }
       } catch (error) {
         console.error('Failed to load quick menu settings:', error);
       } finally {

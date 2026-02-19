@@ -20,7 +20,7 @@ import {
 import { PinInput } from '../shared/PinInput';
 
 export interface TopUpMemberPinData {
-  tabType: 'id-member' | 'excel' | 'top-kartu';
+  tabType: 'id-member' | 'excel' | 'top-kartu' | 'virtual-card';
   balanceTarget: string;
   balanceTargetName: string;
   amount: number;
@@ -28,6 +28,8 @@ export interface TopUpMemberPinData {
   memberName?: string;
   adminFee: number;
   totalAmount: number;
+  cardNumber?: string;
+  cardHolderName?: string;
 }
 
 interface TopUpMemberPinBottomSheetProps {

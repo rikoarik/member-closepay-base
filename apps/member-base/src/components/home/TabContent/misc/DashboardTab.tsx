@@ -59,7 +59,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = React.memo(
 
     // Quick actions
     const quickActions = [
-      { id: 'topup', label: 'Top Up', icon: '⬆️', route: 'VirtualAccount' },
+      { id: 'topup', label: 'Top Up', icon: '⬆️', route: 'TopUp' },
       { id: 'transfer', label: 'Transfer', icon: '💸', route: 'TransferMember' },
       { id: 'qris', label: 'QRIS', icon: '📱', route: 'QrisPayment' },
       { id: 'marketplace', label: 'Belanja', icon: '🛒', route: 'Marketplace' },
