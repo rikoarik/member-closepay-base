@@ -21,5 +21,6 @@ module.exports = {
         ],
       },
     ],
+    'react-native-reanimated/plugin', // must be last
   ],
 };

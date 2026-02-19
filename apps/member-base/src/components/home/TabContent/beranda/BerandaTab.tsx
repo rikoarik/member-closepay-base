@@ -4,9 +4,9 @@
  * Widgets: user override dari settings > config > default.
  */
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, StyleSheet, Text, ScrollView, RefreshControl } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useTheme } from '@core/theme';
 import {
   moderateVerticalScale,
@@ -19,6 +19,7 @@ import {
   useRefreshRegistry,
 } from '@core/config';
 import { QuickAccessButtons } from '../../quick-actions/QuickAccessButtons';
+import { AllMenuSheet } from '../../quick-actions/AllMenuSheet';
 import { BalanceCard } from '@plugins/balance/components/ui/BalanceCard';
 import { useTranslation } from '@core/i18n';
 import {
@@ -83,6 +84,7 @@ const BerandaTabContent: React.FC<BerandaTabProps> = React.memo(
     const insets = useSafeAreaInsets();
     const horizontalPadding = getHorizontalPadding();
     const { t } = useTranslation();
+    const navigation = useNavigation();
     const { config } = useConfig();
     const [widgetOverride, setWidgetOverride] = React.useState<
       Array<{ id: string; visible?: boolean; order?: number }> | null
@@ -106,6 +108,7 @@ const BerandaTabContent: React.FC<BerandaTabProps> = React.memo(
 
     const [showBalance, setShowBalance] = React.useState(false);
     const [refreshing, setRefreshing] = React.useState(false);
+    const [allMenuVisible, setAllMenuVisible] = React.useState(false);
     const refreshRegistry = useRefreshRegistry();
 
     const handleRefresh = useCallback(async () => {
@@ -148,10 +151,21 @@ const BerandaTabContent: React.FC<BerandaTabProps> = React.memo(
           if (widget.id === 'quick-access') {
             return (
               <View key="quick-access" style={styles.menuItem}>
-                <Text style={[styles.menuItemTitle, { color: colors.text }]}>
-                  {t('home.quickAccess')}
-                </Text>
-                <QuickAccessButtons />
+                <View style={styles.quickAccessHeader}>
+                  <Text style={[styles.menuItemTitle, styles.quickAccessTitle, { color: colors.text }]}>
+                    {t('home.quickAccess')}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => (navigation as any).navigate('QuickMenuSettings')}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                    style={styles.manageButton}
+                  >
+                    <Text style={[styles.manageButtonText, { color: colors.primary }]}>
+                      {t('home.manageQuickAccess')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <QuickAccessButtons onAllMenuPress={() => setAllMenuVisible(true)} />
               </View>
             );
           }
@@ -254,57 +268,70 @@ const BerandaTabContent: React.FC<BerandaTabProps> = React.memo(
       </>
     );
 
+    const allMenuSheet = (
+      <AllMenuSheet
+        visible={allMenuVisible}
+        onClose={() => setAllMenuVisible(false)}
+      />
+    );
+
     // Jika scrollEnabled={false}, render konten tanpa ScrollView wrapper
     // (untuk digunakan dengan parent ScrollView dengan sticky header)
     if (!scrollEnabled) {
       return (
-        <View
-          style={[
-            styles.contentContainer,
-            {
-              backgroundColor: colors.background,
-              paddingBottom: insets.bottom + moderateVerticalScale(24),
-              paddingHorizontal: horizontalPadding,
-              paddingTop: moderateVerticalScale(16),
-            },
-          ]}
-          pointerEvents={isActive ? 'auto' : 'none'}
-        >
-          {content}
-        </View>
+        <>
+          <View
+            style={[
+              styles.contentContainer,
+              {
+                backgroundColor: colors.background,
+                paddingBottom: insets.bottom + moderateVerticalScale(24),
+                paddingHorizontal: horizontalPadding,
+                paddingTop: moderateVerticalScale(16),
+              },
+            ]}
+            pointerEvents={isActive ? 'auto' : 'none'}
+          >
+            {content}
+          </View>
+          {allMenuSheet}
+        </>
       );
     }
 
     // Default: render dengan ScrollView
     return (
-      <ScrollView
-        style={[
-          styles.container,
-          {
-            backgroundColor: colors.background,
-          },
-        ]}
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + moderateVerticalScale(24),
-          paddingHorizontal: horizontalPadding,
-          paddingTop: moderateVerticalScale(16),
-        }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-        pointerEvents={isActive ? 'auto' : 'none'}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        scrollEnabled={scrollEnabled}
-      >
-        {content}
-      </ScrollView>
+      <>
+        <ScrollView
+          style={[
+            styles.container,
+            {
+              backgroundColor: colors.background,
+            },
+          ]}
+          contentContainerStyle={{
+            paddingBottom: insets.bottom + moderateVerticalScale(24),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: moderateVerticalScale(16),
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+          pointerEvents={isActive ? 'auto' : 'none'}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          scrollEnabled={scrollEnabled}
+        >
+          {content}
+        </ScrollView>
+        {allMenuSheet}
+      </>
     );
   }
 );
@@ -334,8 +361,25 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.monasans.bold,
     marginBottom: moderateVerticalScale(8),
   },
+  quickAccessHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: moderateVerticalScale(8),
+  },
+  quickAccessTitle: {
+    marginBottom: 0,
+  },
+  manageButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  manageButtonText: {
+    fontSize: getResponsiveFontSize('medium'),
+    fontFamily: FontFamily.monasans.semiBold,
+  },
   menuItem: {
-   
+
     marginBottom: moderateVerticalScale(16),
     paddingVertical: moderateVerticalScale(16),
   },

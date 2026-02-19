@@ -51,12 +51,14 @@
     "react-native-ble-plx": "^3.5.0",
     "react-native-chucker": "^1.0.1",
     "react-native-draggable-flatlist": "^4.0.3",
+    "react-native-gesture-handler": "^2.20.2",
     "react-native-image-crop-picker": "^0.51.1",
     "react-native-image-picker": "^7.1.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-nfc-manager": "^3.17.2",
     "react-native-permissions": "^5.4.4",
+    "react-native-reanimated": "^4.2.2",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.18.0",
     "react-native-skeleton-placeholder": "^5.2.4",
@@ -71,9 +73,9 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "^14.0.1",
-    "@react-native-community/cli-platform-android": "^15.1.0",
-    "@react-native-community/cli-platform-ios": "^14.0.1",
+    "@react-native-community/cli": "^13.6.9",
+    "@react-native-community/cli-platform-android": "^11.4.1",
+    "@react-native-community/cli-platform-ios": "^13.6.9",
     "@react-native/babel-preset": "0.82.1",
     "@react-native/eslint-config": "0.82.1",
     "@react-native/metro-config": "0.82.1",
@@ -102,6 +104,7 @@
   "overrides": {
     "qs": ">=6.14.1",
     "@react-native-masked-view/masked-view": "^0.3.2",
-    "fast-xml-parser": "5.3.4"
+    "fast-xml-parser": ">=5.3.6",
+    "ajv": ">=8.18.0"
   }
 }

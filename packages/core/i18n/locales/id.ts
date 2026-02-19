@@ -174,6 +174,12 @@ export const id = {
     transferMerchant: 'Transfer Merchant',
     payBarcode: 'Bayar Barcode',
     quickAccess: 'Akses Cepat',
+    manageQuickAccess: 'Atur',
+    allMenu: 'Semua Menu',
+    allMenuCategoryTransaksi: 'Transaksi',
+    allMenuCategorySimpan: 'Simpan',
+    allMenuCategoryLifestyle: 'Lifestyle & Belanja',
+    allMenuCategoryLainnya: 'Lainnya',
     topUpVA: 'Top Up VA',
     transferMember: 'Transfer Member',
     kartuVirtual: 'Kartu Virtual',
@@ -819,6 +825,9 @@ export const id = {
   },
   quickMenu: {
     maxItemsHint: 'Maksimal {max} item akses cepat.',
+    manageTitle: 'Atur fitur pilihan kamu',
+    instructionReorder: 'Urutin ulang, hapus, atau tukar 3 fitur paling bawah dengan fitur pilihan kamu.',
+    instructionSwap: 'Geser atau klik fitur yang kamu mau dari bawah untuk gantiin fitur yang ada di atas.',
   },
   qr: {
     title: 'MPM / CPM',

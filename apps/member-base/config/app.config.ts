@@ -429,6 +429,12 @@ export const appConfig: AppConfig = {
     { id: 'donasizakat', route: 'DonationHub', labelKey: 'home.donasiZakat', icon: 'heart', order: 9 },
   ],
 
+  // Atur fitur pilihan: drag-to-reorder (enableDrag), fixed top slots (fixedTopCount)
+  quickMenu: {
+    enableDrag: true,
+    fixedTopCount: 3,
+  },
+
   // ============================================================================
   // BRANDING
   // ============================================================================

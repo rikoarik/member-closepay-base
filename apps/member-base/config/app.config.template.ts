@@ -59,6 +59,16 @@ export const appConfig: AppConfig = {
   // Payment methods
   paymentMethods: ['balance', 'bank_transfer', 'virtual_account'],
 
+  // Quick menu (Atur fitur pilihan): menu utama fixed, sisanya bisa di-edit (kotak putus-putus)
+  // fixedTopCount: jumlah item atas yang tidak bisa diubah (menu utama). Default 3.
+  // editableSlotCount: jumlah slot yang bisa di-edit (3 atau 4). Default 4. Total slot = fixedTopCount + editableSlotCount.
+  // enableDrag: true = bisa geser reorder. false = hanya tap add/remove.
+  quickMenu: {
+    enableDrag: true,
+    fixedTopCount: 3,
+    editableSlotCount: 4, // 3 atau 4
+  },
+
   // Branding
   branding: {
     logo: 'assets/logo.png', // Logo path (relative path or URL) - Colors come from backend

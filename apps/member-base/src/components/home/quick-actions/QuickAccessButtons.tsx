@@ -17,6 +17,7 @@ import {
   Heart,
   Coffee,
   Activity,
+  Element3,
 } from 'iconsax-react-nativejs';
 import {
   scale,
@@ -57,8 +58,14 @@ interface QuickAccessButton {
   onPress?: () => void;
 }
 
+const QUICK_ACCESS_MAX_SLOTS = 7;
+
 interface QuickAccessButtonsProps {
   buttons?: QuickAccessButton[];
+  /**
+   * Callback when "Semua Menu" (slot 8) is pressed. If not provided, slot 8 is still shown but press is no-op.
+   */
+  onAllMenuPress?: () => void;
   /**
    * Gap antar button untuk tablet landscape (optional)
    * Jika tidak diatur, akan menggunakan gap default
@@ -88,15 +95,41 @@ const getQuickAccessAssetIcon = (itemId: string, iconColor: string): React.React
   }
 };
 
-// Icon mapping untuk setiap menu - returns icon dengan dynamic color
-const getMenuIcon = (iconColor: string, iconName?: string, itemId?: string): React.ReactNode => {
+// Fallback by itemId when config from admin has dummy/empty icon - top slots tetap tampil benar
+const getIconByItemId = (itemId: string, iconColor: string): React.ReactNode | null => {
+  const size = getIconSize('large');
+  const variant = 'Bulk';
+  switch (itemId?.toLowerCase()) {
+    case 'donasizakat':
+    case 'donasi':
+      return <IconDonation width={size} height={size} color={iconColor} />;
+    case 'marketplace':
+      return <Shop size={size} color={iconColor} variant={variant} />;
+    case 'fnb':
+      return <IconFnB width={size} height={size} color={iconColor} />;
+    case 'sportcenter':
+      return <IconSport width={size} height={size} color={iconColor} />;
+    case 'invoice':
+      return <DocumentText size={size} color={iconColor} variant={variant} />;
+    default:
+      return null;
+  }
+};
+
+// Icon mapping untuk setiap menu - returns icon dengan dynamic color (exported for QuickMenuSettingsScreen)
+// Config dari admin bisa cuma kirim dummy/empty icon; pakai itemId fallback + IconMore agar tidak break
+export const getMenuIconForQuickAccess = (iconColor: string, iconName?: string, itemId?: string): React.ReactNode => {
   const assetIcon = itemId ? getQuickAccessAssetIcon(itemId, iconColor) : null;
   if (assetIcon) return assetIcon;
 
-  // Iconsax uses size as number in some versions, string in others. CAST TO ANY if needed to suppress TS errors safely.
   const size = getIconSize('large');
   const variant = 'Bulk';
-  // HMR Trigger: Donation Icon Updated v2 (Hand Heart)
+
+  const byItemId = itemId ? getIconByItemId(itemId, iconColor) : null;
+  if (byItemId) return byItemId;
+
+  const name = (iconName ?? '').trim();
+  if (!name) return <IconMore width={size} height={size} color={iconColor} />;
 
   switch (iconName) {
     case 'payIPL':
@@ -184,6 +217,7 @@ const areEqualQuickAccess = (
   prevProps: QuickAccessButtonsProps,
   nextProps: QuickAccessButtonsProps
 ) => {
+  if (prevProps.onAllMenuPress !== nextProps.onAllMenuPress) return false;
   // Jika buttons prop diberikan, compare buttons
   if (prevProps.buttons && nextProps.buttons) {
     if (prevProps.buttons.length !== nextProps.buttons.length) {
@@ -197,12 +231,18 @@ const areEqualQuickAccess = (
 };
 
 export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
-  ({ buttons, tabletLandscapeGap, tabletPortraitGap }) => {
+  ({ buttons, onAllMenuPress, tabletLandscapeGap, tabletPortraitGap }) => {
     const { colors } = useTheme();
     const { t } = useTranslation();
     const navigation = useNavigation();
     const { enabledItems, isLoading, refresh } = useQuickMenu();
     const { width: screenWidth } = useDimensions();
+
+    useFocusEffect(
+      useCallback(() => {
+        refresh();
+      }, [refresh])
+    );
 
     // Stabilize colors untuk mencegah re-render yang tidak perlu
     const primaryColor = colors.primary;
@@ -269,7 +309,7 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
       const buttons: QuickAccessButton[] = items.map((item) => ({
         id: item.id,
         label: item.labelKey ? t(item.labelKey) : getMenuLabel(item.id, item.label),
-        icon: getMenuIcon(primaryColor, item.icon as string, item.id),
+        icon: getMenuIconForQuickAccess(primaryColor, item.icon as string, item.id),
         iconBgColor: item.iconBgColor || getDefaultBgColor(colorsRef.current, item.icon as string),
         onPress: (item as unknown as QuickMenuItem).route
           ? () => {
@@ -295,7 +335,20 @@ export const QuickAccessButtons: React.FC<QuickAccessButtonsProps> = React.memo(
       return buttons;
     }, [stableEnabledItems, getMenuLabel, isLoading, navigation, primaryColor]);
 
-    const buttonsToRender = buttons || menuButtons;
+    const allMenuButton: QuickAccessButton = useMemo(
+      () => ({
+        id: 'all-menu',
+        label: t('home.allMenu'),
+        icon: <Element3 size={getIconSize('large')} color={primaryColor} variant="Bulk" />,
+        iconBgColor: colors.primaryLight || colors.surface,
+        onPress: onAllMenuPress,
+      }),
+      [t, primaryColor, colors.primaryLight, colors.surface, onAllMenuPress]
+    );
+
+    const baseButtons = buttons ?? menuButtons;
+    const displayedSlots = baseButtons.slice(0, QUICK_ACCESS_MAX_SLOTS);
+    const buttonsToRender = [...displayedSlots, allMenuButton];
     const buttonCount = buttonsToRender.length;
     const itemsPerRow = 4;
 

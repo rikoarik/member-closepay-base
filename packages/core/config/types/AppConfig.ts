@@ -60,6 +60,18 @@ export interface AppConfig {
   quickAccessMenu?: QuickAccessMenuItemConfig[];
 
   /**
+   * Quick menu settings screen (Atur fitur pilihan): drag & fixed slots.
+   * - enableDrag: allow drag-to-reorder (default true). If false, only tap to add/remove.
+   * - fixedTopCount: number of main menu items at top that cannot be changed (default 3). Menu utama gabisa di ubah.
+   * - editableSlotCount: number of slots that can be edited (dashed boxes). 3 or 4, default 4. Total slots = fixedTopCount + editableSlotCount.
+   */
+  quickMenu?: {
+    enableDrag?: boolean;
+    fixedTopCount?: number;
+    editableSlotCount?: number;
+  };
+
+  /**
    * Beranda (Home) widgets configuration.
    * Widgets shown on Beranda tab - can differ per segment.
    * When not set, uses default: balance-card, quick-access, recent-transactions, news-info.

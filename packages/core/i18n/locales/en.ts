@@ -171,6 +171,12 @@ export const en = {
     transferMerchant: 'Transfer Merchant',
     payBarcode: 'Pay Barcode',
     quickAccess: 'Quick Access',
+    manageQuickAccess: 'Manage',
+    allMenu: 'All Menu',
+    allMenuCategoryTransaksi: 'Transactions',
+    allMenuCategorySimpan: 'Save',
+    allMenuCategoryLifestyle: 'Lifestyle & Shopping',
+    allMenuCategoryLainnya: 'Others',
     topUpVA: 'Top Up VA',
     transferMember: 'Transfer Member',
     kartuVirtual: 'Virtual Card',
@@ -788,6 +794,9 @@ export const en = {
   },
   quickMenu: {
     maxItemsHint: 'Maximum {max} quick access items.',
+    manageTitle: 'Manage your chosen features',
+    instructionReorder: 'Reorder, remove, or swap the bottom 3 features with your chosen features.',
+    instructionSwap: 'Drag or tap a feature from below to replace one above.',
   },
   qr: {
     title: 'MPM / CPM',
