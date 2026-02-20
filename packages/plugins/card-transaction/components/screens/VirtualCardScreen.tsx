@@ -41,6 +41,7 @@ interface VirtualCardData {
   number: string;
   colors: string[];
   label: string;
+  hasTransactionPin?: boolean;
 }
 
 // --- Dimensions (single source of truth) ---
@@ -57,11 +58,11 @@ const formatCurrency = (amount: number): string => {
   return `Rp ${amount.toLocaleString('id-ID')}`;
 };
 
-// --- Mock data ---
+// --- Mock data --- (satu kartu tanpa PIN untuk testing flow Aktifkan PIN)
 const MOCK_CARDS: VirtualCardData[] = [
-  { id: '1', type: 'Visa', holder: 'Jhon Doe', balance: 5400000, number: '**** **** **** 1234', colors: ['#005BEA', '#00C6FB'], label: 'Sales Card' },
-  { id: '2', type: 'Visa', holder: 'Jhon Doe', balance: 12350500, number: '**** **** **** 5678', colors: ['#0ba360', '#3cba92'], label: 'Expense Card' },
-  { id: '3', type: 'Visa', holder: 'Jhon Doe', balance: 1200000, number: '**** **** **** 9012', colors: ['#FF9A9E', '#FECFEF'], label: 'Gift Card' },
+  { id: '1', type: 'Visa', holder: 'Jhon Doe', balance: 5400000, number: '**** **** **** 1234', colors: ['#005BEA', '#00C6FB'], label: 'Sales Card', hasTransactionPin: true },
+  { id: '2', type: 'Visa', holder: 'Jhon Doe', balance: 12350500, number: '**** **** **** 5678', colors: ['#0ba360', '#3cba92'], label: 'Expense Card', hasTransactionPin: true },
+  { id: '3', type: 'Visa', holder: 'Jhon Doe', balance: 1200000, number: '**** **** **** 9012', colors: ['#FF9A9E', '#FECFEF'], label: 'Gift Card', hasTransactionPin: false },
 ];
 
 // --- Closepay Logo ---
@@ -206,6 +207,7 @@ export const VirtualCardScreen: React.FC = () => {
         cardHolderName: card.holder,
         expiryDate: '12/28',
         gradientColors: card.colors,
+        hasTransactionPin: card.hasTransactionPin,
       },
     });
   };

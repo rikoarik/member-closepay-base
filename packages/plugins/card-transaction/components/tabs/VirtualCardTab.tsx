@@ -34,6 +34,7 @@ interface VirtualCardData {
   colors: string[];
   label: string;
   avatarUrl?: string;
+  hasTransactionPin?: boolean;
 }
 
 // --- Dimensions (single source of truth) ---
@@ -50,7 +51,7 @@ const formatCurrency = (amount: number): string => {
   return `Rp ${amount.toLocaleString('id-ID')}`;
 };
 
-// --- Mock data ---
+// --- Mock data --- (satu kartu tanpa PIN untuk testing flow Aktifkan PIN)
 const MOCK_CARDS: VirtualCardData[] = [
   {
     id: '1',
@@ -61,6 +62,7 @@ const MOCK_CARDS: VirtualCardData[] = [
     colors: ['#005BEA', '#00C6FB'],
     label: 'Sales Card',
     avatarUrl: 'https://i.pravatar.cc/150?u=1',
+    hasTransactionPin: true,
   },
   {
     id: '2',
@@ -71,6 +73,7 @@ const MOCK_CARDS: VirtualCardData[] = [
     colors: ['#0ba360', '#3cba92'],
     label: 'Expense Card',
     avatarUrl: 'https://i.pravatar.cc/150?u=2',
+    hasTransactionPin: true,
   },
   {
     id: '3',
@@ -81,6 +84,7 @@ const MOCK_CARDS: VirtualCardData[] = [
     colors: ['#FF9A9E', '#FECFEF'],
     label: 'Gift Card',
     avatarUrl: 'https://i.pravatar.cc/150?u=3',
+    hasTransactionPin: false,
   },
 ];
 
@@ -284,6 +288,7 @@ export const VirtualCardTab: React.FC<VirtualCardTabProps> = ({ isVisible }) => 
                   cardHolderName: item.holder,
                   expiryDate: '12/28',
                   gradientColors: item.colors,
+                  hasTransactionPin: item.hasTransactionPin,
                 },
               });
             }}

@@ -47,6 +47,7 @@ import type { RootStackParamList } from '@core/navigation';
 import Svg, { Path } from 'react-native-svg';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { CardTransactionSettingsSheet } from '../CardTransactionSettingsSheet';
+import { SetPinOptionsSheet, type SetPinAction } from '../SetPinOptionsSheet';
 
 // Extend RootStackParamList for app-specific route params
 type AppRootStackParamList = RootStackParamList & {
@@ -59,6 +60,8 @@ type AppRootStackParamList = RootStackParamList & {
       gradientColors: string[];
       orbColors?: string[];
       avatarUrl?: string;
+      /** true = sudah punya PIN (tampil sheet opsi). false/undefined = belum punya PIN → langsung ke Aktifkan PIN */
+      hasTransactionPin?: boolean;
     };
   };
 };
@@ -356,6 +359,7 @@ export const VirtualCardDetailScreen: React.FC = () => {
   const [accumulationModalVisible, setAccumulationModalVisible] = useState(false);
   const [identityModalVisible, setIdentityModalVisible] = useState(false);
   const [transactionSettingsVisible, setTransactionSettingsVisible] = useState(false);
+  const [setPinSheetVisible, setSetPinSheetVisible] = useState(false);
   const [cardName, setCardName] = useState(t('virtualCardDetail.dailyLimitCard'));
   const [description, setDescription] = useState(t('virtualCardDetail.monthlyShopping'));
 
@@ -390,6 +394,14 @@ export const VirtualCardDetailScreen: React.FC = () => {
       (navigation as any).navigate('CardQr', { card });
     } else if (menu === 'transactionSettings') {
       setTransactionSettingsVisible(true);
+    } else if (menu === 'activityLog' && card) {
+      (navigation as any).navigate('CardActivityLog', { card });
+    } else if (menu === 'setPin' && card) {
+      if (card.hasTransactionPin) {
+        requestAnimationFrame(() => setSetPinSheetVisible(true));
+      } else {
+        (navigation as any).navigate('ActivatePin', { card });
+      }
     } else {
       console.log('Menu pressed:', menu);
     }
@@ -397,6 +409,13 @@ export const VirtualCardDetailScreen: React.FC = () => {
 
   const handleEdit = () => {
     setModalVisible(true);
+  };
+
+  const handleSetPinSelect = (action: SetPinAction) => {
+    setSetPinSheetVisible(false);
+    if (card) {
+      (navigation as any).navigate('SetPinFlow', { card, action });
+    }
   };
 
   const renderInfoRow = (
@@ -424,6 +443,7 @@ export const VirtualCardDetailScreen: React.FC = () => {
       style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={() => handleMenuPress(key)}
       activeOpacity={0.7}
+      hitSlop={{ top: 8, bottom: 8, left: 0, right: 0 }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: scale(12), flex: 1 }}>
         {icon}
@@ -459,6 +479,7 @@ export const VirtualCardDetailScreen: React.FC = () => {
           },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Card Preview */}
         {card && (
@@ -673,6 +694,12 @@ export const VirtualCardDetailScreen: React.FC = () => {
         visible={transactionSettingsVisible}
         onClose={() => setTransactionSettingsVisible(false)}
         onSave={() => setTransactionSettingsVisible(false)}
+      />
+
+      <SetPinOptionsSheet
+        visible={setPinSheetVisible}
+        onClose={() => setSetPinSheetVisible(false)}
+        onSelect={handleSetPinSelect}
       />
     </SafeAreaView>
   );
