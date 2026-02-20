@@ -46,6 +46,7 @@ import { useTranslation } from '@core/i18n';
 import type { RootStackParamList } from '@core/navigation';
 import Svg, { Path } from 'react-native-svg';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { CardTransactionSettingsSheet } from '../CardTransactionSettingsSheet';
 
 // Extend RootStackParamList for app-specific route params
 type AppRootStackParamList = RootStackParamList & {
@@ -354,6 +355,7 @@ export const VirtualCardDetailScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [accumulationModalVisible, setAccumulationModalVisible] = useState(false);
   const [identityModalVisible, setIdentityModalVisible] = useState(false);
+  const [transactionSettingsVisible, setTransactionSettingsVisible] = useState(false);
   const [cardName, setCardName] = useState(t('virtualCardDetail.dailyLimitCard'));
   const [description, setDescription] = useState(t('virtualCardDetail.monthlyShopping'));
 
@@ -380,6 +382,14 @@ export const VirtualCardDetailScreen: React.FC = () => {
       setIdentityModalVisible(true);
     } else if (menu === 'topup' && card) {
       (navigation as any).navigate('VirtualCardTopUpAmount', { card });
+    } else if (menu === 'withdrawal' && card) {
+      (navigation as any).navigate('CardWithdraw', { card });
+    } else if (menu === 'history' && card) {
+      (navigation as any).navigate('CardTransactionHistory', { card });
+    } else if (menu === 'qr' && card) {
+      (navigation as any).navigate('CardQr', { card });
+    } else if (menu === 'transactionSettings') {
+      setTransactionSettingsVisible(true);
     } else {
       console.log('Menu pressed:', menu);
     }
@@ -657,6 +667,12 @@ export const VirtualCardDetailScreen: React.FC = () => {
       <IdentityCardModal
         visible={identityModalVisible}
         onClose={() => setIdentityModalVisible(false)}
+      />
+
+      <CardTransactionSettingsSheet
+        visible={transactionSettingsVisible}
+        onClose={() => setTransactionSettingsVisible(false)}
+        onSave={() => setTransactionSettingsVisible(false)}
       />
     </SafeAreaView>
   );

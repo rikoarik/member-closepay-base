@@ -112,4 +112,6 @@ declare module 'iconsax-react-nativejs' {
   export class Activity extends Component<IconProps> { }
   export class Danger extends Component<IconProps> { }
   export class Warning2 extends Component<IconProps> { }
+  export class TickSquare extends Component<IconProps> { }
+  export class Square extends Component<IconProps> { }
 }
