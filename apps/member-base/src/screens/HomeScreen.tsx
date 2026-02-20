@@ -31,6 +31,7 @@ import {
   MAX_HOME_TABS,
   getTabPlugin,
   PluginRegistry,
+  validateEnabledTabIds,
 } from '@core/config';
 import {
   TopBar,
@@ -88,13 +89,22 @@ const HomeScreenComponent = () => {
 
   const homeTabs = React.useMemo(() => {
     if (enabledTabIdsFromSettings === null) return configHomeTabs;
-    if (enabledTabIdsFromSettings.length === 0) return configHomeTabs;
-    const orderedIds = enabledTabIdsFromSettings.slice(0, MAX_HOME_TABS);
     const tabById = new Map(configHomeTabs.map((tab) => [tab.id, tab]));
+    const validIds = configHomeTabs.map((tab) => tab.id);
+    if (validIds.length === 0) return configHomeTabs;
+    if (enabledTabIdsFromSettings.length === 0) return configHomeTabs;
+
+    const orderedIds = validateEnabledTabIds(enabledTabIdsFromSettings, validIds);
+    const seen = new Set<string>();
     return orderedIds.map((id) => {
       const fromConfig = tabById.get(id);
-      if (fromConfig) return fromConfig;
-      return { id, label: id, visible: true as const };
+      if (fromConfig) {
+        seen.add(id);
+        return fromConfig;
+      }
+      const fallback = validIds.find((vid) => !seen.has(vid)) ?? validIds[0];
+      seen.add(fallback);
+      return tabById.get(fallback) ?? { id: fallback, label: fallback, visible: true as const };
     });
   }, [configHomeTabs, enabledTabIdsFromSettings]);
 

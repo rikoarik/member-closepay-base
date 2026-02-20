@@ -72,8 +72,13 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0,0,0,0.05)',
     },
+    scrollView: {
+        flexGrow: 0,
+    },
     scrollContent: {
         gap: scale(8),
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     tab: {
         paddingHorizontal: scale(16),

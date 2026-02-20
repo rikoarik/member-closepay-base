@@ -77,6 +77,9 @@ export const HomeTabSettingsScreen: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [dropdownSlot, setDropdownSlot] = useState<Slot | null>(null);
   const [showTabsInfo, setShowTabsInfo] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const knownWidgetIds = useMemo(() => new Set(WIDGET_IDS), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -103,13 +106,22 @@ export const HomeTabSettingsScreen: React.FC = () => {
           setLeftTabId(fromConfig[0]?.id || ALL_AVAILABLE_HOME_TABS[0]?.id || '');
           setRightTabId(fromConfig[1]?.id || ALL_AVAILABLE_HOME_TABS[1]?.id || '');
         }
-        setBerandaWidgets(
-          settings.berandaWidgets?.length
-            ? settings.berandaWidgets
-            : config?.berandaWidgets ?? DEFAULT_BERANDA_WIDGETS
-        );
+        const rawWidgets = settings.berandaWidgets?.length
+          ? settings.berandaWidgets
+          : config?.berandaWidgets ?? DEFAULT_BERANDA_WIDGETS;
+        const sanitized = rawWidgets.filter((w) => w?.id && (knownWidgetIds as Set<string>).has(w.id));
+        const merged = [...DEFAULT_BERANDA_WIDGETS];
+        const byId = new Map(sanitized.map((w) => [w.id, w]));
+        WIDGET_IDS.forEach((id, i) => {
+          const existing = byId.get(id);
+          merged[i] = existing
+            ? { id: existing.id, visible: existing.visible !== false, order: (existing.order ?? i + 1) }
+            : { id, visible: true, order: i + 1 };
+        });
+        setBerandaWidgets(merged.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
       } catch (error) {
         console.error('Failed to load home tab settings:', error);
+        if (!cancelled) setBerandaWidgets(DEFAULT_BERANDA_WIDGETS);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -118,23 +130,36 @@ export const HomeTabSettingsScreen: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [config?.homeTabs, config?.berandaWidgets]);
-
-  const getEnabledTabIds = useCallback((): string[] => {
-    const left = leftTabId || ALL_AVAILABLE_HOME_TABS[0]?.id || 'marketplace';
-    const right = rightTabId || ALL_AVAILABLE_HOME_TABS[1]?.id || 'fnb';
-    return [left, BERANDA_TAB_ID, right];
-  }, [leftTabId, rightTabId]);
+  }, [config?.homeTabs, config?.berandaWidgets, knownWidgetIds]);
 
   const handleSave = async () => {
+    if (isSaving) return;
+    const ids = allAvailableTabs.map((t) => t.id);
+    if (ids.length < 2) {
+      setSaveError(t('homeTabSettings.noTabsConfigured') || 'Tidak ada tab dikonfigurasi.');
+      return;
+    }
+    let left = (leftTabId && ids.includes(leftTabId)) ? leftTabId : ids[0];
+    let right = (rightTabId && ids.includes(rightTabId)) ? rightTabId : (ids[1] ?? ids[0]);
+    if (left === right) {
+      right = ids.find((id) => id !== left) ?? ids[0];
+    }
+    if (left === right) {
+      setSaveError('Pilih tab yang berbeda untuk Kiri dan Kanan.');
+      return;
+    }
+    const enabledTabIds: [string, string, string] = [left, BERANDA_TAB_ID, right];
+    setSaveError(null);
     setIsSaving(true);
     try {
       await saveHomeTabSettings({
-        enabledTabIds: getEnabledTabIds(),
+        enabledTabIds,
         berandaWidgets: berandaWidgets.length > 0 ? berandaWidgets : undefined,
       });
       navigation.goBack();
     } catch (error) {
+      const message = error instanceof Error ? error.message : (t('common.error') || 'Terjadi kesalahan');
+      setSaveError(message);
       console.error('Failed to save home tab settings:', error);
     } finally {
       setIsSaving(false);
@@ -149,20 +174,72 @@ export const HomeTabSettingsScreen: React.FC = () => {
     [t]
   );
 
+  const allAvailableTabs = useMemo(() => {
+    const fromConfig = (config?.homeTabs || [])
+      .filter((tab) => tab.id !== BERANDA_TAB_ID && tab.id !== 'home')
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    if (fromConfig.length > 0) {
+      return fromConfig.map((tab) => ({ id: tab.id, label: tab.label }));
+    }
+    return ALL_AVAILABLE_HOME_TABS.map((tab) => {
+      const translated = t(tab.labelKey);
+      return { id: tab.id, label: translated && translated !== tab.labelKey ? translated : tab.id };
+    });
+  }, [config?.homeTabs, t]);
+
   const getTabLabelById = useCallback(
     (id: string) => {
       if (id === BERANDA_TAB_ID) return t('homeTabSettings.slotCenter');
-      const tab = ALL_AVAILABLE_HOME_TABS.find((t) => t.id === id);
-      return tab ? getTabLabel(tab) : id;
+      const i18nLabel = t(`home.${id}`);
+      if (i18nLabel && i18nLabel !== `home.${id}`) return i18nLabel;
+      const tab = allAvailableTabs.find((t) => t.id === id);
+      return tab?.label ?? id;
     },
-    [getTabLabel, t]
+    [allAvailableTabs, t]
   );
 
-  const dropdownOptions = ALL_AVAILABLE_HOME_TABS.filter(
+  const dropdownOptions = allAvailableTabs.filter(
     (tab) => tab.id !== (dropdownSlot === 'left' ? rightTabId : leftTabId)
   );
 
+  useEffect(() => {
+    if (allAvailableTabs.length === 0) return;
+    const validIds = new Set(allAvailableTabs.map((t) => t.id));
+    let changed = false;
+    let nextLeft = leftTabId;
+    let nextRight = rightTabId;
+    if (leftTabId && !validIds.has(leftTabId)) {
+      nextLeft = allAvailableTabs[0]?.id ?? '';
+      changed = true;
+    }
+    if (rightTabId && !validIds.has(rightTabId)) {
+      nextRight = allAvailableTabs.find((t) => t.id !== nextLeft)?.id ?? allAvailableTabs[1]?.id ?? '';
+      changed = true;
+    }
+    if (nextLeft && nextRight && nextLeft === nextRight) {
+      nextRight = allAvailableTabs.find((t) => t.id !== nextLeft)?.id ?? allAvailableTabs[0]?.id ?? '';
+      changed = true;
+    }
+    if (changed) {
+      setLeftTabId(nextLeft);
+      setRightTabId(nextRight);
+    }
+  }, [allAvailableTabs, leftTabId, rightTabId]);
+
+  const getEnabledTabIds = useCallback((): string[] => {
+    const ids = allAvailableTabs.map((t) => t.id);
+    let left = leftTabId && ids.includes(leftTabId) ? leftTabId : ids[0];
+    let right = rightTabId && ids.includes(rightTabId) ? rightTabId : ids[ids.length > 1 ? 1 : 0];
+    if (left === right) {
+      right = ids.find((id) => id !== left) ?? ids[0];
+    }
+    return [left || 'marketplace', BERANDA_TAB_ID, right || 'fnb'];
+  }, [leftTabId, rightTabId, allAvailableTabs]);
+
+  const canSave = allAvailableTabs.length >= 2;
+
   const handleSelectTab = (id: string) => {
+    setSaveError(null);
     if (dropdownSlot === 'left') setLeftTabId(id);
     else if (dropdownSlot === 'right') setRightTabId(id);
     setDropdownSlot(null);
@@ -320,11 +397,12 @@ export const HomeTabSettingsScreen: React.FC = () => {
               activeOpacity={0.7}
             >
               <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
                 style={[
                   styles.dropdownText,
                   { color: colors.text, fontSize: getResponsiveFontSize('medium') },
                 ]}
-                numberOfLines={1}
               >
                 {leftTabId ? getTabLabelById(leftTabId) : t('homeTabSettings.slotLeft')}
               </Text>
@@ -385,11 +463,12 @@ export const HomeTabSettingsScreen: React.FC = () => {
               activeOpacity={0.7}
             >
               <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
                 style={[
                   styles.dropdownText,
                   { color: colors.text, fontSize: getResponsiveFontSize('medium') },
                 ]}
-                numberOfLines={1}
               >
                 {rightTabId ? getTabLabelById(rightTabId) : t('homeTabSettings.slotRight')}
               </Text>
@@ -556,13 +635,25 @@ export const HomeTabSettingsScreen: React.FC = () => {
           },
         ]}
       >
+        {saveError ? (
+          <Text
+            numberOfLines={2}
+            style={[styles.saveErrorText, { color: colors.error }]}
+          >
+            {saveError}
+          </Text>
+        ) : null}
         <TouchableOpacity
           style={[
             styles.saveButton,
-            { backgroundColor: colors.primary, minHeight: getMinTouchTarget() },
+            {
+              backgroundColor: colors.primary,
+              minHeight: getMinTouchTarget(),
+              opacity: canSave && !isSaving ? 1 : 0.6,
+            },
           ]}
           onPress={handleSave}
-          disabled={isSaving}
+          disabled={!canSave || isSaving}
           activeOpacity={0.8}
         >
           <Text
@@ -603,26 +694,34 @@ export const HomeTabSettingsScreen: React.FC = () => {
                 ? t('homeTabSettings.slotLeft')
                 : t('homeTabSettings.slotRight')}
             </Text>
-            {dropdownOptions.map((tab) => (
+            <ScrollView
+              style={styles.modalOptionsScroll}
+              showsVerticalScrollIndicator={true}
+              keyboardShouldPersistTaps="handled"
+            >
+            {dropdownOptions.map((option) => (
               <TouchableOpacity
-                key={tab.id}
+                key={option.id}
                 style={[
                   styles.modalOption,
                   { borderBottomColor: colors.border },
                 ]}
-                onPress={() => handleSelectTab(tab.id)}
+                onPress={() => handleSelectTab(option.id)}
                 activeOpacity={0.7}
               >
                 <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                   style={[
                     styles.modalOptionText,
                     { color: colors.text, fontSize: getResponsiveFontSize('medium') },
                   ]}
                 >
-                  {getTabLabel(tab)}
+                  {getTabLabelById(option.id)}
                 </Text>
               </TouchableOpacity>
             ))}
+            </ScrollView>
           </View>
         </Pressable>
       </Modal>
@@ -709,7 +808,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   dropdownDisabled: { opacity: 0.9 },
-  dropdownText: { fontFamily: fontRegular, flex: 1 },
+  dropdownText: { fontFamily: fontRegular, flex: 1, minWidth: 0 },
   widgetList: { gap: moderateVerticalScale(10) },
   widgetSectionLabel: {
     fontFamily: fontSemiBold,
@@ -733,6 +832,12 @@ const styles = StyleSheet.create({
   },
   widgetLabel: { fontFamily: fontRegular, flex: 1 },
   footer: { borderTopWidth: 1, borderTopColor: 'rgba(0, 0, 0, 0.1)' },
+  saveErrorText: {
+    fontFamily: fontRegular,
+    fontSize: getResponsiveFontSize('small'),
+    marginBottom: moderateVerticalScale(8),
+    textAlign: 'center',
+  },
   saveButton: {
     borderRadius: 12,
     paddingVertical: moderateVerticalScale(16),
@@ -752,6 +857,10 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     paddingBottom: moderateVerticalScale(32),
     paddingHorizontal: getHorizontalPadding(),
+    maxHeight: '70%',
+  },
+  modalOptionsScroll: {
+    maxHeight: moderateVerticalScale(320),
   },
   modalTitle: {
     fontFamily: fontSemiBold,

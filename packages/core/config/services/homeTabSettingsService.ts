@@ -53,20 +53,48 @@ export const DEFAULT_BERANDA_WIDGETS: BerandaWidgetConfig[] = [
   { id: 'sport-center-featured', visible: true, order: 16 },
 ];
 
+function isStringArray(arr: unknown): arr is string[] {
+  return Array.isArray(arr) && arr.every((x) => typeof x === 'string');
+}
+
+function sanitizeEnabledTabIds(ids: unknown): string[] {
+  if (!isStringArray(ids)) return [];
+  return ids
+    .slice(0, MAX_HOME_TABS)
+    .map((id) => (typeof id === 'string' ? id.trim() : ''))
+    .filter(Boolean);
+}
+
+function sanitizeBerandaWidgets(widgets: unknown): BerandaWidgetConfig[] | undefined {
+  if (!Array.isArray(widgets)) return undefined;
+  const out: BerandaWidgetConfig[] = [];
+  const seen = new Set<string>();
+  for (const w of widgets) {
+    if (!w || typeof w !== 'object') continue;
+    const id = typeof (w as BerandaWidgetConfig).id === 'string' ? (w as BerandaWidgetConfig).id.trim() : '';
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    const visible = (w as BerandaWidgetConfig).visible !== false;
+    const order = typeof (w as BerandaWidgetConfig).order === 'number' ? (w as BerandaWidgetConfig).order : out.length + 1;
+    out.push({ id, visible, order });
+  }
+  return out.length > 0 ? out.sort((a, b) => a.order - b.order) : undefined;
+}
+
 /**
- * Load home tab settings dari storage
+ * Load home tab settings dari storage. Sanitizes and validates stored data.
  */
 export const loadHomeTabSettings = async (): Promise<HomeTabSettings> => {
   try {
     const stored = await SecureStorage.getItem(HOME_TAB_SETTINGS_KEY);
     if (stored) {
       const parsed = JSON.parse(stored) as HomeTabSettings;
-      if (Array.isArray(parsed.enabledTabIds)) {
-        return {
-          enabledTabIds: parsed.enabledTabIds.slice(0, MAX_HOME_TABS),
-          berandaWidgets: parsed.berandaWidgets,
-        };
-      }
+      const enabledTabIds = sanitizeEnabledTabIds(parsed?.enabledTabIds);
+      const berandaWidgets = sanitizeBerandaWidgets(parsed?.berandaWidgets);
+      return {
+        enabledTabIds,
+        berandaWidgets,
+      };
     }
   } catch (error) {
     console.error('Failed to load home tab settings:', error);
@@ -75,17 +103,39 @@ export const loadHomeTabSettings = async (): Promise<HomeTabSettings> => {
 };
 
 /**
- * Save home tab settings - format: [leftTabId, 'beranda', rightTabId]
+ * Validates settings before save. Returns null if invalid.
+ */
+export function validateHomeTabSettings(settings: HomeTabSettings): HomeTabSettings | null {
+  const raw = settings.enabledTabIds;
+  if (!Array.isArray(raw) || raw.length < MAX_HOME_TABS) return null;
+  const left = typeof raw[0] === 'string' ? raw[0].trim() : '';
+  const center = typeof raw[1] === 'string' ? raw[1].trim() : '';
+  const right = typeof raw[2] === 'string' ? raw[2].trim() : '';
+  if (!left || !center || !right) return null;
+  if (center !== BERANDA_TAB_ID && center !== 'home') return null;
+  if (left === right) return null;
+  const berandaWidgets = sanitizeBerandaWidgets(settings.berandaWidgets);
+  return {
+    enabledTabIds: [left, BERANDA_TAB_ID, right],
+    berandaWidgets: berandaWidgets && berandaWidgets.length > 0 ? berandaWidgets : undefined,
+  };
+}
+
+/**
+ * Save home tab settings - format: [leftTabId, 'beranda', rightTabId]. Validates before writing.
  */
 export const saveHomeTabSettings = async (
   settings: HomeTabSettings
 ): Promise<void> => {
+  const toSave = validateHomeTabSettings(settings);
+  if (!toSave) {
+    throw new Error('Invalid tab settings: need left, beranda, right (left ≠ right)');
+  }
   try {
-    const toSave: HomeTabSettings = {
-      enabledTabIds: settings.enabledTabIds.slice(0, MAX_HOME_TABS),
-      berandaWidgets: settings.berandaWidgets,
-    };
-    await SecureStorage.setItem(HOME_TAB_SETTINGS_KEY, JSON.stringify(toSave));
+    await SecureStorage.setItem(HOME_TAB_SETTINGS_KEY, JSON.stringify({
+      enabledTabIds: toSave.enabledTabIds,
+      berandaWidgets: toSave.berandaWidgets,
+    }));
   } catch (error) {
     console.error('Failed to save home tab settings:', error);
     throw error;
@@ -99,3 +149,26 @@ export const getEnabledHomeTabIds = async (): Promise<string[]> => {
   const settings = await loadHomeTabSettings();
   return settings.enabledTabIds;
 };
+
+/**
+ * Validates and normalizes enabled tab IDs against a list of valid IDs (for left/right only; beranda is fixed center).
+ * Returns [left, beranda, right] with no duplicates and only valid IDs.
+ */
+export function validateEnabledTabIds(
+  enabledTabIds: string[],
+  validTabIds: string[]
+): string[] {
+  const validSet = new Set(validTabIds.filter((id) => id && id !== BERANDA_TAB_ID && id !== 'home'));
+  if (validSet.size === 0) return [];
+
+  const [left = '', , right = ''] = enabledTabIds.slice(0, MAX_HOME_TABS);
+  const ids = Array.from(validSet);
+
+  const leftId = left && validSet.has(left) ? left : ids[0];
+  let rightId = right && validSet.has(right) ? right : ids[ids.length > 1 ? 1 : 0];
+  if (rightId === leftId) {
+    rightId = ids.find((id) => id !== leftId) ?? ids[0];
+  }
+
+  return [leftId, BERANDA_TAB_ID, rightId];
+}
